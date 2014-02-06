@@ -1,0 +1,21 @@
+<launch>
+
+    <arg name="markerId"     default="582"/>
+    <arg name="markerSize"   default="0.034"/>    <!-- in m -->
+    <arg name="eye"          default="left"/>
+    <arg name="side"         default="l"/>       <!-- l or r depending on if eye is left or right -->
+    <arg name="marker_frame" default="aruco_marker_frame"/>
+
+
+    <node pkg="aruco_ros" type="single" name="aruco_single">
+        <remap from="/camera_info" to="/stereo/$(arg eye)/camera_info" />
+        <remap from="/image" to="/stereo/$(arg eye)/image_rect_color" />
+        <param name="image_is_rectified" value="True"/>
+        <param name="marker_size" value="$(arg markerSize)"/>
+        <param name="marker_id"   value="$(arg markerId)"/>
+        <param name="parent_name" value="stereo_gazebo_$(arg side)_stereo_camera_optical_frame"/>
+        <param name="child_name"  value="$(arg marker_frame)" />
+    </node>
+
+</launch>
+
