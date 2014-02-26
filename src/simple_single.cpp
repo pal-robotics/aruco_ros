@@ -44,6 +44,7 @@ or implied, of Rafael Muñoz Salinas.
 #include <sensor_msgs/image_encodings.h>
 #include <aruco_ros/aruco_ros_utils.h>
 #include <tf/transform_broadcaster.h>
+#include <tf/transform_listener.h>
 
 using namespace aruco;
 
@@ -59,9 +60,10 @@ private:
   bool cam_info_received;
   image_transport::Publisher image_pub;
   image_transport::Publisher debug_pub;
-  ros::Publisher pose_pub;
-  std::string child_name;
-  std::string parent_name;
+  ros::Publisher pose_pub;  
+  std::string marker_frame;
+  std::string camera_frame;
+  std::string reference_frame;
 
   double marker_size;
   int marker_id;
@@ -69,6 +71,8 @@ private:
   ros::NodeHandle nh;
   image_transport::ImageTransport it;
   image_transport::Subscriber image_sub;
+
+  tf::TransformListener _tfListener;
 
 public:
   ArucoSimple()
@@ -85,17 +89,57 @@ public:
 
     nh.param<double>("marker_size", marker_size, 0.05);
     nh.param<int>("marker_id", marker_id, 300);
-    nh.param<std::string>("parent_name", parent_name, "");
-    nh.param<std::string>("child_name", child_name, "");
+    nh.param<std::string>("reference_frame", reference_frame, "");
+    nh.param<std::string>("camera_frame", camera_frame, "");
+    nh.param<std::string>("marker_frame", marker_frame, "");
     nh.param<bool>("image_is_rectified", useRectifiedImages, true);
 
-    ROS_ASSERT(parent_name != "" && child_name != "");
+    ROS_ASSERT(camera_frame != "" && marker_frame != "");
+
+    if ( reference_frame.empty() )
+      reference_frame = camera_frame;
 
     ROS_INFO("Aruco node started with marker size of %f m and marker id to track: %d",
              marker_size, marker_id);
     ROS_INFO("Aruco node will publish pose to TF with %s as parent and %s as child.",
-             parent_name.c_str(), child_name.c_str());
+             reference_frame.c_str(), marker_frame.c_str());
   }
+
+  bool getTransform(const std::string& refFrame,
+                    const std::string& childFrame,
+                    tf::StampedTransform& transform)
+  {
+    std::string errMsg;
+
+    if ( !_tfListener.waitForTransform(refFrame,
+                                       childFrame,
+                                       ros::Time(0),
+                                       ros::Duration(0.5),
+                                       ros::Duration(0.01),
+                                       &errMsg)
+         )
+    {
+      ROS_ERROR_STREAM("Unable to get pose from TF: " << errMsg);
+      return false;
+    }
+    else
+    {
+      try
+      {
+        _tfListener.lookupTransform( refFrame, childFrame,
+                                     ros::Time(0),                  //get latest available
+                                     transform);
+      }
+      catch ( const tf::TransformException& e)
+      {
+        ROS_ERROR_STREAM("Error in lookupTransform of " << childFrame << " in " << refFrame);
+        return false;
+      }
+
+    }
+    return true;
+  }
+
 
   void image_callback(const sensor_msgs::ImageConstPtr& msg)
   {
@@ -119,12 +163,24 @@ public:
           if(markers[i].id == marker_id)
           {
             tf::Transform transform = aruco_ros::arucoMarker2Tf(markers[i]);
+            tf::StampedTransform cameraToReference;
+            cameraToReference.setIdentity();
+
+            if ( reference_frame != camera_frame )
+            {
+              getTransform(reference_frame,
+                           camera_frame,
+                           cameraToReference);
+            }
+
+            transform = static_cast<tf::Transform>(cameraToReference) * transform;
+
             tf::StampedTransform stampedTransform(transform, ros::Time::now(),
-                                                  parent_name, child_name);
+                                                  reference_frame, marker_frame);
             br.sendTransform(stampedTransform);
             geometry_msgs::PoseStamped poseMsg;
             tf::poseTFToMsg(transform, poseMsg.pose);
-            poseMsg.header.frame_id = parent_name;
+            poseMsg.header.frame_id = reference_frame;
             poseMsg.header.stamp = ros::Time::now();
             pose_pub.publish(poseMsg);
           }
