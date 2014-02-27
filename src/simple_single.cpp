@@ -60,7 +60,9 @@ private:
   bool cam_info_received;
   image_transport::Publisher image_pub;
   image_transport::Publisher debug_pub;
-  ros::Publisher pose_pub;  
+  ros::Publisher pose_pub;
+  ros::Publisher transform_pub; 
+  ros::Publisher position_pub;
   std::string marker_frame;
   std::string camera_frame;
   std::string reference_frame;
@@ -86,6 +88,8 @@ public:
     image_pub = it.advertise("result", 1);
     debug_pub = it.advertise("debug", 1);
     pose_pub = nh.advertise<geometry_msgs::PoseStamped>("pose", 100);
+    transform_pub = nh.advertise<geometry_msgs::TransformStamped>("transform", 100);
+    position_pub = nh.advertise<geometry_msgs::Vector3Stamped>("position", 100);
 
     nh.param<double>("marker_size", marker_size, 0.05);
     nh.param<int>("marker_id", marker_id, 300);
@@ -183,6 +187,15 @@ public:
             poseMsg.header.frame_id = reference_frame;
             poseMsg.header.stamp = ros::Time::now();
             pose_pub.publish(poseMsg);
+
+            geometry_msgs::TransformStamped transformMsg;
+            tf::transformStampedTFToMsg(stampedTransform, transformMsg);
+            transform_pub.publish(transformMsg);
+
+            geometry_msgs::Vector3Stamped positionMsg;
+            positionMsg.header = transformMsg.header;
+            positionMsg.vector = transformMsg.transform.translation;
+            position_pub.publish(positionMsg);
           }
           // but drawing all the detected markers
           markers[i].draw(inImage,cv::Scalar(0,0,255),2);
