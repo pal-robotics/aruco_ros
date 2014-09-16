@@ -45,6 +45,8 @@ add_library(aruco
               src/aruco/marker.cpp
               src/aruco/boarddetector.cpp
               src/aruco/markerdetector.cpp
+              src/aruco/ar_omp.cpp
+              src/aruco/subpixelcorner.cpp
 )
 target_link_libraries(aruco ${catkin_LIBRARIES})
 

@@ -28,7 +28,7 @@ or implied, of Rafael Muñoz Salinas.
 #ifndef _Aruco_CameraParameters_H
 #define  _Aruco_CameraParameters_H
 #include "exports.h"
-#include <opencv2/opencv.hpp>
+#include <opencv2/core/core.hpp>
 #include <string>
 using namespace std;
 namespace aruco
@@ -118,6 +118,10 @@ public:
      */
     void OgreGetProjectionMatrix( cv::Size orgImgSize, cv::Size size,double proj_matrix[16],double gnear,double gfar,bool invert=false   )throw(cv::Exception);
     
+    
+    /**Returns the 4x4 homogeneous transform matrix from the R and T vectors computed 
+     */
+    static cv::Mat getRTMatrix(const cv::Mat &R_,const cv::Mat &T_ ,int forceType);
 
 private:
     //GL routines

@@ -39,11 +39,11 @@ namespace aruco
     
     static void draw3dAxis(cv::Mat &Image,Marker &m,const CameraParameters &CP);
     
-    static void draw3dCube(cv::Mat &Image,Marker &m,const CameraParameters &CP);
+    static void draw3dCube(cv::Mat &Image,Marker &m,const CameraParameters &CP, bool setYperpendicular=false);
     
     static void draw3dAxis(cv::Mat &Image,Board &m,const CameraParameters &CP);
     
-    static void draw3dCube(cv::Mat &Image,Board &m,const CameraParameters &CP);
+    static void draw3dCube(cv::Mat &Image,Board &m,const CameraParameters &CP, bool setYperpendicular=false);
 
   };
 };
