@@ -27,7 +27,7 @@ or implied, of Rafael Muñoz Salinas.
 ********************************/
 #ifndef _Aruco_BoardDetector_H
 #define _Aruco_BoardDetector_H
-#include <opencv2/opencv.hpp>
+#include <opencv2/core/core.hpp>
 #include "exports.h"
 #include "board.h"
 #include "cameraparameters.h"
@@ -68,7 +68,7 @@ public:
   /** See discussion in @see enableRotateXAxis.
    * Do not change unless you know what you are doing
    */
-    BoardDetector(bool setYPerpendicular=true);
+    BoardDetector(bool  setYPerpendicular=false);
     
     
     /**
@@ -108,6 +108,14 @@ public:
     float detect(const vector<Marker> &detectedMarkers,const  BoardConfiguration &BConf, Board &Bdetected, cv::Mat camMatrix=cv::Mat(),cv::Mat distCoeff=cv::Mat(), float markerSizeMeters=-1 )throw (cv::Exception);
     float detect(const vector<Marker> &detectedMarkers,const  BoardConfiguration &BConf, Board &Bdetected,const CameraParameters &cp, float markerSizeMeters=-1 )throw (cv::Exception);
 
+     /**Static version (all in one). Detects the board indicated
+    * @param Image input image
+    * @param bc the board you want to see if is present
+    * @param cp camera parameters
+    * @param markerSizeMeters size of the marker sides expressed in meters (not needed in the board is expressed in meters)
+    * @return Board detected
+    */
+    static Board detect(const cv::Mat &Image, const BoardConfiguration &bc,const CameraParameters &cp, float markerSizeMeters=-1);
 
     /**
      * By default, the Y axis is set to point up. However this is not the default
@@ -115,8 +123,15 @@ public:
      * So, to achieve this change, we have to rotate the X axis.
      */
     void setYPerpendicular(bool enable){_setYPerpendicular=enable;}
+    void setYPerperdicular(bool enable){ setYPerpendicular(enable); } // TODO mark as deprecated
+    bool isYPerpendicular(){ return _setYPerpendicular; }
     
-    
+    /**Sets the threshold for reprjection test. Pixels that after  estimating the camera location
+     * projects 'repj_err_thres' pixels farther from its original location are discarded as outliers.
+     * By default it is set to -1, meaning that not reprojection test is performed
+     */
+    void set_repj_err_thres(float Repj_err_thres){repj_err_thres=Repj_err_thres;}
+    float get_repj_err_thres  ( )const {return repj_err_thres;}
     
     
 private:
@@ -127,7 +142,7 @@ private:
     bool _areParamsSet;
     BoardConfiguration _bconf;
     Board _boardDetected;
-    float _markerSize;
+    float _markerSize,repj_err_thres;
     CameraParameters _camParams;
     MarkerDetector _mdetector;//internal markerdetector
     vector<Marker> _vmarkers;//markers detected in the call to : float  detect(const cv::Mat &im);

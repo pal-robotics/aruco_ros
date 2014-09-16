@@ -27,7 +27,7 @@ or implied, of Rafael Muñoz Salinas.
 ********************************/
 #ifndef _Aruco_board_h
 #define _Aruco_board_h
-#include <opencv2/opencv.hpp>
+#include <opencv2/core/core.hpp>
 #include <string>
 #include <vector>
 #include "exports.h"
@@ -38,8 +38,8 @@ namespace aruco {
  * 3d representation of a marker
  */
 struct ARUCO_EXPORTS MarkerInfo:public vector<cv::Point3f> {
-    MarkerInfo() : id(-1) {}
-    MarkerInfo(int _id) : id(_id) {}
+    MarkerInfo() {}
+    MarkerInfo(int _id) {id=_id; }
     MarkerInfo(const MarkerInfo&MI): vector<cv::Point3f>(MI){id=MI.id; }
     MarkerInfo & operator=(const MarkerInfo&MI){
 	vector<cv::Point3f> ::operator=(MI);
@@ -76,6 +76,10 @@ public:
     /**
      */
     BoardConfiguration();
+    /**Loads from file
+     * @param filePath to the config file
+     */
+    BoardConfiguration(string filePath)throw (cv::Exception);
 
     /**
     */
@@ -162,6 +166,9 @@ public:
      */
     void readFromFile(string filePath)throw(cv::Exception);
 
+    /**Draws the detected markers
+     */
+    void draw(cv::Mat &im,cv::Scalar color, int lineWidth=1,bool writeId=true);
 };
 }
 

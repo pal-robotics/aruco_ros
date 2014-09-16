@@ -207,10 +207,13 @@ void CameraParameters::readFromXMLFile(string filePath)throw(cv::Exception)
     //convert to 32 and get the 4 first elements only
     cv::Mat mdist32;
     MDist.convertTo(mdist32,CV_32FC1);
-    Distorsion.create(1,4,CV_32FC1);
-    for (int i=0;i<4;i++)
-        Distorsion.ptr<float>(0)[i]=mdist32.ptr<float>(0)[i];
+//     Distorsion.create(1,4,CV_32FC1);
+//     for (int i=0;i<4;i++)
+//         Distorsion.ptr<float>(0)[i]=mdist32.ptr<float>(0)[i];
 
+    Distorsion.create(1,5,CV_32FC1);
+    for (int i=0;i<5;i++)
+        Distorsion.ptr<float>(0)[i]=mdist32.ptr<float>(0)[i];
     CamSize.width=w;
     CamSize.height=h;
 }
@@ -443,8 +446,53 @@ void CameraParameters::OgreGetProjectionMatrix(cv::Size orgImgSize, cv::Size siz
     proj_matrix[14]=-temp_matrix[11];
     proj_matrix[15]=temp_matrix[15];
 }
+/******
+ *
+ */
 
+    cv::Mat CameraParameters::getRTMatrix ( const cv::Mat &R_,const cv::Mat &T_ ,int forceType ) {
+        cv::Mat M;
+        cv::Mat R,T;
+        R_.copyTo ( R );
+        T_.copyTo ( T );
+        if ( R.type() ==CV_64F ) {
+            assert ( T.type() ==CV_64F );
+            cv::Mat Matrix=cv::Mat::eye ( 4,4,CV_64FC1 );
 
+            cv::Mat R33=cv::Mat ( Matrix,cv::Rect ( 0,0,3,3 ) );
+            if ( R.total() ==3 ) {
+                cv::Rodrigues ( R,R33 );
+            } else if ( R.total() ==9 ) {
+                cv::Mat R64;
+                R.convertTo ( R64,CV_64F );
+                R.copyTo ( R33 );
+            }
+            for ( int i=0; i<3; i++ )
+                Matrix.at<double> ( i,3 ) =T.ptr<double> ( 0 ) [i];
+            M=Matrix;
+        } else if ( R.depth() ==CV_32F ) {
+            cv::Mat Matrix=cv::Mat::eye ( 4,4,CV_32FC1 );
+            cv::Mat R33=cv::Mat ( Matrix,cv::Rect ( 0,0,3,3 ) );
+            if ( R.total() ==3 ) {
+                cv::Rodrigues ( R,R33 );
+            } else if ( R.total() ==9 ) {
+                cv::Mat R32;
+                R.convertTo ( R32,CV_32F );
+                R.copyTo ( R33 );
+            }
+
+            for ( int i=0; i<3; i++ )
+                Matrix.at<float> ( i,3 ) =T.ptr<float> ( 0 ) [i];
+            M=Matrix;
+        }
+
+        if ( forceType==-1 ) return M;
+        else {
+            cv::Mat MTyped;
+            M.convertTo ( MTyped,forceType );
+            return MTyped;
+        }
+    }
 
 
 };

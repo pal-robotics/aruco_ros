@@ -27,7 +27,7 @@ or implied, of Rafael Muñoz Salinas.
 ********************************/
 #ifndef _ARUCO_MarkerDetector_H
 #define _ARUCO_MarkerDetector_H
-#include <opencv2/opencv.hpp>
+#include <opencv2/core/core.hpp>
 #include <cstdio>
 #include <iostream>
 #include "cameraparameters.h"
@@ -44,13 +44,16 @@ namespace aruco
 class ARUCO_EXPORTS  MarkerDetector
 {
   //Represent a candidate to be a maker
-  class MarkerCandidate: public Marker{
+  class MarkerCandidate : public Marker{
   public:
-    MarkerCandidate(): idx(-1) {}
-    MarkerCandidate(const Marker &M): Marker(M), idx(-1) {}
-    MarkerCandidate(const  MarkerCandidate &M): Marker(M), contour(M.contour), idx(M.idx) {}
-    MarkerCandidate & operator=(const MarkerCandidate &M){
-      Marker::operator=(M);
+    MarkerCandidate(){}
+    MarkerCandidate(const Marker &M): Marker(M){} 
+    MarkerCandidate(const  MarkerCandidate &M): Marker(M){
+      contour=M.contour;
+      idx=M.idx;
+    }
+    MarkerCandidate & operator=(const  MarkerCandidate &M){
+      (*(Marker*)this)=(*(Marker*)&M);
       contour=M.contour;
       idx=M.idx;
       return *this;
@@ -79,9 +82,9 @@ public:
      * @param camMatrix intrinsic camera information.
      * @param distCoeff camera distorsion coefficient. If set Mat() if is assumed no camera distorion
      * @param markerSizeMeters size of the marker sides expressed in meters
-     * @param setYPerpendicular If set the Y axis will be perpendicular to the surface. Otherwise, it will be the Z axis
+     * @param setYPerperdicular If set the Y axis will be perpendicular to the surface. Otherwise, it will be the Z axis
      */
-    void detect(const cv::Mat &input, std::vector<Marker> &detectedMarkers, cv::Mat camMatrix=cv::Mat(), cv::Mat distCoeff=cv::Mat(), float markerSizeMeters=-1, bool setYPerpendicular=true) throw (cv::Exception);
+    void detect(const cv::Mat &input,std::vector<Marker> &detectedMarkers,cv::Mat camMatrix=cv::Mat(),cv::Mat distCoeff=cv::Mat(),float markerSizeMeters=-1,bool setYPerperdicular=false) throw (cv::Exception);
     /**Detects the markers in the image passed
      *
      * If you provide information about the camera parameters and the size of the marker, then, the extrinsics of the markers are detected
@@ -90,9 +93,9 @@ public:
      * @param detectedMarkers output vector with the markers detected
      * @param camParams Camera parameters
      * @param markerSizeMeters size of the marker sides expressed in meters
-     * @param setYPerpendicular If set the Y axis will be perpendicular to the surface. Otherwise, it will be the Z axis
+     * @param setYPerperdicular If set the Y axis will be perpendicular to the surface. Otherwise, it will be the Z axis
      */
-    void detect(const cv::Mat &input, std::vector<Marker> &detectedMarkers, CameraParameters camParams, float markerSizeMeters=-1, bool setYPerpendicular=true) throw (cv::Exception);
+    void detect(const cv::Mat &input,std::vector<Marker> &detectedMarkers, CameraParameters camParams,float markerSizeMeters=-1,bool setYPerperdicular=false) throw (cv::Exception);
 
     /**This set the type of thresholding methods available
      */
@@ -185,6 +188,17 @@ public:
     int getDesiredSpeed()const {
         return _speed;
     }
+    
+    /**
+     * Specifies the size for the canonical marker image. A big value makes the detection slower than a small value. 
+     * Minimun value is 10. Default value is 56.
+     */
+    void setWarpSize(int val)throw(cv::Exception);;
+    /**
+     */
+    int getWarpSize()const {
+        return _markerWarpSize;
+    }    
 
     /**
      * Allows to specify the function that identifies a marker. Therefore, you can create your own type of markers different from these
@@ -248,7 +262,7 @@ public:
     /** Refine MarkerCandidate Corner using LINES method
      * @param candidate candidate to refine corners
      */
-    void refineCandidateLines(MarkerCandidate &candidate);    
+    void refineCandidateLines(MarkerCandidate &candidate, const cv::Mat &camMatrix, const cv::Mat &distCoeff);    
     
     
     /**DEPRECATED!!! Use the member function in CameraParameters
@@ -268,8 +282,7 @@ public:
 
 private:
 
-    bool _enableCylinderWarp;
-    bool warp_cylinder ( cv::Mat &in,cv::Mat &out,cv::Size size, MarkerCandidate& mc ) throw ( cv::Exception );
+     bool warp_cylinder ( cv::Mat &in,cv::Mat &out,cv::Size size, MarkerCandidate& mc ) throw ( cv::Exception );
     /**
     * Detection of candidates to be markers, i.e., rectangles.
     * This function returns in candidates all the rectangles found in a thresolded image
@@ -287,6 +300,7 @@ private:
     int _speed;
     int _markerWarpSize;
     bool _doErosion;
+    float _borderDistThres;//border around image limits in which corners are not allowed to be detected.
     //vectr of candidates to be markers. This is a vector with a set of rectangles that have no valid id
     vector<std::vector<cv::Point2f> > _candidates;
     //level of image reduction
@@ -318,8 +332,9 @@ private:
    
     
     // auxiliar functions to perform LINES refinement
-    void interpolate2Dline( const vector< cv::Point > &inPoints, cv::Point3f &outLine);
+    void interpolate2Dline( const vector< cv::Point2f > &inPoints, cv::Point3f &outLine);
     cv::Point2f getCrossPoint(const cv::Point3f& line1, const cv::Point3f& line2);      
+    void distortPoints(vector<cv::Point2f> in, vector<cv::Point2f> &out, const cv::Mat &camMatrix, const cv::Mat &distCoeff);    
     
     
     /**Given a vector vinout with elements and a boolean vector indicating the lements from it to remove, 
@@ -347,6 +362,12 @@ private:
     void drawAllContours(cv::Mat input, std::vector<std::vector<cv::Point> > &contours);
     void draw(cv::Mat out,const std::vector<Marker> &markers );
 
+    
+    template<typename T> void joinVectors(vector<vector<T> >  &vv,vector<T> &v,bool clearv=false){
+      if (clearv) v.clear();
+     for(size_t i=0;i<vv.size();i++)
+       for(size_t j=0;j<vv[i].size();j++) v.push_back(vv[i][j]);
+    }
 };
 
 
