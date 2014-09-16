@@ -40,18 +40,19 @@ tf::Transform aruco_ros::arucoMarker2Tf(const aruco::Marker &marker)
     cv::Mat tran = marker.Tvec;
 
     cv::Mat rotate_to_ros(3, 3, CV_32FC1);
-    // -1 0 0
-    // 0 0 1
-    // 0 1 0
-    rotate_to_ros.at<float>(0,0) = -1.0;
+    // Make a rotation around X by PI, fixed by Sahloul
+    // 1 0 0
+    // 0 -1 0
+    // 0 0 -1
+    rotate_to_ros.at<float>(0,0) = 1.0;
     rotate_to_ros.at<float>(0,1) = 0.0;
     rotate_to_ros.at<float>(0,2) = 0.0;
     rotate_to_ros.at<float>(1,0) = 0.0;
-    rotate_to_ros.at<float>(1,1) = 0.0;
-    rotate_to_ros.at<float>(1,2) = 1.0;
+    rotate_to_ros.at<float>(1,1) = -1.0;
+    rotate_to_ros.at<float>(1,2) = 0.0;
     rotate_to_ros.at<float>(2,0) = 0.0;
-    rotate_to_ros.at<float>(2,1) = 1.0;
-    rotate_to_ros.at<float>(2,2) = 0.0;
+    rotate_to_ros.at<float>(2,1) = 0.0;
+    rotate_to_ros.at<float>(2,2) = -1.0;
     rot = rot*rotate_to_ros.t();
 
     tf::Matrix3x3 tf_rot(rot.at<float>(0,0), rot.at<float>(0,1), rot.at<float>(0,2),

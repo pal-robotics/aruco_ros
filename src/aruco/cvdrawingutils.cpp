@@ -43,11 +43,11 @@ void CvDrawingUtils::draw3dAxis(cv::Mat &Image,Marker &m,const CameraParameters 
     objectPoints.at<float>(0,0)=0;
     objectPoints.at<float>(0,1)=0;
     objectPoints.at<float>(0,2)=0;
-    objectPoints.at<float>(1,0)=size;
-    objectPoints.at<float>(1,1)=0;
+    objectPoints.at<float>(1,0)=0;
+    objectPoints.at<float>(1,1)=size;
     objectPoints.at<float>(1,2)=0;
-    objectPoints.at<float>(2,0)=0;
-    objectPoints.at<float>(2,1)=size;
+    objectPoints.at<float>(2,0)=-size;
+    objectPoints.at<float>(2,1)=0;
     objectPoints.at<float>(2,2)=0;
     objectPoints.at<float>(3,0)=0;
     objectPoints.at<float>(3,1)=0;
@@ -56,12 +56,12 @@ void CvDrawingUtils::draw3dAxis(cv::Mat &Image,Marker &m,const CameraParameters 
     vector<Point2f> imagePoints;
     cv::projectPoints( objectPoints, m.Rvec,m.Tvec, CP.CameraMatrix,CP.Distorsion,   imagePoints);
 //draw lines of different colours
-    cv::line(Image,imagePoints[0],imagePoints[1],Scalar(0,0,255,255),1,CV_AA);
+    cv::line(Image,imagePoints[0],imagePoints[1],Scalar(255,0,0,255),1,CV_AA);
     cv::line(Image,imagePoints[0],imagePoints[2],Scalar(0,255,0,255),1,CV_AA);
-    cv::line(Image,imagePoints[0],imagePoints[3],Scalar(255,0,0,255),1,CV_AA);
-    putText(Image,"x", imagePoints[1],FONT_HERSHEY_SIMPLEX, 0.6, Scalar(0,0,255,255),2);
+    cv::line(Image,imagePoints[0],imagePoints[3],Scalar(0,0,255,255),1,CV_AA);
+    putText(Image,"x", imagePoints[1],FONT_HERSHEY_SIMPLEX, 0.6, Scalar(255,0,0,255),2);
     putText(Image,"y", imagePoints[2],FONT_HERSHEY_SIMPLEX, 0.6, Scalar(0,255,0,255),2);
-    putText(Image,"z", imagePoints[3],FONT_HERSHEY_SIMPLEX, 0.6, Scalar(255,0,0,255),2);
+    putText(Image,"z", imagePoints[3],FONT_HERSHEY_SIMPLEX, 0.6, Scalar(0,0,255,255),2);
 }
 
 /****
@@ -154,19 +154,19 @@ void CvDrawingUtils::draw3dAxis(cv::Mat &Image,Board &B,const CameraParameters &
 Mat objectPoints (4,3,CV_32FC1);
 objectPoints.at<float>(0,0)=0;objectPoints.at<float>(0,1)=0;objectPoints.at<float>(0,2)=0;
 objectPoints.at<float>(1,0)=2*B[0].ssize;objectPoints.at<float>(1,1)=0;objectPoints.at<float>(1,2)=0;
-objectPoints.at<float>(2,0)=0;objectPoints.at<float>(2,1)=2*B[0].ssize;objectPoints.at<float>(2,2)=0;
-objectPoints.at<float>(3,0)=0;objectPoints.at<float>(3,1)=0;objectPoints.at<float>(3,2)=2*B[0].ssize;
+objectPoints.at<float>(2,0)=0;objectPoints.at<float>(2,1)=-2*B[0].ssize;objectPoints.at<float>(2,2)=0;
+objectPoints.at<float>(3,0)=0;objectPoints.at<float>(3,1)=0;objectPoints.at<float>(3,2)=-2*B[0].ssize;
 
 vector<Point2f> imagePoints;
 projectPoints( objectPoints, B.Rvec,B.Tvec, CP.CameraMatrix, CP.Distorsion,   imagePoints);
 //draw lines of different colours
-cv::line(Image,imagePoints[0],imagePoints[1],Scalar(0,0,255,255),2,CV_AA);
+cv::line(Image,imagePoints[0],imagePoints[1],Scalar(255,0,0,255),2,CV_AA);
 cv::line(Image,imagePoints[0],imagePoints[2],Scalar(0,255,0,255),2,CV_AA);
-cv::line(Image,imagePoints[0],imagePoints[3],Scalar(255,0,0,255),2,CV_AA);
+cv::line(Image,imagePoints[0],imagePoints[3],Scalar(0,0,255,255),2,CV_AA);
 
-putText(Image,"X", imagePoints[1],FONT_HERSHEY_SIMPLEX, 1, Scalar(0,0,255,255),2);
+putText(Image,"X", imagePoints[1],FONT_HERSHEY_SIMPLEX, 1, Scalar(255,0,0,255),2);
 putText(Image,"Y", imagePoints[2],FONT_HERSHEY_SIMPLEX, 1, Scalar(0,255,0,255),2);
-putText(Image,"Z", imagePoints[3],FONT_HERSHEY_SIMPLEX, 1, Scalar(255,0,0,255),2);
+putText(Image,"Z", imagePoints[3],FONT_HERSHEY_SIMPLEX, 1, Scalar(0,0,255,255),2);
 }
 
 
