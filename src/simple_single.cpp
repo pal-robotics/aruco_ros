@@ -53,6 +53,7 @@ class ArucoSimple
 private:
   cv::Mat inImage;
   aruco::CameraParameters camParam;
+  tf::StampedTransform rightToLeft;
   bool useRectifiedImages;
   MarkerDetector mDetector;
   vector<Marker> markers;
@@ -177,7 +178,10 @@ public:
                            cameraToReference);
             }
 
-            transform = static_cast<tf::Transform>(cameraToReference) * transform;
+            transform = 
+              static_cast<tf::Transform>(cameraToReference) 
+              * static_cast<tf::Transform>(rightToLeft) 
+              * transform;
 
             tf::StampedTransform stampedTransform(transform, ros::Time::now(),
                                                   reference_frame, marker_frame);
@@ -242,6 +246,16 @@ public:
   void cam_info_callback(const sensor_msgs::CameraInfo &msg)
   {
     camParam = aruco_ros::rosCameraInfo2ArucoCamParams(msg, useRectifiedImages);
+
+    // handle cartesian offset between stereo pairs
+    // see the sensor_msgs/CamaraInfo documentation for details
+    rightToLeft.setIdentity();
+    rightToLeft.setOrigin(
+        tf::Vector3(
+            -msg.P[3]/msg.P[0],
+            -msg.P[7]/msg.P[5],
+            0.0));
+
     cam_info_received = true;
     cam_info_sub.shutdown();
   }
