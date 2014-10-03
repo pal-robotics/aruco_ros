@@ -8,8 +8,13 @@ find_package(catkin REQUIRED COMPONENTS
   image_transport
   pal_vision_segmentation
   roscpp
+  rospy
   tf
+  message_generation
 )
+
+add_message_files( FILES Marker.msg MarkerArray.msg )
+generate_messages( DEPENDENCIES std_msgs geometry_msgs )
 
 generate_dynamic_reconfigure_options(
   cfg/ArucoThreshold.cfg
@@ -29,6 +34,7 @@ catkin_package(
   LIBRARIES aruco
 #  CATKIN_DEPENDS cv_bridge dynamic_reconfigure geometry_msgs image_transport pal_vision_segmentation roscpp tf
 #  DEPENDS system_lib
+  CATKIN_DEPENDS message_runtime
 )
 
 include_directories(
@@ -57,6 +63,11 @@ add_executable(double src/simple_double.cpp
                       src/aruco_ros_utils.cpp)
 add_dependencies(double ${PROJECT_NAME}_gencfg)
 target_link_libraries(double aruco ${catkin_LIBRARIES})
+
+add_executable(marker_pub src/marker_publish.cpp
+                      src/aruco_ros_utils.cpp)
+add_dependencies(marker_pub ${PROJECT_NAME}_gencfg)
+target_link_libraries(marker_pub aruco ${catkin_LIBRARIES})
 
 
 install(DIRECTORY include/
