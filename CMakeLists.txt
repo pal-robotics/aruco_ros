@@ -2,14 +2,19 @@ cmake_minimum_required(VERSION 2.8.3)
 project(aruco_ros)
 
 find_package(catkin REQUIRED COMPONENTS
+  message_generation
   cv_bridge
   dynamic_reconfigure
   geometry_msgs
   image_transport
   pal_vision_segmentation
   roscpp
+  rospy
   tf
 )
+
+add_message_files( FILES Marker.msg MarkerArray.msg )
+generate_messages( DEPENDENCIES std_msgs geometry_msgs )
 
 generate_dynamic_reconfigure_options(
   cfg/ArucoThreshold.cfg
@@ -27,6 +32,7 @@ generate_dynamic_reconfigure_options(
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES aruco
+  CATKIN_DEPENDS message_runtime
 #  CATKIN_DEPENDS cv_bridge dynamic_reconfigure geometry_msgs image_transport pal_vision_segmentation roscpp tf
 #  DEPENDS system_lib
 )

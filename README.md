@@ -18,6 +18,23 @@ Software package and ROS wrappers of the [Aruco][1] Augmented Reality marker det
  * Visual servoing: track object and hand at the same time
 
 <img align="right" src="https://raw.github.com/pal-robotics/aruco_ros/master/etc/reem_gazebo_floating_marker_world.png"/>
+
+### ROS API
+
+#### Messages
+
+ * aruco_ros/Marker.msg
+
+        Header header
+        uint32 id
+        geometry_msgs/PoseWithCovariance pose
+        float64 confidence
+
+ * aruco_ros/MarkerArray.msg
+
+        Header header
+        aruco_ros/Marker[] markers
+
 ### Test it with REEM
 
  * Open a REEM in simulation with a marker floating in front of the robot. This will start the stereo cameras of the robot too. Since this is only a vision test, there is nothing else in this world apart from the robot and a marker floating in front of it. An extra light source had to be added to compensate for the default darkness.
