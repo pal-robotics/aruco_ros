@@ -30,8 +30,8 @@ or implied, of Rafael Muñoz Salinas.
 #include <opencv2/opencv.hpp>
 #include <string>
 #include <vector>
-#include "exports.h"
-#include "marker.h"
+#include <aruco/exports.h>
+#include <aruco/marker.h>
 using namespace std;
 namespace aruco {
 /**
