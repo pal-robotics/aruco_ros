@@ -1,0 +1,54 @@
+cmake_minimum_required(VERSION 2.8.3)
+project(aruco_ros)
+
+find_package(catkin REQUIRED COMPONENTS
+  cv_bridge
+  dynamic_reconfigure
+  geometry_msgs
+  image_transport
+  pal_vision_segmentation
+  roscpp
+  rospy
+  tf
+  aruco
+  aruco_msgs
+)
+
+generate_dynamic_reconfigure_options(
+  cfg/ArucoThreshold.cfg
+)
+
+catkin_package(
+  INCLUDE_DIRS include
+  LIBRARIES aruco
+)
+
+include_directories(
+  include
+  ${catkin_INCLUDE_DIRS}
+)
+
+add_executable(single src/simple_single.cpp
+                      src/aruco_ros_utils.cpp)
+add_dependencies(single ${PROJECT_NAME}_gencfg)
+target_link_libraries(single aruco ${catkin_LIBRARIES})
+
+add_executable(double src/simple_double.cpp
+                      src/aruco_ros_utils.cpp)
+add_dependencies(double ${PROJECT_NAME}_gencfg)
+target_link_libraries(double aruco ${catkin_LIBRARIES})
+
+#############
+## Install ##
+#############
+
+install(TARGETS single double
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+install(DIRECTORY include/
+   DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION}
+   FILES_MATCHING PATTERN "*.h"
+)

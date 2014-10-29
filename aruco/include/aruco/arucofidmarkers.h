@@ -29,9 +29,9 @@ or implied, of Rafael Muñoz Salinas.
 #ifndef ArucoFiducicalMarkerDetector_H
 #define ArucoFiducicalMarkerDetector_H
 #include <opencv2/core/core.hpp>
-#include "exports.h"
-#include "marker.h"
-#include "board.h"
+#include <aruco/exports.h>
+#include <aruco/marker.h>
+#include <aruco/board.h>
 namespace aruco {
 
 class ARUCO_EXPORTS FiducidalMarkers {
