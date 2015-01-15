@@ -43,11 +43,11 @@ or implied, of Rafael Muñoz Salinas.
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
 #include <aruco_ros/aruco_ros_utils.h>
-#include <aruco_ros/MarkerArray.h>
+#include <aruco_msgs/MarkerArray.h>
 #include <tf/transform_broadcaster.h>
 #include <tf/transform_listener.h>
 
-class ArucoSimple
+class ArucoMarkerPublisher
 {
 private:
   cv::Mat inImage_;
@@ -55,7 +55,7 @@ private:
   bool useRectifiedImages_;
   aruco::MarkerDetector mDetector_;
   vector<aruco::Marker> markers_;
-  aruco_ros::MarkerArray::Ptr marker_msg_;
+  aruco_msgs::MarkerArray::Ptr marker_msg_;
   ros::Subscriber cam_info_sub_;
   bool cam_info_received_;
   image_transport::Publisher image_pub_;
@@ -74,17 +74,17 @@ private:
   tf::TransformListener tfListener_;
 
 public:
-  ArucoSimple()
+  ArucoMarkerPublisher()
     : cam_info_received_(false),
       nh_("~"),
       it_(nh_)
   {
-    image_sub_ = it_.subscribe("/image", 1, &ArucoSimple::image_callback, this);
-    cam_info_sub_ = nh_.subscribe("/camera_info", 1, &ArucoSimple::cam_info_callback, this);
+    image_sub_ = it_.subscribe("/image", 1, &ArucoMarkerPublisher::image_callback, this);
+    cam_info_sub_ = nh_.subscribe("/camera_info", 1, &ArucoMarkerPublisher::cam_info_callback, this);
 
     image_pub_ = it_.advertise("result", 1);
     debug_pub_ = it_.advertise("debug", 1);
-    marker_pub_ = nh_.advertise<aruco_ros::MarkerArray>("markers", 100);
+    marker_pub_ = nh_.advertise<aruco_msgs::MarkerArray>("markers", 100);
 
     nh_.param<double>("marker_size", marker_size_, 0.05);
     nh_.param<std::string>("reference_frame", reference_frame_, "");
@@ -103,7 +103,7 @@ public:
     //ROS_INFO("Aruco node will publish pose to TF with %s as parent and %s as child.",
              //reference_frame_.c_str(), marker_frame_.c_str());
 
-    marker_msg_ = aruco_ros::MarkerArray::Ptr( new aruco_ros::MarkerArray() );
+    marker_msg_ = aruco_msgs::MarkerArray::Ptr( new aruco_msgs::MarkerArray() );
     marker_msg_->header.frame_id = reference_frame_;
     marker_msg_->header.seq = 0;
   }
@@ -189,11 +189,12 @@ public:
               //reference_frame_, marker_frame_);
           //br.sendTransform(stampedTransform);
 
-          aruco_ros::Marker & marker_i = marker_msg_->markers.at(i);
-          tf::poseTFToMsg(transform, marker_i.pose);
+          aruco_msgs::Marker & marker_i = marker_msg_->markers.at(i);
+          tf::poseTFToMsg(transform, marker_i.pose.pose);
           marker_i.header.frame_id = reference_frame_;
           marker_i.header.stamp = curr_stamp;
           marker_i.id = markers_.at(i).id;
+          marker_i.confidence = 1.0;
 
           markers_[i].draw(inImage_,cv::Scalar(0,0,255),2);
         }
@@ -248,9 +249,9 @@ public:
 
 int main(int argc,char **argv)
 {
-  ros::init(argc, argv, "aruco_simple");
+  ros::init(argc, argv, "aruco_marker_publisher");
 
-  ArucoSimple node;
+  ArucoMarkerPublisher node;
 
   ros::spin();
 }
