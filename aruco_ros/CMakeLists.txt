@@ -38,6 +38,11 @@ add_executable(double src/simple_double.cpp
 add_dependencies(double ${PROJECT_NAME}_gencfg)
 target_link_libraries(double ${catkin_LIBRARIES})
 
+add_executable(marker_publisher src/marker_publish.cpp
+                                src/aruco_ros_utils.cpp)
+add_dependencies(marker_publisher ${PROJECT_NAME}_gencfg)
+target_link_libraries(marker_publisher ${catkin_LIBRARIES})
+
 #############
 ## Install ##
 #############
