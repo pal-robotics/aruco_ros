@@ -47,7 +47,7 @@ target_link_libraries(marker_publisher ${catkin_LIBRARIES})
 ## Install ##
 #############
 
-install(TARGETS single double
+install(TARGETS single double marker_publisher
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
