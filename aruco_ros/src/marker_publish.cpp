@@ -149,6 +149,7 @@ public:
     static tf::TransformBroadcaster br;
     if(cam_info_received_)
     {
+      ros::Time curr_stamp(ros::Time::now());
       cv_bridge::CvImagePtr cv_ptr;
       try
       {
@@ -163,7 +164,6 @@ public:
         mDetector_.detect(inImage_, markers_, camParam_, marker_size_, false);
         marker_msg_->markers.resize(markers_.size());
 
-        ros::Time curr_stamp(ros::Time::now());
         marker_msg_->header.stamp = curr_stamp;
         marker_msg_->header.seq++;
 

@@ -151,6 +151,7 @@ public:
     static tf::TransformBroadcaster br;
     if(cam_info_received)
     {
+      ros::Time curr_stamp(ros::Time::now());
       cv_bridge::CvImagePtr cv_ptr;
       try
       {
@@ -183,13 +184,13 @@ public:
               * static_cast<tf::Transform>(rightToLeft) 
               * transform;
 
-            tf::StampedTransform stampedTransform(transform, ros::Time::now(),
+            tf::StampedTransform stampedTransform(transform, curr_stamp,
                                                   reference_frame, marker_frame);
             br.sendTransform(stampedTransform);
             geometry_msgs::PoseStamped poseMsg;
             tf::poseTFToMsg(transform, poseMsg.pose);
             poseMsg.header.frame_id = reference_frame;
-            poseMsg.header.stamp = ros::Time::now();
+            poseMsg.header.stamp = curr_stamp;
             pose_pub.publish(poseMsg);
 
             geometry_msgs::TransformStamped transformMsg;
@@ -218,7 +219,7 @@ public:
         {
           //show input with augmented information
           cv_bridge::CvImage out_msg;
-          out_msg.header.stamp = ros::Time::now();
+          out_msg.header.stamp = curr_stamp;
           out_msg.encoding = sensor_msgs::image_encodings::RGB8;
           out_msg.image = inImage;
           image_pub.publish(out_msg.toImageMsg());
@@ -228,7 +229,7 @@ public:
         {
           //show also the internal image resulting from the threshold operation
           cv_bridge::CvImage debug_msg;
-          debug_msg.header.stamp = ros::Time::now();
+          debug_msg.header.stamp = curr_stamp;
           debug_msg.encoding = sensor_msgs::image_encodings::MONO8;
           debug_msg.image = mDetector.getThresholdedImage();
           debug_pub.publish(debug_msg.toImageMsg());

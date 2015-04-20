@@ -81,6 +81,7 @@ void image_callback(const sensor_msgs::ImageConstPtr& msg)
   static tf::TransformBroadcaster br;
   if(cam_info_received)
   {
+    ros::Time curr_stamp(ros::Time::now());
     cv_bridge::CvImagePtr cv_ptr;
     try
     {
@@ -105,7 +106,7 @@ void image_callback(const sensor_msgs::ImageConstPtr& msg)
         if ( markers[i].id == marker_id1 )
         {
           tf::Transform transform = aruco_ros::arucoMarker2Tf(markers[i]);
-          br.sendTransform(tf::StampedTransform(transform, ros::Time::now(),
+          br.sendTransform(tf::StampedTransform(transform, curr_stamp,
                                                 parent_name, child_name1));
           geometry_msgs::Pose poseMsg;
           tf::poseTFToMsg(transform, poseMsg);
@@ -114,7 +115,7 @@ void image_callback(const sensor_msgs::ImageConstPtr& msg)
         else if ( markers[i].id == marker_id2 )
         {
           tf::Transform transform = aruco_ros::arucoMarker2Tf(markers[i]);
-          br.sendTransform(tf::StampedTransform(transform, ros::Time::now(),
+          br.sendTransform(tf::StampedTransform(transform, curr_stamp,
                                                 parent_name, child_name2));
           geometry_msgs::Pose poseMsg;
           tf::poseTFToMsg(transform, poseMsg);
@@ -193,7 +194,7 @@ void image_callback(const sensor_msgs::ImageConstPtr& msg)
       {
         //show input with augmented information
         cv_bridge::CvImage out_msg;
-        out_msg.header.stamp = ros::Time::now();
+        out_msg.header.stamp = curr_stamp;
         out_msg.encoding = sensor_msgs::image_encodings::RGB8;
         out_msg.image = inImage;
         image_pub.publish(out_msg.toImageMsg());
@@ -203,7 +204,7 @@ void image_callback(const sensor_msgs::ImageConstPtr& msg)
       {
         //show also the internal image resulting from the threshold operation
         cv_bridge::CvImage debug_msg;
-        debug_msg.header.stamp = ros::Time::now();
+        debug_msg.header.stamp = curr_stamp;
         debug_msg.encoding = sensor_msgs::image_encodings::MONO8;
         debug_msg.image = mDetector.getThresholdedImage();
         debug_pub.publish(debug_msg.toImageMsg());
