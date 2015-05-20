@@ -50,8 +50,6 @@ or implied, of Rafael Muñoz Salinas.
 #include <dynamic_reconfigure/server.h>
 #include <aruco_ros/ArucoThresholdConfig.h>
 
-#include <pal_vision_segmentation/image_processing.h>
-
 using namespace cv;
 using namespace aruco;
 
@@ -90,9 +88,10 @@ void image_callback(const sensor_msgs::ImageConstPtr& msg)
 
       if(normalizeImageIllumination)
       {
-        cv::Mat inImageNorm;
-        pal_vision_util::dctNormalization(inImage, inImageNorm, dctComponentsToRemove);
-        inImage = inImageNorm;
+        ROS_WARN("normalizeImageIllumination is unimplemented!");
+        //cv::Mat inImageNorm;
+        //pal_vision_util::dctNormalization(inImage, inImageNorm, dctComponentsToRemove);
+        //inImage = inImageNorm;
       }
 
       //detection results will go into "markers"

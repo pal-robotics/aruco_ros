@@ -18,7 +18,6 @@
   <depend>dynamic_reconfigure</depend>
   <depend>geometry_msgs</depend>
   <depend>image_transport</depend>
-  <depend>pal_vision_segmentation</depend>
   <depend>roscpp</depend>
   <depend>tf</depend>
   <depend>aruco</depend>

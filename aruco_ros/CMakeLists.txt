@@ -6,7 +6,6 @@ find_package(catkin REQUIRED COMPONENTS
   dynamic_reconfigure
   geometry_msgs
   image_transport
-  pal_vision_segmentation
   roscpp
   rospy
   tf
