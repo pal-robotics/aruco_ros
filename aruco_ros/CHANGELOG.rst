@@ -2,8 +2,8 @@
 Changelog for package aruco_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.0.1 (2015-05-20)
+------------------
 * More accurate ROS timestamps (callback triggering time)
   This commit ensures that:
   - all published msgs in a callback have the same timestamp
