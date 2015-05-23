@@ -1,5 +1,6 @@
 #include <aruco_ros/aruco_ros_utils.h>
 #include <ros/console.h>
+#include <ros/assert.h>
 #include <iostream>
 #include <tf/transform_datatypes.h>
 
@@ -17,6 +18,7 @@ aruco::CameraParameters aruco_ros::rosCameraInfo2ArucoCamParams(const sensor_msg
       cameraMatrix.at<float>(1,0) = cam_info.P[4];   cameraMatrix.at<float>(1,1) = cam_info.P[5];   cameraMatrix.at<float>(1,2) = cam_info.P[6];
       cameraMatrix.at<float>(2,0) = cam_info.P[8];   cameraMatrix.at<float>(2,1) = cam_info.P[9];   cameraMatrix.at<float>(2,2) = cam_info.P[10];
 
+      ROS_ASSERT(cam_info.D.size() == 4);
       for(int i=0; i<4; ++i)
         distorsionCoeff.at<float>(i, 0) = 0;
     }
@@ -25,8 +27,17 @@ aruco::CameraParameters aruco_ros::rosCameraInfo2ArucoCamParams(const sensor_msg
       for(int i=0; i<9; ++i)
         cameraMatrix.at<float>(i%3, i-(i%3)*3) = cam_info.K[i];
 
-      for(int i=0; i<4; ++i)
-        distorsionCoeff.at<float>(i, 0) = cam_info.D[i];
+      if(cam_info.D.size() == 4)
+      {
+        for(int i=0; i<4; ++i)
+          distorsionCoeff.at<float>(i, 0) = cam_info.D[i];
+      }
+      else
+      {
+        ROS_WARN("length of camera_info D vector is not 4, assuming zero distortion...");
+        for(int i=0; i<4; ++i)
+          distorsionCoeff.at<float>(i, 0) = 0;
+      }
     }
 
     return aruco::CameraParameters(cameraMatrix, distorsionCoeff, size);
