@@ -94,6 +94,11 @@ public:
       camParam_ = aruco_ros::rosCameraInfo2ArucoCamParams(*msg, useRectifiedImages_);
       nh_.param<double>("marker_size", marker_size_, 0.05);
       nh_.param<bool>("image_is_rectified", useRectifiedImages_, true);
+      nh_.param<std::string>("reference_frame", reference_frame_, "");
+      nh_.param<std::string>("camera_frame", camera_frame_, "");
+      ROS_ASSERT(not camera_frame_.empty());
+      if(reference_frame_.empty())
+        reference_frame_ = camera_frame_;
     }
     else
     {
@@ -104,13 +109,6 @@ public:
     debug_pub_ = it_.advertise("debug", 1);
     marker_pub_ = nh_.advertise<aruco_msgs::MarkerArray>("markers", 100);
     marker_list_pub_ = nh_.advertise<std_msgs::UInt32MultiArray>("markers_list", 10);
-
-    nh_.param<std::string>("reference_frame", reference_frame_, "");
-    nh_.param<std::string>("camera_frame", camera_frame_, "");
-
-    ROS_ASSERT(not camera_frame_.empty());
-    if(reference_frame_.empty())
-      reference_frame_ = camera_frame_;
 
     marker_msg_ = aruco_msgs::MarkerArray::Ptr(new aruco_msgs::MarkerArray());
     marker_msg_->header.frame_id = reference_frame_;
