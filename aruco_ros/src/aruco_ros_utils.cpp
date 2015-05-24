@@ -18,7 +18,6 @@ aruco::CameraParameters aruco_ros::rosCameraInfo2ArucoCamParams(const sensor_msg
       cameraMatrix.at<float>(1,0) = cam_info.P[4];   cameraMatrix.at<float>(1,1) = cam_info.P[5];   cameraMatrix.at<float>(1,2) = cam_info.P[6];
       cameraMatrix.at<float>(2,0) = cam_info.P[8];   cameraMatrix.at<float>(2,1) = cam_info.P[9];   cameraMatrix.at<float>(2,2) = cam_info.P[10];
 
-      ROS_ASSERT(cam_info.D.size() == 4);
       for(int i=0; i<4; ++i)
         distorsionCoeff.at<float>(i, 0) = 0;
     }
