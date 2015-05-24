@@ -175,29 +175,37 @@ public:
           marker_msg_->header.stamp = curr_stamp;
           marker_msg_->header.seq++;
 
-          //get the current transform from the camera frame to output ref frame
-          tf::StampedTransform cameraToReference;
-          cameraToReference.setIdentity();
-
-          if ( reference_frame_ != camera_frame_ )
-          {
-            getTransform(reference_frame_,
-                camera_frame_,
-                cameraToReference);
-          }
-
-          //Now find the transform for each detected marker
           for(size_t i=0; i<markers_.size(); ++i)
           {
-            tf::Transform transform = aruco_ros::arucoMarker2Tf(markers_[i]);
-            transform = static_cast<tf::Transform>(cameraToReference) * transform;
-
             aruco_msgs::Marker & marker_i = marker_msg_->markers.at(i);
-            tf::poseTFToMsg(transform, marker_i.pose.pose);
-            marker_i.header.frame_id = reference_frame_;
             marker_i.header.stamp = curr_stamp;
             marker_i.id = markers_.at(i).id;
             marker_i.confidence = 1.0;
+          }
+
+          // if there is camera info let's do 3D stuff
+          if(useCamInfo_)
+          {
+            //get the current transform from the camera frame to output ref frame
+            tf::StampedTransform cameraToReference;
+            cameraToReference.setIdentity();
+
+            if ( reference_frame_ != camera_frame_ )
+            {
+              getTransform(reference_frame_,
+                  camera_frame_,
+                  cameraToReference);
+            }
+
+            //Now find the transform for each detected marker
+            for(size_t i=0; i<markers_.size(); ++i)
+            {
+              aruco_msgs::Marker & marker_i = marker_msg_->markers.at(i);
+              tf::Transform transform = aruco_ros::arucoMarker2Tf(markers_[i]);
+              transform = static_cast<tf::Transform>(cameraToReference) * transform;
+              tf::poseTFToMsg(transform, marker_i.pose.pose);
+              marker_i.header.frame_id = reference_frame_;
+            }
           }
 
           //publish marker array
