@@ -44,8 +44,8 @@ or implied, of Rafael Muñoz Salinas.
 #include <sensor_msgs/image_encodings.h>
 #include <aruco_ros/aruco_ros_utils.h>
 #include <aruco_msgs/MarkerArray.h>
-#include <tf/transform_broadcaster.h>
 #include <tf/transform_listener.h>
+#include <std_msgs/UInt32MultiArray.h>
 
 class ArucoMarkerPublisher
 {
@@ -70,12 +70,14 @@ private:
   image_transport::Publisher image_pub_;
   image_transport::Publisher debug_pub_;
   ros::Publisher marker_pub_;
+  ros::Publisher marker_list_pub_;
   tf::TransformListener tfListener_;
 
   ros::Subscriber cam_info_sub_;
   aruco_msgs::MarkerArray::Ptr marker_msg_;
   cv::Mat inImage_;
   bool useCamInfo_;
+  std_msgs::UInt32MultiArray marker_list_msg_;
 
 public:
   ArucoMarkerPublisher()
@@ -101,7 +103,7 @@ public:
     image_pub_ = it_.advertise("result", 1);
     debug_pub_ = it_.advertise("debug", 1);
     marker_pub_ = nh_.advertise<aruco_msgs::MarkerArray>("markers", 100);
-
+    marker_list_pub_ = nh_.advertise<std_msgs::UInt32MultiArray>("markers_list", 10);
 
     nh_.param<std::string>("reference_frame", reference_frame_, "");
     nh_.param<std::string>("camera_frame", camera_frame_, "");
@@ -149,7 +151,6 @@ public:
     return true;
   }
 
-
   void image_callback(const sensor_msgs::ImageConstPtr& msg)
   {
       ros::Time curr_stamp(ros::Time::now());
@@ -164,7 +165,6 @@ public:
 
         //Ok, let's detect
         mDetector_.detect(inImage_, markers_, camParam_, marker_size_, false);
-        ROS_INFO_STREAM("markers num: " << markers_.size());
 
         // marker array publish
         if(marker_pub_.getNumSubscribers()>0)
@@ -210,6 +210,15 @@ public:
           //publish marker array
           if (marker_msg_->markers.size() > 0)
             marker_pub_.publish(marker_msg_);
+        }
+
+        if(marker_list_pub_.getNumSubscribers() > 0)
+        {
+            marker_list_msg_.data.resize(markers_.size());
+            for(size_t i=0; i<markers_.size(); ++i)
+              marker_list_msg_.data[i] = markers_[i].id;
+
+            marker_list_pub_.publish(marker_list_msg_);
         }
 
         // Draw detected markers on the image for visualization
