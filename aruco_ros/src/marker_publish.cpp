@@ -152,7 +152,6 @@ public:
 
   void image_callback(const sensor_msgs::ImageConstPtr& msg)
   {
-    static tf::TransformBroadcaster br;
       ros::Time curr_stamp(ros::Time::now());
       cv_bridge::CvImagePtr cv_ptr;
       try
