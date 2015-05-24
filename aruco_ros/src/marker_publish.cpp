@@ -73,7 +73,6 @@ private:
   tf::TransformListener tfListener_;
 
   ros::Subscriber cam_info_sub_;
-  bool cam_info_received_;
   aruco_msgs::MarkerArray::Ptr marker_msg_;
   cv::Mat inImage_;
   bool useCamInfo_;
@@ -82,7 +81,6 @@ public:
   ArucoMarkerPublisher()
     : nh_("~")
     , it_(nh_)
-    , cam_info_received_(false)
     , useCamInfo_(true)
   {
     image_sub_ = it_.subscribe("/image", 1, &ArucoMarkerPublisher::image_callback, this);
@@ -90,14 +88,14 @@ public:
     nh_.param<bool>("use_camera_info", useCamInfo_, true);
     if(useCamInfo_)
     {
-      cam_info_sub_ = nh_.subscribe("/camera_info", 1, &ArucoMarkerPublisher::cam_info_callback, this);
+      sensor_msgs::CameraInfoConstPtr msg = ros::topic::waitForMessage<sensor_msgs::CameraInfo>("/camera_info", nh_);//, 10.0);
+      camParam_ = aruco_ros::rosCameraInfo2ArucoCamParams(*msg, useRectifiedImages_);
       nh_.param<double>("marker_size", marker_size_, 0.05);
       nh_.param<bool>("image_is_rectified", useRectifiedImages_, true);
     }
     else
     {
       camParam_ = aruco::CameraParameters();
-      cam_info_received_ = true;
     }
 
     image_pub_ = it_.advertise("result", 1);
@@ -155,8 +153,6 @@ public:
   void image_callback(const sensor_msgs::ImageConstPtr& msg)
   {
     static tf::TransformBroadcaster br;
-    if((cam_info_received_ and useCamInfo_) or not useCamInfo_)
-    {
       ros::Time curr_stamp(ros::Time::now());
       cv_bridge::CvImagePtr cv_ptr;
       try
@@ -249,15 +245,6 @@ public:
       {
         ROS_ERROR("cv_bridge exception: %s", e.what());
       }
-    }
-  }
-
-  // wait for one camerainfo, then shut down that subscriber
-  void cam_info_callback(const sensor_msgs::CameraInfo &msg)
-  {
-    camParam_ = aruco_ros::rosCameraInfo2ArucoCamParams(msg, useRectifiedImages_);
-    cam_info_received_ = true;
-    cam_info_sub_.shutdown();
   }
 };
 
