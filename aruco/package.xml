@@ -13,4 +13,5 @@
   <author email="bence.magyar@pal-robotics.com">Bence Magyar</author>
 
   <buildtool_depend>catkin</buildtool_depend>
+  <depend>opencv2</depend>
 </package>
