@@ -2,6 +2,18 @@
 Changelog for package aruco_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Frame parameters only checked when using camera info
+* Add marker list publisher
+* Remove unused broadcaster
+* Only do 3d when there is camera info
+* Use waitForMessage for camerainfo
+* Remove nonsense assert
+* Reorganize and allow no camera_info
+* Fix crash when distortion vector is 0 long (usb_cam)
+* Contributors: Bence Magyar
+
 0.0.1 (2015-05-20)
 ------------------
 * More accurate ROS timestamps (callback triggering time)
