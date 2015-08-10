@@ -4,6 +4,7 @@ Changelog for package aruco_ros
 
 Forthcoming
 -----------
+* Update changelogs and maintainer email
 * Frame parameters only checked when using camera info
 * Add marker list publisher
 * Remove unused broadcaster

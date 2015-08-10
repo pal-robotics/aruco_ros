@@ -4,6 +4,9 @@ Changelog for package aruco
 
 Forthcoming
 -----------
+* Depend on libopencv-dev directly
+* Replace opencv2 dependency with cv_bridge
+* Update changelogs and maintainer email
 * Add aruco marker generator and opencv dependency
 * Remove duplicated images
 * Remove old launch files
