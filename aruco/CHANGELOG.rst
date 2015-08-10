@@ -2,8 +2,8 @@
 Changelog for package aruco
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.0 (2015-08-10)
+------------------
 * Depend on libopencv-dev directly
 * Replace opencv2 dependency with cv_bridge
 * Update changelogs and maintainer email

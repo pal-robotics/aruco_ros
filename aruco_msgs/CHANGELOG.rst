@@ -2,8 +2,8 @@
 Changelog for package aruco_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.0 (2015-08-10)
+------------------
 * Update changelogs and maintainer email
 * Contributors: Bence Magyar
 

@@ -2,8 +2,8 @@
 Changelog for package aruco_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.0 (2015-08-10)
+------------------
 * Update changelogs and maintainer email
 * Frame parameters only checked when using camera info
 * Add marker list publisher
