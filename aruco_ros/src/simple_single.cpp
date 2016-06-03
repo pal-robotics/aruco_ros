@@ -35,6 +35,7 @@ or implied, of Rafael Muñoz Salinas.
 
 #include <iostream>
 #include <aruco/aruco.h>
+#include <aruco_msgs/Marker.h>
 #include <aruco/cvdrawingutils.h>
 
 #include <opencv2/core/core.hpp>
@@ -69,7 +70,9 @@ private:
   std::string reference_frame;
 
   double marker_size;
-  int marker_id;
+
+  int marker_id[11]; // Hardcoded, max number of aruco code that can be detected is 11
+  int num_markers_in_list; //
 
   ros::NodeHandle nh;
   image_transport::ImageTransport it;
@@ -88,24 +91,37 @@ public:
 
     image_pub = it.advertise("result", 1);
     debug_pub = it.advertise("debug", 1);
-    pose_pub = nh.advertise<geometry_msgs::PoseStamped>("pose", 100);
+    pose_pub = nh.advertise<aruco_msgs::Marker>("pose", 100);
     transform_pub = nh.advertise<geometry_msgs::TransformStamped>("transform", 100);
     position_pub = nh.advertise<geometry_msgs::Vector3Stamped>("position", 100);
 
     nh.param<double>("marker_size", marker_size, 0.05);
-    nh.param<int>("marker_id", marker_id, 300);
+    nh.param<int>("num_markers", num_markers_in_list, 11);
+    nh.param<int>("marker_id_0", marker_id[0], 500);
+    nh.param<int>("marker_id_1", marker_id[1], 582);
+    nh.param<int>("marker_id_2", marker_id[2], 590);
+    nh.param<int>("marker_id_3", marker_id[3], 614);
+    nh.param<int>("marker_id_4", marker_id[4], 625);
+    nh.param<int>("marker_id_5", marker_id[5], 750);
+    nh.param<int>("marker_id_6", marker_id[6], 785);
+    nh.param<int>("marker_id_7", marker_id[7], 798);
+    nh.param<int>("marker_id_8", marker_id[8], 825);
+    nh.param<int>("marker_id_9", marker_id[9], 921);
+    nh.param<int>("marker_id_10", marker_id[10], 945);
     nh.param<std::string>("reference_frame", reference_frame, "");
     nh.param<std::string>("camera_frame", camera_frame, "");
     nh.param<std::string>("marker_frame", marker_frame, "");
     nh.param<bool>("image_is_rectified", useRectifiedImages, true);
 
     ROS_ASSERT(camera_frame != "" && marker_frame != "");
+    ROS_ASSERT(num_markers_in_list <= 11);
 
     if ( reference_frame.empty() )
       reference_frame = camera_frame;
 
-    ROS_INFO("Aruco node started with marker size of %f m and marker id to track: %d",
-             marker_size, marker_id);
+    ROS_INFO("Aruco node started with marker size of %f m and marker id to track: %d %d %d %d %d %d %d %d %d %d %d",
+             marker_size, marker_id[0], marker_id[1], marker_id[2], marker_id[3], marker_id[4], marker_id[5],
+             marker_id[6], marker_id[7], marker_id[8], marker_id[9], marker_id[10]);
     ROS_INFO("Aruco node will publish pose to TF with %s as parent and %s as child.",
              reference_frame.c_str(), marker_frame.c_str());
   }
@@ -146,6 +162,16 @@ public:
   }
 
 
+  bool is_marker_id_in_list(int id){
+    for (unsigned i = 0; i < num_markers_in_list; ++i){
+      if (marker_id[i] == id){
+        return true;
+      }
+    }
+    return false;
+  }
+
+
   void image_callback(const sensor_msgs::ImageConstPtr& msg)
   {
     static tf::TransformBroadcaster br;
@@ -165,42 +191,52 @@ public:
         //for each marker, draw info and its boundaries in the image
         for(size_t i=0; i<markers.size(); ++i)
         {
-          // only publishing the selected marker
-          if(markers[i].id == marker_id)
-          {
-            tf::Transform transform = aruco_ros::arucoMarker2Tf(markers[i]);
-            tf::StampedTransform cameraToReference;
-            cameraToReference.setIdentity();
 
-            if ( reference_frame != camera_frame )
+          if (markers.size() == 1){  // Only process markers if there is only one in FOV
+            // only publishing the selected markers
+            if(is_marker_id_in_list(markers[i].id))
             {
-              getTransform(reference_frame,
-                           camera_frame,
-                           cameraToReference);
+              tf::Transform transform = aruco_ros::arucoMarker2Tf(markers[i]);
+              tf::StampedTransform cameraToReference;
+              cameraToReference.setIdentity();
+
+              if ( reference_frame != camera_frame )
+              {
+                getTransform(reference_frame,
+                             camera_frame,
+                             cameraToReference);
+              }
+
+              transform =
+                static_cast<tf::Transform>(cameraToReference)
+                * static_cast<tf::Transform>(rightToLeft)
+                * transform;
+
+              tf::StampedTransform stampedTransform(transform, curr_stamp,
+                                                    reference_frame, marker_frame);
+              br.sendTransform(stampedTransform);
+
+              aruco_msgs::Marker arucoMsg;
+              arucoMsg.header.frame_id = reference_frame;
+              arucoMsg.header.stamp = curr_stamp;
+              arucoMsg.id = markers[i].id;
+              arucoMsg.confidence = 1.0;
+
+              geometry_msgs::PoseWithCovariance poseMsg;
+              tf::poseTFToMsg(transform, poseMsg.pose);
+
+              arucoMsg.pose = poseMsg;
+              pose_pub.publish(arucoMsg);
+
+              geometry_msgs::TransformStamped transformMsg;
+              tf::transformStampedTFToMsg(stampedTransform, transformMsg);
+              transform_pub.publish(transformMsg);
+
+              geometry_msgs::Vector3Stamped positionMsg;
+              positionMsg.header = transformMsg.header;
+              positionMsg.vector = transformMsg.transform.translation;
+              position_pub.publish(positionMsg);
             }
-
-            transform = 
-              static_cast<tf::Transform>(cameraToReference) 
-              * static_cast<tf::Transform>(rightToLeft) 
-              * transform;
-
-            tf::StampedTransform stampedTransform(transform, curr_stamp,
-                                                  reference_frame, marker_frame);
-            br.sendTransform(stampedTransform);
-            geometry_msgs::PoseStamped poseMsg;
-            tf::poseTFToMsg(transform, poseMsg.pose);
-            poseMsg.header.frame_id = reference_frame;
-            poseMsg.header.stamp = curr_stamp;
-            pose_pub.publish(poseMsg);
-
-            geometry_msgs::TransformStamped transformMsg;
-            tf::transformStampedTFToMsg(stampedTransform, transformMsg);
-            transform_pub.publish(transformMsg);
-
-            geometry_msgs::Vector3Stamped positionMsg;
-            positionMsg.header = transformMsg.header;
-            positionMsg.vector = transformMsg.transform.translation;
-            position_pub.publish(positionMsg);
           }
           // but drawing all the detected markers
           markers[i].draw(inImage,cv::Scalar(0,0,255),2);
