@@ -1,0 +1,23 @@
+<launch>
+    <node name="image_view2" pkg="image_view" type="image_view" respawn="false" output="screen">
+        <remap from="image" to="/aruco_marker_publisher/result"/>
+        <param name="autosize" value="true" />
+    </node>
+
+    <!-- ARUCO ROS -->
+    <arg name="markerSize"      default="0.05"/>    <!-- in m -->
+    <arg name="side"            default="left"/>
+    <arg name="ref_frame"       default="base"/>  <!-- leave empty and the pose will be published wrt param parent_name -->
+
+    <param name="aruco_marker_publisher/image_is_rectified" value="True"/>
+    <param name="aruco_marker_publisher/marker_size"        value="$(arg markerSize)"/>
+    <param name="aruco_marker_publisher/reference_frame"    value="$(arg ref_frame)"/>
+    <param name="aruco_marker_publisher/camera_frame"       value="left_hand_camera"/>
+
+    <node pkg="aruco_ros" type="marker_publisher" name="aruco_marker_publisher" output="screen">
+        <remap from="image" to="/cameras/left_hand_camera/image"/>
+        <remap from="camera_info" to="/cameras/left_hand_camera/camera_info"/>
+    </node>
+
+</launch>
+
