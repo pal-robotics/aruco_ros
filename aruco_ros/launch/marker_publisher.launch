@@ -1,17 +1,37 @@
 <launch>
+    <!-- USB CAM -->
+    <node name="usb_cam" pkg="usb_cam" type="usb_cam_node" output="screen" >
+        <param name="video_device" value="/dev/video0" />
+        <param name="image_width" value="640" />
+        <param name="image_height" value="480" />
+        <param name="pixel_format" value="yuyv" />
+        <param name="camera_frame_id" value="usb_cam" />
+        <param name="camera_name" value="usb_cam" />
+        <param name="camera_info_url" value="file:///home/alecive/.ros/camera_info/usb_cam.yaml" />
+        <param name="io_method" value="mmap"/>
+    </node>
+    <!-- <node name="image_view" pkg="image_view" type="image_view" respawn="false" output="screen">
+        <remap from="image" to="/usb_cam/image_raw"/>
+        <param name="autosize" value="true" />
+    </node> -->
+    <node name="image_view2" pkg="image_view" type="image_view" respawn="false" output="screen">
+        <remap from="image" to="/aruco_marker_publisher/result"/>
+        <param name="autosize" value="true" />
+    </node>
 
-    <arg name="markerSize"      default="0.05"/>    <!-- in m -->
-    <arg name="side"             default="left"/>
+    <!-- ARUCO ROS -->
+    <arg name="markerSize"      default="0.04"/>    <!-- in m -->
+    <arg name="side"            default="left"/>
     <arg name="ref_frame"       default="base"/>  <!-- leave empty and the pose will be published wrt param parent_name -->
 
+    <param name="aruco_marker_publisher/image_is_rectified" value="True"/>
+    <param name="aruco_marker_publisher/marker_size"        value="$(arg markerSize)"/>
+    <param name="aruco_marker_publisher/reference_frame"    value="$(arg ref_frame)"/>
+    <param name="aruco_marker_publisher/camera_frame"       value="left_hand_camera_axis"/>
 
-    <node pkg="aruco_ros" type="marker_publisher" name="aruco_marker_publisher">
-        <remap from="/camera_info" to="/cameras/$(arg side)_hand_camera/camera_info" />
-        <remap from="/image" to="/cameras/$(arg side)_hand_camera/image" />
-        <param name="image_is_rectified" value="True"/>
-        <param name="marker_size"        value="$(arg markerSize)"/>
-        <param name="reference_frame"    value="$(arg ref_frame)"/>   <!-- frame in which the marker pose will be refered -->
-        <param name="camera_frame"       value="$(arg side)_hand_camera"/>
+    <node pkg="aruco_ros" type="marker_publisher" name="aruco_marker_publisher" output="screen">
+        <remap from="image" to="/usb_cam/image_raw"/>
+        <remap from="camera_info" to="/usb_cam/camera_info"/>
     </node>
 
 </launch>
