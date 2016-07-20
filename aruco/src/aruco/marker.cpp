@@ -255,7 +255,6 @@ namespace aruco {
     if (!isValid()) throw cv::Exception(9004,"!isValid(): invalid marker. It is not possible to calculate extrinsics","calculateExtrinsics",__FILE__,__LINE__);
     if (markerSizeMeters<=0)throw cv::Exception(9004,"markerSize<=0: invalid markerSize","calculateExtrinsics",__FILE__,__LINE__);
     if ( camMatrix.rows==0 || camMatrix.cols==0) throw cv::Exception(9004,"CameraMatrix is empty","calculateExtrinsics",__FILE__,__LINE__);
-
     double halfSize=markerSizeMeters/2.;
     cv::Mat ObjPoints(4,3,CV_32FC1);
     ObjPoints.at<float>(1,0)=-halfSize;
@@ -287,8 +286,7 @@ namespace aruco {
     //rotate the X axis so that Y is perpendicular to the marker plane
     if (setYPerpendicular) rotateXAxis(Rvec);
     ssize=markerSizeMeters;
-    cout<<(*this)<<endl;
-    
+    cout<<"Marker "<<(*this)<<endl;
   }
 
   void Marker::rotateXAxis(Mat &rotation)

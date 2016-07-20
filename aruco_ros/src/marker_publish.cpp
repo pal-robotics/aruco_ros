@@ -34,6 +34,7 @@ or implied, of Rafael Muñoz Salinas.
 */
 
 #include <iostream>
+#include <sstream>
 #include <aruco/aruco.h>
 #include <aruco/cvdrawingutils.h>
 
@@ -45,7 +46,15 @@ or implied, of Rafael Muñoz Salinas.
 #include <aruco_ros/aruco_ros_utils.h>
 #include <aruco_msgs/MarkerArray.h>
 #include <tf/transform_listener.h>
+#include <tf/transform_broadcaster.h>
 #include <std_msgs/UInt32MultiArray.h>
+
+string int_to_string( const int a )
+{
+    std::stringstream ss;
+    ss << a;
+    return ss.str();
+}
 
 class ArucoMarkerPublisher
 {
@@ -202,6 +211,10 @@ public:
               transform = static_cast<tf::Transform>(cameraToReference) * transform;
               tf::poseTFToMsg(transform, marker_i.pose.pose);
               marker_i.header.frame_id = reference_frame_;
+
+              tf::TransformBroadcaster br;
+              br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), reference_frame_,
+                                                    "marker "+int_to_string(marker_i.id)));
             }
           }
 
@@ -265,6 +278,7 @@ public:
 
 int main(int argc,char **argv)
 {
+  ROS_INFO("Starting ARUCO Marker Publisher");
   ros::init(argc, argv, "aruco_marker_publisher");
 
   ArucoMarkerPublisher node;
