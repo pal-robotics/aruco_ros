@@ -13,6 +13,8 @@ find_package(catkin REQUIRED COMPONENTS
   aruco_msgs
 )
 
+find_package(OpenCV 2.4 REQUIRED)
+
 generate_dynamic_reconfigure_options(
   cfg/ArucoThreshold.cfg
 )
