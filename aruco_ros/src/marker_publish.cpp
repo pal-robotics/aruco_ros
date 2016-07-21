@@ -214,7 +214,8 @@ public:
 
               tf::TransformBroadcaster br;
               br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), reference_frame_,
-                                                    "marker "+int_to_string(marker_i.id)));
+                                                    "/marker_"+int_to_string(marker_i.id)));
+              // printf("%s %s\n", reference_frame_.c_str(), ("/marker_"+int_to_string(marker_i.id)).c_str());
             }
           }
 

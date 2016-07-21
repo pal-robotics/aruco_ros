@@ -62,9 +62,9 @@ def ik_test(limb):
             header=hdr,
             pose=Pose(
                 position=Point(
-                    x=0.848408791443,
-                    y=0.519319729449,
-                    z=-0.0155924900572,
+                    x=0.568989627932,
+                    y=0.311573903295,
+                    z=-0.0637563885416,
                 ),
                 orientation=Quaternion(
                     x=0.712801568376,
@@ -118,10 +118,10 @@ def ik_test(limb):
         print "------------------"
         print "Response Message:\n", resp
 
-        # arm = baxter_interface.Limb(limb)
-        # while not rospy.is_shutdown():
-        #     arm.set_joint_positions(limb_joints)
-        #     rospy.sleep(0.01)
+        arm = baxter_interface.Limb(limb)
+        while not rospy.is_shutdown():
+            arm.set_joint_positions(limb_joints)
+            rospy.sleep(0.01)
     else:
         print("INVALID POSE - No Valid Joint Solution Found.")
 
