@@ -176,7 +176,7 @@ int main(int argc,char **argv)
 	  char name[1024];
 	  sprintf(name,"%s%d.png",argv[2],selectedMarkers[i]);
 // 	  cout<<"name="<<name<<endl;
-	  cout<<selectedMarkers[i]<<" "<<flush;
+//	  cout<<selectedMarkers[i]<<" "<<flush;
 	  Mat markerImage=aruco::FiducidalMarkers::createMarkerImage(selectedMarkers[i],atoi(argv[3]));
 	  imwrite(name,markerImage);
 	}
