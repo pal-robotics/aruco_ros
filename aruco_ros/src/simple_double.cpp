@@ -251,9 +251,6 @@ int main(int argc,char **argv)
   nh.param<bool>("image_is_rectified", useRectifiedImages, true);
   ROS_INFO_STREAM("Image is rectified: " << useRectifiedImages);
 
-  image_transport::Subscriber image_sub = it.subscribe("/image", 1, &image_callback);
-  cam_info_sub = nh.subscribe("/camera_info", 1, &cam_info_callback);
-
   cam_info_received = false;
   image_pub = it.advertise("result", 1);
   debug_pub = it.advertise("debug", 1);
@@ -276,6 +273,9 @@ int main(int argc,char **argv)
     ROS_ERROR("parent_name and/or child_name was not set!");
     return -1;
   }
+  
+  image_transport::Subscriber image_sub = it.subscribe("/image", 1, &image_callback);
+  cam_info_sub = nh.subscribe("/camera_info", 1, &cam_info_callback);
 
   ROS_INFO("Aruco node started with marker size of %f meters and marker ids to track: %d, %d",
            marker_size, marker_id1, marker_id2);
