@@ -85,8 +85,6 @@ public:
     , it_(nh_)
     , useCamInfo_(true)
   {
-    image_sub_ = it_.subscribe("/image", 1, &ArucoMarkerPublisher::image_callback, this);
-
     nh_.param<bool>("use_camera_info", useCamInfo_, true);
     if(useCamInfo_)
     {
@@ -113,6 +111,8 @@ public:
     marker_msg_ = aruco_msgs::MarkerArray::Ptr(new aruco_msgs::MarkerArray());
     marker_msg_->header.frame_id = reference_frame_;
     marker_msg_->header.seq = 0;
+    
+    image_sub_ = it_.subscribe("/image", 1, &ArucoMarkerPublisher::image_callback, this);
   }
 
   bool getTransform(const std::string& refFrame,

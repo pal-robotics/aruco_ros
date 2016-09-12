@@ -83,15 +83,6 @@ public:
       nh("~"),
       it(nh)
   {
-    image_sub = it.subscribe("/image", 1, &ArucoSimple::image_callback, this);
-    cam_info_sub = nh.subscribe("/camera_info", 1, &ArucoSimple::cam_info_callback, this);
-
-    image_pub = it.advertise("result", 1);
-    debug_pub = it.advertise("debug", 1);
-    pose_pub = nh.advertise<geometry_msgs::PoseStamped>("pose", 100);
-    transform_pub = nh.advertise<geometry_msgs::TransformStamped>("transform", 100);
-    position_pub = nh.advertise<geometry_msgs::Vector3Stamped>("position", 100);
-
     nh.param<double>("marker_size", marker_size, 0.05);
     nh.param<int>("marker_id", marker_id, 300);
     nh.param<std::string>("reference_frame", reference_frame, "");
@@ -103,6 +94,15 @@ public:
 
     if ( reference_frame.empty() )
       reference_frame = camera_frame;
+    
+    image_pub = it.advertise("result", 1);
+    debug_pub = it.advertise("debug", 1);
+    pose_pub = nh.advertise<geometry_msgs::PoseStamped>("pose", 100);
+    transform_pub = nh.advertise<geometry_msgs::TransformStamped>("transform", 100);
+    position_pub = nh.advertise<geometry_msgs::Vector3Stamped>("position", 100);
+    
+    image_sub = it.subscribe("/image", 1, &ArucoSimple::image_callback, this);
+    cam_info_sub = nh.subscribe("/camera_info", 1, &ArucoSimple::cam_info_callback, this);
 
     ROS_INFO("Aruco node started with marker size of %f m and marker id to track: %d",
              marker_size, marker_id);
