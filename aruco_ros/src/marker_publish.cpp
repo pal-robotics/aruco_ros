@@ -151,6 +151,14 @@ public:
 
   void image_callback(const sensor_msgs::ImageConstPtr& msg)
   {
+      bool publishMarkers = marker_pub_.getNumSubscribers() > 0;
+      bool publishMarkersList = marker_list_pub_.getNumSubscribers() > 0;
+      bool publishImage = image_pub_.getNumSubscribers() > 0;
+      bool publishDebug = debug_pub_.getNumSubscribers() > 0;
+
+      if(!publishMarkers && !publishMarkersList && !publishImage && !publishDebug)
+        return;
+
       ros::Time curr_stamp(ros::Time::now());
       cv_bridge::CvImagePtr cv_ptr;
       try
@@ -165,7 +173,7 @@ public:
         mDetector_.detect(inImage_, markers_, camParam_, marker_size_, false);
 
         // marker array publish
-        if(marker_pub_.getNumSubscribers()>0)
+        if(publishMarkers)
         {
           marker_msg_->markers.clear();
           marker_msg_->markers.resize(markers_.size());
@@ -210,7 +218,7 @@ public:
             marker_pub_.publish(marker_msg_);
         }
 
-        if(marker_list_pub_.getNumSubscribers() > 0)
+        if(publishMarkersList)
         {
             marker_list_msg_.data.resize(markers_.size());
             for(size_t i=0; i<markers_.size(); ++i)
@@ -233,7 +241,7 @@ public:
         }
 
         // publish input image with markers drawn on it
-        if(image_pub_.getNumSubscribers() > 0)
+        if(publishImage)
         {
           //show input with augmented information
           cv_bridge::CvImage out_msg;
@@ -244,7 +252,7 @@ public:
         }
 
         // publish image after internal image processing
-        if(debug_pub_.getNumSubscribers() > 0)
+        if(publishDebug)
         {
           //show also the internal image resulting from the threshold operation
           cv_bridge::CvImage debug_msg;
