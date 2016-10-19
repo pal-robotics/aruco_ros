@@ -2,6 +2,12 @@
 Changelog for package aruco
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix compilation error in Ubuntu 16.04
+  With this change, aruco_ros compiles properly in Ubuntu 16.04, ROS kinetic.
+* Contributors: Francisco
+
 0.1.0 (2015-08-10)
 ------------------
 * Depend on libopencv-dev directly
