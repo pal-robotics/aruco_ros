@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   aruco
   aruco_msgs
+  visualization_msgs
 )
 
 generate_dynamic_reconfigure_options(

@@ -22,4 +22,5 @@
   <depend>tf</depend>
   <depend>aruco</depend>
   <depend>aruco_msgs</depend>
+  <depend>visualization_msgs</depend>
 </package>
