@@ -2,8 +2,8 @@
 Changelog for package aruco
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.2.0 (2016-10-19)
+------------------
 * Fix compilation error in Ubuntu 16.04
   With this change, aruco_ros compiles properly in Ubuntu 16.04, ROS kinetic.
 * Contributors: Francisco

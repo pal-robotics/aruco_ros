@@ -2,8 +2,8 @@
 Changelog for package aruco_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.2.0 (2016-10-19)
+------------------
 * only proccesses images if there are subscribers
 * add rviz marker and add corner param
 * use double precision to improve accuracy
