@@ -21,7 +21,7 @@ generate_dynamic_reconfigure_options(
 
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES aruco
+  LIBRARIES aruco aruco_ros
 )
 
 include_directories(
@@ -29,20 +29,20 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-add_executable(single src/simple_single.cpp
-                      src/aruco_ros_utils.cpp)
-add_dependencies(single ${PROJECT_NAME}_gencfg)
-target_link_libraries(single ${catkin_LIBRARIES})
+add_library(aruco_ros
+  src/aruco_ros_utils.cpp)
 
-add_executable(double src/simple_double.cpp
-                      src/aruco_ros_utils.cpp)
-add_dependencies(double ${PROJECT_NAME}_gencfg)
-target_link_libraries(double ${catkin_LIBRARIES})
+add_executable(single src/simple_single.cpp)
+add_dependencies(single aruco_ros ${PROJECT_NAME}_gencfg)
+target_link_libraries(single aruco_ros ${catkin_LIBRARIES})
 
-add_executable(marker_publisher src/marker_publish.cpp
-                                src/aruco_ros_utils.cpp)
-add_dependencies(marker_publisher ${PROJECT_NAME}_gencfg)
-target_link_libraries(marker_publisher ${catkin_LIBRARIES})
+add_executable(double src/simple_double.cpp)
+add_dependencies(double aruco_ros ${PROJECT_NAME}_gencfg)
+target_link_libraries(double aruco_ros ${catkin_LIBRARIES})
+
+add_executable(marker_publisher src/marker_publish.cpp)
+add_dependencies(marker_publisher aruco_ros ${PROJECT_NAME}_gencfg)
+target_link_libraries(marker_publisher aruco_ros ${catkin_LIBRARIES})
 
 #############
 ## Install ##
