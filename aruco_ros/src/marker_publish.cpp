@@ -96,7 +96,11 @@ public:
       nh_.param<bool>("image_is_rectified", useRectifiedImages_, true);
       nh_.param<std::string>("reference_frame", reference_frame_, "");
       nh_.param<std::string>("camera_frame", camera_frame_, "");
-      ROS_ASSERT(not camera_frame_.empty());
+      //ROS_ASSERT(not camera_frame_.empty());
+      if(camera_frame_.empty())
+      {
+        ROS_ERROR("camera_frame empty");
+      }
       if(reference_frame_.empty())
         reference_frame_ = camera_frame_;
     }
