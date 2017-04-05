@@ -37,7 +37,6 @@ or implied, of Rafael Muñoz Salinas.
 #include <aruco/aruco.h>
 #include <aruco/cvdrawingutils.h>
 
-#include <opencv2/core/core.hpp>
 #include <ros/ros.h>
 #include <image_transport/image_transport.h>
 #include <cv_bridge/cv_bridge.h>
@@ -96,7 +95,7 @@ public:
       nh_.param<bool>("image_is_rectified", useRectifiedImages_, true);
       nh_.param<std::string>("reference_frame", reference_frame_, "");
       nh_.param<std::string>("camera_frame", camera_frame_, "");
-      ROS_ASSERT(not camera_frame_.empty());
+      ROS_ASSERT(not (camera_frame_.empty() and not reference_frame_.empty()));
       if(reference_frame_.empty())
         reference_frame_ = camera_frame_;
     }
