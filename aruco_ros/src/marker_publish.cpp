@@ -45,6 +45,7 @@ or implied, of Rafael Muñoz Salinas.
 #include <sensor_msgs/image_encodings.h>
 #include <aruco_ros/aruco_ros_utils.h>
 #include <aruco_msgs/MarkerArray.h>
+#include <geometry_msgs/Point.h>
 #include <tf/transform_listener.h>
 #include <tf/transform_broadcaster.h>
 #include <std_msgs/UInt32MultiArray.h>
@@ -95,11 +96,13 @@ public:
     , useCamInfo_(true)
   {
     image_sub_ = it_.subscribe("/image", 1, &ArucoMarkerPublisher::image_callback, this);
+    //image_sub_ = it_.subscribe("/cameras/left_hand_camera/image", 1, &ArucoMarkerPublisher::image_callback, this);
 
     nh_.param<bool>("use_camera_info", useCamInfo_, true);
     if(useCamInfo_)
     {
       sensor_msgs::CameraInfoConstPtr msg = ros::topic::waitForMessage<sensor_msgs::CameraInfo>("/camera_info", nh_);//, 10.0);
+      //sensor_msgs::CameraInfoConstPtr msg = ros::topic::waitForMessage<sensor_msgs::CameraInfo>("/cameras/left_hand_camera/camera_info", nh_);//, 10.0);
       camParam_ = aruco_ros::rosCameraInfo2ArucoCamParams(*msg, useRectifiedImages_);
       nh_.param<double>("marker_size", marker_size_, 0.05);
       nh_.param<bool>("image_is_rectified", useRectifiedImages_, true);
@@ -187,6 +190,17 @@ public:
             marker_i.header.stamp = curr_stamp;
             marker_i.id = markers_.at(i).id;
             marker_i.confidence = 1.0;
+
+
+            for(size_t j=0; j < 4; ++j){
+
+              geometry_msgs::Point pixel;
+              pixel.x = markers_[i][j].x;
+              pixel.y = markers_[i][j].y;
+
+              marker_i.corners.push_back(pixel);
+
+            }
           }
 
           // if there is camera info let's do 3D stuff
@@ -217,6 +231,12 @@ public:
                                                     "/marker_"+int_to_string(marker_i.id)));
               // printf("%s %s\n", reference_frame_.c_str(), ("/marker_"+int_to_string(marker_i.id)).c_str());
             }
+          }
+
+          if (markers_.size()>0)
+          {
+            ROS_INFO("Center: %g %g\n", markers_[0].getCenter().x, markers_[0].getCenter().y);
+            ROS_INFO("Coords of corner: %g %g\n",markers_[0][0].x, markers_[0][0].y);
           }
 
           //publish marker array
