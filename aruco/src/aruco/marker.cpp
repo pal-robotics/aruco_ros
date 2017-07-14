@@ -286,6 +286,7 @@ namespace aruco {
     //rotate the X axis so that Y is perpendicular to the marker plane
     if (setYPerpendicular) rotateXAxis(Rvec);
     ssize=markerSizeMeters;
+
     ROS_DEBUG_STREAM("Marker "<<(*this)<<endl);
   }
 
