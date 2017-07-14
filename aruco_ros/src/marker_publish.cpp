@@ -189,6 +189,9 @@ public:
             marker_i.id = markers_.at(i).id;
             marker_i.confidence = 1.0;
 
+            marker_i.center.x = markers_.at(i).getCenter().x;
+            marker_i.center.y = markers_.at(i).getCenter().y;
+
             for(size_t j=0; j < 4; ++j){
               geometry_msgs::Point pixel;
               pixel.x = markers_[i][j].x;

@@ -135,16 +135,16 @@ namespace aruco {
       if (Rvec.at<float>(i,0)!=-999999) invalid|=false;
     }
     if (invalid) throw cv::Exception(9003,"extrinsic parameters are not set","Marker::getModelViewMatrix",__FILE__,__LINE__);
-    
+
     // calculate position vector
     position[0] = Tvec.ptr<float>(0)[0];
     position[1] = Tvec.ptr<float>(0)[1];
     position[2] = +Tvec.ptr<float>(0)[2];
-    
+
     // now calculare orientation quaternion
     cv::Mat Rot(3,3,CV_32FC1);
     cv::Rodrigues(Rvec, Rot);
-    
+
     // calculate axes for quaternion
     double stAxes[3][3];
     // x axis
@@ -159,21 +159,21 @@ namespace aruco {
     stAxes[2][0] = stAxes[0][1]*stAxes[1][2] - stAxes[0][2]*stAxes[1][1];
     stAxes[2][1] = - stAxes[0][0]*stAxes[1][2] + stAxes[0][2]*stAxes[1][0];
     stAxes[2][2] = stAxes[0][0]*stAxes[1][1] - stAxes[0][1]*stAxes[1][0];
-    
+
     // transposed matrix
     double axes[3][3];
     axes[0][0] = stAxes[0][0];
     axes[1][0] = stAxes[0][1];
     axes[2][0] = stAxes[0][2];
-    
+
     axes[0][1] = stAxes[1][0];
     axes[1][1] = stAxes[1][1];
     axes[2][1] = stAxes[1][2];
-    
+
     axes[0][2] = stAxes[2][0];
     axes[1][2] = stAxes[2][1];
     axes[2][2] = stAxes[2][2];
-    
+
     // Algorithm in Ken Shoemake's article in 1987 SIGGRAPH course notes
     // article "Quaternion Calculus and Fast Animation".
     double fTrace = axes[0][0]+axes[1][1]+axes[2][2];
@@ -278,7 +278,7 @@ namespace aruco {
       ImagePoints.at<float>(c,0)=((*this)[c%4].x);
       ImagePoints.at<float>(c,1)=((*this)[c%4].y);
     }
-    
+
     cv::Mat raux,taux;
     cv::solvePnP(ObjPoints, ImagePoints, camMatrix, distCoeff,raux,taux);
     raux.convertTo(Rvec,CV_32F);
@@ -286,7 +286,7 @@ namespace aruco {
     //rotate the X axis so that Y is perpendicular to the marker plane
     if (setYPerpendicular) rotateXAxis(Rvec);
     ssize=markerSizeMeters;
-    cout<<"Marker "<<(*this)<<endl;
+    ROS_DEBUG_STREAM("Marker "<<(*this)<<endl);
   }
 
   void Marker::rotateXAxis(Mat &rotation)
