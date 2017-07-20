@@ -47,6 +47,8 @@ or implied, of Rafael Muñoz Salinas.
 #include <tf/transform_listener.h>
 #include <visualization_msgs/Marker.h>
 
+#include <dynamic_reconfigure/server.h>
+#include <aruco_ros/ArucoThresholdConfig.h>
 using namespace aruco;
 
 class ArucoSimple
@@ -79,6 +81,8 @@ private:
   image_transport::Subscriber image_sub;
 
   tf::TransformListener _tfListener;
+
+  dynamic_reconfigure::Server<aruco_ros::ArucoThresholdConfig> dyn_rec_server;
 
 public:
   ArucoSimple()
@@ -138,6 +142,8 @@ public:
              marker_size, marker_id);
     ROS_INFO("Aruco node will publish pose to TF with %s as parent and %s as child.",
              reference_frame.c_str(), marker_frame.c_str());
+
+    dyn_rec_server.setCallback(boost::bind(&ArucoSimple::reconf_callback, this, _1, _2));
   }
 
   bool getTransform(const std::string& refFrame,
@@ -315,6 +321,16 @@ public:
 
     cam_info_received = true;
     cam_info_sub.shutdown();
+  }
+
+
+  void reconf_callback(aruco_ros::ArucoThresholdConfig &config, uint32_t level)
+  {
+    mDetector.setThresholdParams(config.param1,config.param2);
+    if (config.normalizeImage)
+    {
+      ROS_WARN("normalizeImageIllumination is unimplemented!");
+    }
   }
 };
 
