@@ -2,6 +2,9 @@
 Changelog for package aruco
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.2.0 (2016-10-19)
 ------------------
 * Fix compilation error in Ubuntu 16.04
