@@ -2,8 +2,8 @@
 Changelog for package aruco_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.2.1 (2017-07-21)
+------------------
 * Change default threshold to match defaults of aruco marker detector
 * Add dynamic reconfigure to simple_single
 * Contributors: Victor Lopez
