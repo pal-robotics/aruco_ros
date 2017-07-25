@@ -2,8 +2,8 @@
 Changelog for package aruco_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.2.2 (2017-07-25)
+------------------
 * only look for aruco if someone is looking for them
 * Contributors: Victor Lopez
 
