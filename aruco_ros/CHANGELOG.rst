@@ -2,6 +2,11 @@
 Changelog for package aruco_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* only look for aruco if someone is looking for them
+* Contributors: Victor Lopez
+
 0.2.1 (2017-07-21)
 ------------------
 * Change default threshold to match defaults of aruco marker detector
