@@ -259,7 +259,6 @@ public:
             //Publish rviz marker representing the ArUco marker patch
             visualization_msgs::Marker visMarker;
             visMarker.header = transformMsg.header;
-            visMarker.pose = poseMsg.pose;
             visMarker.id = 1;
             visMarker.type   = visualization_msgs::Marker::CUBE;
             visMarker.action = visualization_msgs::Marker::ADD;
