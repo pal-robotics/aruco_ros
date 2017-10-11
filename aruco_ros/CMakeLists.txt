@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   aruco
   aruco_msgs
+  sensor_msgs
   visualization_msgs
 )
 
@@ -20,13 +21,16 @@ generate_dynamic_reconfigure_options(
 
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES aruco
+  LIBRARIES aruco_ros_utils
+  CATKIN_DEPENDS aruco sensor_msgs tf 
 )
 
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
 )
+add_library(aruco_ros_utils src/aruco_ros_utils.cpp)
+target_link_libraries(aruco_ros_utils ${catkin_LIBRARIES})
 
 add_executable(single src/simple_single.cpp
                       src/aruco_ros_utils.cpp)
@@ -47,7 +51,7 @@ target_link_libraries(marker_publisher ${catkin_LIBRARIES})
 ## Install ##
 #############
 
-install(TARGETS single double marker_publisher
+install(TARGETS single double marker_publisher aruco_ros_utils
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
