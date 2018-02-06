@@ -21,6 +21,8 @@ generate_dynamic_reconfigure_options(
   cfg/ArucoThreshold.cfg
 )
 
+add_compile_options(-std=c++11)
+
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES aruco_ros_utils

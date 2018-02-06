@@ -57,7 +57,7 @@ aruco::CameraParameters camParam;
 bool useRectifiedImages, normalizeImageIllumination;
 int dctComponentsToRemove;
 MarkerDetector mDetector;
-vector<Marker> markers;
+std::vector<Marker> markers;
 ros::Subscriber cam_info_sub;
 bool cam_info_received;
 image_transport::Publisher image_pub;
@@ -229,7 +229,7 @@ void cam_info_callback(const sensor_msgs::CameraInfo &msg)
 
 void reconf_callback(aruco_ros::ArucoThresholdConfig &config, uint32_t level)
 {
-  mDetector.setThresholdParams(config.param1,config.param2);
+  mDetector.setDetectionMode(aruco::DetectionMode(config.detection_mode), config.min_image_size);
   normalizeImageIllumination = config.normalizeImage;
   dctComponentsToRemove      = config.dctComponentsToRemove;
 }

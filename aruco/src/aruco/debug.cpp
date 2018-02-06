@@ -1,5 +1,5 @@
-/*****************************
-Copyright 2011 Rafael Muñoz Salinas. All rights reserved.
+/**
+Copyright 2017 Rafael Muñoz Salinas. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are
 permitted provided that the following conditions are met:
@@ -24,23 +24,44 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 The views and conclusions contained in the software and documentation are those of the
 authors and should not be interpreted as representing official policies, either expressed
 or implied, of Rafael Muñoz Salinas.
-********************************/
- 
+*/
+
+#include "debug.h"
+#include <fstream>
+ namespace aruco{
+int Debug::level=2;
+std::map<std::string,std::string> Debug::strings;
+void Debug::addString(std::string &label, std::string &data){
+    strings.insert(make_pair(label,data));
+}
+
+std::string Debug::getString(std::string &str){
+    auto it=strings.find(str);
+    if (it==strings.end())return "";
+    else return it->second;
+}
 
 
-#ifndef __OPENARUCO_CORE_TYPES_H__
-#define __OPENARUCO_CORE_TYPES_H__
+bool Debug::isInited=false;
 
-#if !defined _CRT_SECURE_NO_DEPRECATE && _MSC_VER > 1300
-#define _CRT_SECURE_NO_DEPRECATE /* to avoid multiple Visual Studio 2005 warnings */
-#endif
+void Debug::setLevel ( int l ) {
+    level=l;
+    isInited=false;
+    init();
+}
+int Debug::getLevel() {
+    init();
+    return level;
+}
+void Debug::init() {
+    if ( !isInited ) {
+        isInited=true;
+        if ( level>=1 ) {
+        }
+    }
+
+}
 
 
-#if (defined WIN32 || defined _WIN32 || defined WINCE)   && defined DSO_EXPORTS
-     #define ARUCO_EXPORTS __declspec(dllexport)  
-#else
-    #define ARUCO_EXPORTS  
-#endif
+}
 
-
-#endif

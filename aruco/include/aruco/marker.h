@@ -1,5 +1,5 @@
-/*****************************
-Copyright 2011 Rafael Muñoz Salinas. All rights reserved.
+/**
+Copyright 2017 Rafael Muñoz Salinas. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are
 permitted provided that the following conditions are met:
@@ -24,120 +24,161 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 The views and conclusions contained in the software and documentation are those of the
 authors and should not be interpreted as representing official policies, either expressed
 or implied, of Rafael Muñoz Salinas.
-********************************/
+*/
+
 #ifndef _Aruco_Marker_H
 #define _Aruco_Marker_H
-#include <vector>
+
+#include "aruco_export.h"
+
+#include <opencv2/core.hpp>
+
+#include <cstdint>
 #include <iostream>
-#include <opencv2/opencv.hpp>
-#include <aruco/exports.h>
-#include <aruco/cameraparameters.h>
-using namespace std;
-namespace aruco {
-/**\brief This class represents a marker. It is a vector of the fours corners ot the marker
- *
- */
+#include <vector>
 
-class  ARUCO_EXPORTS Marker: public std::vector<cv::Point2f>
+ namespace aruco
 {
-public:
-    //id of  the marker
-    int id;
-    //size of the markers sides in meters
-    float ssize;
-    //matrices of rotation and translation respect to the camera
-    cv::Mat Rvec,Tvec;
+    /**\brief This class represents a marker. It is a vector of the fours corners ot the marker
+     *
+     */
 
-    /**
-     */
-    Marker();
-    /**
-     */
-    Marker(const Marker &M);
-    /**
-     */
-    Marker(const  std::vector<cv::Point2f> &corners,int _id=-1);
-    /**
-     */
-    ~Marker() {}
-    /**Indicates if this object is valid
-     */
-    bool isValid()const{return id!=-1 && size()==4;}
-
-    /**Draws this marker in the input image
-     */
-    void draw(cv::Mat &in, cv::Scalar color, int lineWidth=1,bool writeId=true)const;
-
-    /**Calculates the extrinsics (Rvec and Tvec) of the marker with respect to the camera
-     * @param markerSize size of the marker side expressed in meters
-     * @param CP parmeters of the camera
-     * @param setYPerpendicular If set the Y axis will be perpendicular to the surface. Otherwise, it will be the Z axis
-     */
-    void calculateExtrinsics(float markerSize, const CameraParameters &CP, bool setYPerpendicular=true)throw(cv::Exception);
-    /**Calculates the extrinsics (Rvec and Tvec) of the marker with respect to the camera
-     * @param markerSize size of the marker side expressed in meters
-     * @param CameraMatrix matrix with camera parameters (fx,fy,cx,cy)
-     * @param Distorsion matrix with distorsion parameters (k1,k2,p1,p2)
-     * @param setYPerpendicular If set the Y axis will be perpendicular to the surface. Otherwise, it will be the Z axis
-     */
-    void calculateExtrinsics(float markerSize, cv::Mat  CameraMatrix, cv::Mat Distorsion=cv::Mat(), bool setYPerpendicular=true)throw(cv::Exception);
-    
-    /**Given the extrinsic camera parameters returns the GL_MODELVIEW matrix for opengl.
-     * Setting this matrix, the reference coordinate system will be set in this marker
-     */
-    void glGetModelViewMatrix(  double modelview_matrix[16])throw(cv::Exception);
-    
-    /**
-     * Returns position vector and orientation quaternion for an Ogre scene node or entity.
-     * 	Use:
-     * ...
-     * Ogre::Vector3 ogrePos (position[0], position[1], position[2]);
-     * Ogre::Quaternion  ogreOrient (orientation[0], orientation[1], orientation[2], orientation[3]);
-     * mySceneNode->setPosition( ogrePos  );
-     * mySceneNode->setOrientation( ogreOrient  );
-     * ...
-     */
-    void OgreGetPoseParameters(  double position[3], double orientation[4] )throw(cv::Exception);    
-    
-  /**Returns the centroid of the marker
-      */
-    cv::Point2f getCenter()const;
-     /**Returns the perimeter of the marker
-      */
-    float getPerimeter()const;
-    /**Returns the area
-     */
-    float getArea()const;
-    /**
-     */
-    /**
-     */
-    friend bool operator<(const Marker &M1,const Marker&M2)
+    class CameraParameters;
+    class ARUCO_EXPORT Marker : public std::vector<cv::Point2f>
     {
-        return M1.id<M2.id;
-    }
-    /**
-     */
-    friend ostream & operator<<(ostream &str,const Marker &M)
-    {
-        str<<M.id<<"=";
-        for (int i=0;i<4;i++)
-            str<<"("<<M[i].x<< ","<<M[i].y<<") ";
-        str<<"Txyz=";
-        for (int i=0;i<3;i++)
-            str<<M.Tvec.ptr<float>(0)[i]<<" ";
-        str<<"Rxyz=";
-        for (int i=0;i<3;i++)
-            str<<M.Rvec.ptr<float>(0)[i]<<" ";
+    public:
+        // id of  the marker
+        int id;
+        // size of the markers sides in meters
+        float ssize;
+        // matrices of rotation and translation respect to the camera
+        cv::Mat Rvec, Tvec;
+        //additional info about the dictionary
+        std::string dict_info;
 
-        return str;
-    }
-    
- 
-private:
-  void rotateXAxis(cv::Mat &rotation);
- 
-};
+        /**
+         */
+        Marker();
+        /**
+         */
+        Marker(int id);
+        /**
+         */
+        Marker(const Marker& M);
+        /**
+         */
+        Marker(const std::vector<cv::Point2f>& corners, int _id = -1);
+        /**
+         */
+        ~Marker()
+        {
+        }
+        /**Indicates if this object is valid
+         */
+        bool isValid() const
+        {
+            return id != -1 && size() == 4;
+        }
 
+        bool isPoseValid()const{return !Rvec.empty() && !Tvec.empty();}
+        /**Draws this marker in the input image
+         */
+        void draw(cv::Mat& in, cv::Scalar color=cv::Scalar(0,0,255), int lineWidth = -1, bool writeId = true,bool writeInfo=false) const;
+
+        /**Calculates the extrinsics (Rvec and Tvec) of the marker with respect to the camera
+         * @param markerSize size of the marker side expressed in meters
+         * @param CP parmeters of the camera
+         * @param setYPerpendicular If set the Y axis will be perpendicular to the surface. Otherwise, it will be the Z
+         * axis
+         */
+        void calculateExtrinsics(float markerSize, const CameraParameters& CP,
+                                 bool setYPerpendicular = true);
+        /**Calculates the extrinsics (Rvec and Tvec) of the marker with respect to the camera
+         * @param markerSize size of the marker side expressed in meters
+         * @param CameraMatrix matrix with camera parameters (fx,fy,cx,cy)
+         * @param Distorsion matrix with distorsion parameters (k1,k2,p1,p2)
+         * @param setYPerpendicular If set the Y axis will be perpendicular to the surface. Otherwise, it will be the Z
+         * axis
+         */
+        void calculateExtrinsics(float markerSize, cv::Mat CameraMatrix, cv::Mat Distorsion = cv::Mat(),
+                                 bool setYPerpendicular = true);
+
+        /**Given the extrinsic camera parameters returns the GL_MODELVIEW matrix for opengl.
+         * Setting this matrix, the reference coordinate system will be set in this marker
+         */
+        void glGetModelViewMatrix(double modelview_matrix[16]);
+
+        /**
+         * Returns position vector and orientation quaternion for an Ogre scene node or entity.
+         * 	Use:
+         * ...
+         * Ogre::Vector3 ogrePos (position[0], position[1], position[2]);
+         * Ogre::Quaternion  ogreOrient (orientation[0], orientation[1], orientation[2], orientation[3]);
+         * mySceneNode->setPosition( ogrePos  );
+         * mySceneNode->setOrientation( ogreOrient  );
+         * ...
+         */
+        void OgreGetPoseParameters(double position[3], double orientation[4]);
+
+        /**Returns the centroid of the marker
+            */
+        cv::Point2f getCenter() const;
+        /**Returns the perimeter of the marker
+         */
+        float getPerimeter() const;
+        /**Returns the area
+         */
+        float getArea() const;
+        /**compares ids
+         */
+        bool operator==(const Marker& m) const
+        {
+            return m.id == id;
+        }
+
+        void copyTo(Marker &m) const;
+        /**compares ids
+         */
+        Marker & operator=(const Marker& m) ;
+
+        /**
+         */
+        friend bool operator<(const Marker& M1, const Marker& M2)
+        {
+            return M1.id < M2.id;
+        }
+        /**
+         */
+        friend std::ostream& operator<<(std::ostream& str, const Marker& M){
+            str << M.id << "=";
+            for (int i = 0; i < 4; i++)
+                str << "(" << M[i].x << "," << M[i].y << ") ";
+            if( !M.Tvec.empty() && !M.Rvec.empty()){
+            str << "Txyz=";
+            for (int i = 0; i < 3; i++)
+                str << M.Tvec.ptr<float>(0)[i] << " ";
+            str << "Rxyz=";
+            for (int i = 0; i < 3; i++)
+                str << M.Rvec.ptr<float>(0)[i] << " ";
+            }
+            return str;
+        }
+
+
+        // saves to a binary stream
+        void toStream(std::ostream& str) const;
+        // reads from a binary stream
+        void fromStream(std::istream& str);
+
+        // returns the 3d points of a marker wrt its center
+        static vector<cv::Point3f> get3DPoints(float msize);
+        //returns the 3d points of this marker wrt its center
+          inline vector<cv::Point3f> get3DPoints()const{
+              return get3DPoints(ssize);
+          }
+
+    private:
+        void rotateXAxis(cv::Mat& rotation);
+    };
 }
 #endif

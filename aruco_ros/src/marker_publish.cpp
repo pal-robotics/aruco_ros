@@ -52,7 +52,7 @@ private:
   // aruco stuff
   aruco::MarkerDetector mDetector_;
   aruco::CameraParameters camParam_;
-  vector<aruco::Marker> markers_;
+  std::vector<aruco::Marker> markers_;
 
   // node params
   bool useRectifiedImages_;
