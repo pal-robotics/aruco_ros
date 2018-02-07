@@ -2,6 +2,17 @@
 Changelog for package aruco_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.2.2 (2017-07-25)
+------------------
+* only look for aruco if someone is looking for them
+* Contributors: Victor Lopez
+
+0.2.1 (2017-07-21)
+------------------
+* Change default threshold to match defaults of aruco marker detector
+* Add dynamic reconfigure to simple_single
+* Contributors: Victor Lopez
+
 0.2.0 (2016-10-19)
 ------------------
 * only proccesses images if there are subscribers
