@@ -96,7 +96,7 @@ void image_callback(const sensor_msgs::ImageConstPtr& msg)
       //detection results will go into "markers"
       markers.clear();
       //Ok, let's detect
-      mDetector.detect(inImage, markers, camParam, marker_size);
+      mDetector.detect(inImage, markers, camParam, marker_size, false);
       //for each marker, draw info and its boundaries in the image
       for(unsigned int i=0; i<markers.size(); ++i)
       {

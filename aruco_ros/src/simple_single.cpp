@@ -276,8 +276,8 @@ public:
             visMarker.action = visualization_msgs::Marker::ADD;
             visMarker.pose = poseMsg.pose;
             visMarker.scale.x = marker_size;
-            visMarker.scale.y = 0.001;
-            visMarker.scale.z = marker_size;
+            visMarker.scale.y = marker_size;
+            visMarker.scale.z = 0.001;
             visMarker.color.r = 1.0;
             visMarker.color.g = 0;
             visMarker.color.b = 0;
