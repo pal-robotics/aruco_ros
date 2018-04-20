@@ -2,8 +2,8 @@
 Changelog for package aruco
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.2.3 (2018-04-20)
+------------------
 * Remove debug log msg
 * forcing opencv3 build for kinetic
 * Contributors: Bence Magyar, Christopher Hrabia, Jordi Pages, Victor Lopez
