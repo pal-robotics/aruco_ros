@@ -2,6 +2,11 @@
 Changelog for package aruco_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Kinetic devel merge
+* Contributors: Victor Lopez
+
 0.2.2 (2017-07-25)
 ------------------
 
