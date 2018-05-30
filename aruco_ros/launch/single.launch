@@ -7,15 +7,21 @@
     <arg name="ref_frame"       default=""/>  <!-- leave empty and the pose will be published wrt param parent_name -->
     <arg name="corner_refinement" default="LINES" /> <!-- NONE, HARRIS, LINES, SUBPIX -->
 
+    <!-- Default values for backwards compatibility-->
+    <arg name="camera_info"     default="/stereo/$(arg eye)/camera_info" />
+    <arg name="image"           default="/stereo/$(arg eye)/image_rect_color" />
+    <arg name="camera_frame"    default="stereo_gazebo_$(arg eye)_camera_optical_frame"/>
+    <arg name="image_is_rectified"    default="True"/>
+
 
     <node pkg="aruco_ros" type="single" name="aruco_single">
-        <remap from="/camera_info" to="/stereo/$(arg eye)/camera_info" />
-        <remap from="/image" to="/stereo/$(arg eye)/image_rect_color" />
-        <param name="image_is_rectified" value="True"/>
+        <remap from="/camera_info" to="$(arg camera_info)" />
+        <remap from="/image" to="$(arg image)" />
+        <param name="image_is_rectified" value="$(arg image_is_rectified)"/>
         <param name="marker_size"        value="$(arg markerSize)"/>
         <param name="marker_id"          value="$(arg markerId)"/>
         <param name="reference_frame"    value="$(arg ref_frame)"/>   <!-- frame in which the marker pose will be refered -->
-        <param name="camera_frame"       value="stereo_gazebo_$(arg eye)_camera_optical_frame"/>
+        <param name="camera_frame"       value="$(arg camera_frame)"/>
         <param name="marker_frame"       value="$(arg marker_frame)" />
         <param name="corner_refinement"  value="$(arg corner_refinement)" />
     </node>
