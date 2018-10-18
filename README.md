@@ -23,6 +23,7 @@ Software package and ROS wrappers of the [Aruco][1] Augmented Reality marker det
 
 <img align="right" src="https://raw.github.com/pal-robotics/aruco_ros/master/aruco_ros/etc/reem_gazebo_floating_marker_world.png"/>
 
+
 ### ROS API
 
 #### Messages
@@ -38,6 +39,15 @@ Software package and ROS wrappers of the [Aruco][1] Augmented Reality marker det
 
         Header header
         aruco_ros/Marker[] markers
+
+### Kinetic changes
+
+* Updated the [Aruco][1] library to version 3.0.4
+
+* Changed the coordinate system to match the library's, the convention is shown
+  in the image below, following rviz conventions, X is red, Y is green and Z is
+  blue.
+<img align="bottom" src="/aruco_ros/etc/new_coordinates.png"/>
 
 ### Test it with REEM
 

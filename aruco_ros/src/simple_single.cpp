@@ -58,7 +58,7 @@ private:
   tf::StampedTransform rightToLeft;
   bool useRectifiedImages;
   MarkerDetector mDetector;
-  vector<Marker> markers;
+  std::vector<Marker> markers;
   ros::Subscriber cam_info_sub;
   bool cam_info_received;
   image_transport::Publisher image_pub;
@@ -90,29 +90,41 @@ public:
       it(nh)
   {
 
-    std::string refinementMethod;
-    nh.param<std::string>("corner_refinement", refinementMethod, "LINES");
-    if ( refinementMethod == "SUBPIX" )
-      mDetector.setCornerRefinementMethod(aruco::MarkerDetector::SUBPIX);
-    else if ( refinementMethod == "HARRIS" )
-      mDetector.setCornerRefinementMethod(aruco::MarkerDetector::HARRIS);
-    else if ( refinementMethod == "NONE" )
-      mDetector.setCornerRefinementMethod(aruco::MarkerDetector::NONE); 
-    else      
-      mDetector.setCornerRefinementMethod(aruco::MarkerDetector::LINES); 
+    if (nh.hasParam("corner_refinement"))
+      ROS_WARN("Corner refinement options have been removed in Aruco 3.0.0, corner_refinement ROS parameter is deprecated");
+
+    aruco::MarkerDetector::Params params = mDetector.getParameters();
+    std::string thresh_method;
+    switch (params._thresMethod) {
+      case aruco::MarkerDetector::ThresMethod::THRES_ADAPTIVE:
+        thresh_method = "THRESH_ADAPTIVE";
+        break;
+      case aruco::MarkerDetector::ThresMethod::THRES_AUTO_FIXED:
+        thresh_method = "THRESH_AUTO_FIXED";
+        break;
+      default:
+        thresh_method = "UNKNOWN";
+        break;
+    }
 
     //Print parameters of aruco marker detector:
-    ROS_INFO_STREAM("Corner refinement method: " << mDetector.getCornerRefinementMethod());
-    ROS_INFO_STREAM("Threshold method: " << mDetector.getThresholdMethod());
-    double th1, th2;
-    mDetector.getThresholdParams(th1, th2);
-    ROS_INFO_STREAM("Threshold method: " << " th1: " << th1 << " th2: " << th2);
-    float mins, maxs;
-    mDetector.getMinMaxSize(mins, maxs);
-    ROS_INFO_STREAM("Marker size min: " << mins << "  max: " << maxs);
-    ROS_INFO_STREAM("Desired speed: " << mDetector.getDesiredSpeed());
-    
+    ROS_INFO_STREAM("Threshold method: " << thresh_method);
 
+    float min_marker_size; //percentage of image area
+    nh.param<float>("min_marker_size", min_marker_size, 0.02);
+
+    std::string detection_mode;
+    nh.param<std::string>("detection_mode", detection_mode, "DM_FAST");
+    if (detection_mode == "DM_FAST")
+      mDetector.setDetectionMode(aruco::DM_FAST, min_marker_size);
+    else if (detection_mode == "DM_VIDEO_FAST")
+      mDetector.setDetectionMode(aruco::DM_VIDEO_FAST, min_marker_size);
+    else //Aruco version 2 mode
+      mDetector.setDetectionMode(aruco::DM_NORMAL, min_marker_size);
+
+    ROS_INFO_STREAM("Marker size min: " << min_marker_size << "% of image area");
+    ROS_INFO_STREAM("Detection mode: " << detection_mode);
+    
 
     image_sub = it.subscribe("/image", 1, &ArucoSimple::image_callback, this);
     cam_info_sub = nh.subscribe("/camera_info", 1, &ArucoSimple::cam_info_callback, this);
@@ -264,8 +276,8 @@ public:
             visMarker.action = visualization_msgs::Marker::ADD;
             visMarker.pose = poseMsg.pose;
             visMarker.scale.x = marker_size;
-            visMarker.scale.y = 0.001;
-            visMarker.scale.z = marker_size;
+            visMarker.scale.y = marker_size;
+            visMarker.scale.z = 0.001;
             visMarker.color.r = 1.0;
             visMarker.color.g = 0;
             visMarker.color.b = 0;
@@ -336,7 +348,7 @@ public:
 
   void reconf_callback(aruco_ros::ArucoThresholdConfig &config, uint32_t level)
   {
-    mDetector.setThresholdParams(config.param1,config.param2);
+    mDetector.setDetectionMode(aruco::DetectionMode(config.detection_mode), config.min_image_size);
     if (config.normalizeImage)
     {
       ROS_WARN("normalizeImageIllumination is unimplemented!");

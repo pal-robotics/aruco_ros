@@ -1,5 +1,4 @@
 /**
-
 Copyright 2017 Rafael Muñoz Salinas. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are
@@ -27,11 +26,48 @@ authors and should not be interpreted as representing official policies, either 
 or implied, of Rafael Muñoz Salinas.
 */
 
-#include "markerdetector.h"
-#include "posetracker.h"
-#include "cvdrawingutils.h"
-#include "dictionary.h"
-#define ARUCO_VERSION_MAJOR 3
-#define ARUCO_VERSION_MINOR 0
+#ifndef SVMMARKERS_H
+#define SVMMARKERS_H
+
+#include "markerlabeler.h"
 
 
+namespace aruco {
+
+
+/**
+ * SVM Marker Detector Class
+ *
+ *
+ */
+namespace impl{
+    class SVMMarkers;
+}
+
+class   SVMMarkers: public MarkerLabeler {
+    impl::SVMMarkers *_impl;
+  public:
+
+    SVMMarkers();
+    virtual ~SVMMarkers(){}
+    /**
+     * @brief getName
+     * @return
+     */
+    std::string getName()const{return "SVM";}
+
+    //loads the svm file that detects the markers
+    bool load(std::string path="") ;
+    /**
+     * Detect marker in a canonical image.
+     * Return marker id in 0 rotation, or -1 if not found
+     * Assign the detected rotation of the marker to nRotation
+     */
+     bool detect(const cv::Mat &in, int & marker_id,int &nRotations,std::string &additionalInfo) ;
+     int getBestInputSize();
+};
+
+}
+
+
+#endif // SVMMARKERS_H
