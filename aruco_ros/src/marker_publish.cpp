@@ -60,6 +60,7 @@ private:
   std::string camera_frame_;
   std::string reference_frame_;
   double marker_size_;
+  bool rotate_marker_axis_;
 
   // ROS pub-sub
   ros::NodeHandle nh_;
@@ -95,6 +96,7 @@ public:
       nh_.param<bool>("image_is_rectified", useRectifiedImages_, true);
       nh_.param<std::string>("reference_frame", reference_frame_, "");
       nh_.param<std::string>("camera_frame", camera_frame_, "");
+      nh_.param<bool>("rotate_marker_axis", rotate_marker_axis_, true);
       ROS_ASSERT(not (camera_frame_.empty() and not reference_frame_.empty()));
       if(reference_frame_.empty())
         reference_frame_ = camera_frame_;
@@ -205,7 +207,7 @@ public:
             for(size_t i=0; i<markers_.size(); ++i)
             {
               aruco_msgs::Marker & marker_i = marker_msg_->markers.at(i);
-              tf::Transform transform = aruco_ros::arucoMarker2Tf(markers_[i]);
+              tf::Transform transform = aruco_ros::arucoMarker2Tf(markers_[i], rotate_marker_axis_);
               transform = static_cast<tf::Transform>(cameraToReference) * transform;
               tf::poseTFToMsg(transform, marker_i.pose.pose);
               marker_i.header.frame_id = reference_frame_;
