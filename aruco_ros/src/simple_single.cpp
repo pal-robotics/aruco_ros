@@ -74,6 +74,7 @@ private:
 
   double marker_size;
   int marker_id;
+  bool rotate_marker_axis_;
 
   ros::NodeHandle nh;
   image_transport::ImageTransport it;
@@ -131,6 +132,7 @@ public:
     nh.param<std::string>("camera_frame", camera_frame, "");
     nh.param<std::string>("marker_frame", marker_frame, "");
     nh.param<bool>("image_is_rectified", useRectifiedImages, true);
+    nh.param<bool>("rotate_marker_axis", rotate_marker_axis_, true);
 
     ROS_ASSERT(camera_frame != "" && marker_frame != "");
 
@@ -215,7 +217,7 @@ public:
           // only publishing the selected marker
           if(markers[i].id == marker_id)
           {
-            tf::Transform transform = aruco_ros::arucoMarker2Tf(markers[i]);
+            tf::Transform transform = aruco_ros::arucoMarker2Tf(markers[i], rotate_marker_axis_);
             tf::StampedTransform cameraToReference;
             cameraToReference.setIdentity();
 
