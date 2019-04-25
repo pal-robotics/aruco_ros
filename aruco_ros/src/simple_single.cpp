@@ -265,9 +265,18 @@ public:
             visMarker.type   = visualization_msgs::Marker::CUBE;
             visMarker.action = visualization_msgs::Marker::ADD;
             visMarker.pose = poseMsg.pose;
-            visMarker.scale.x = marker_size;
-            visMarker.scale.y = 0.001;
-            visMarker.scale.z = marker_size;
+            if (rotate_marker_axis_)
+            {
+              visMarker.scale.x = marker_size;
+              visMarker.scale.y = 0.001;
+              visMarker.scale.z = marker_size;
+            }
+            else
+            {
+              visMarker.scale.x = marker_size;
+              visMarker.scale.y = marker_size;
+              visMarker.scale.z = 0.001;
+            }
             visMarker.color.r = 1.0;
             visMarker.color.g = 0;
             visMarker.color.b = 0;
