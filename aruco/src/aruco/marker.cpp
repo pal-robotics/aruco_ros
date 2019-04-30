@@ -101,7 +101,7 @@ void Marker::copyTo(Marker &m) const
   Rvec.copyTo(m.Rvec);
   Tvec.copyTo(m.Tvec);
   m.resize(size());
-  for (size_t i = 0; i < size(); i++)
+  for (std::size_t i = 0; i < size(); i++)
     m.at(i) = at(i);
   m.dict_info = dict_info;
 }
@@ -336,7 +336,7 @@ void Marker::calculateExtrinsics(float markerSizeMeters, cv::Mat camMatrix, cv::
   if (camMatrix.rows == 0 || camMatrix.cols == 0)
     throw cv::Exception(9004, "CameraMatrix is empty", "calculateExtrinsics", __FILE__, __LINE__);
 
-  vector<cv::Point3f> objpoints = get3DPoints(markerSizeMeters);
+  std::vector<cv::Point3f> objpoints = get3DPoints(markerSizeMeters);
 
   cv::Mat raux, taux;
   cv::solvePnP(objpoints, *this, camMatrix, distCoeff, raux, taux);
@@ -388,7 +388,7 @@ void Marker::rotateXAxis(cv::Mat& rotation)
 cv::Point2f Marker::getCenter() const
 {
   cv::Point2f cent(0, 0);
-  for (size_t i = 0; i < size(); i++)
+  for (std::size_t i = 0; i < size(); i++)
   {
     cent.x += (*this)[i].x;
     cent.y += (*this)[i].y;
@@ -436,7 +436,7 @@ void Marker::toStream(std::ostream& str) const
   // write the 2D points
   uint32_t np = static_cast<uint32_t>(size());
   str.write((char*)&np, sizeof(np));
-  for (size_t i = 0; i < size(); i++)
+  for (std::size_t i = 0; i < size(); i++)
     str.write((char*)&at(i), sizeof(cv::Point2f));
 
   // write the additional info
@@ -457,7 +457,7 @@ void Marker::fromStream(std::istream& str)
   uint32_t np;
   str.read((char*)&np, sizeof(np));
   resize(np);
-  for (size_t i = 0; i < size(); i++)
+  for (std::size_t i = 0; i < size(); i++)
     str.read((char*)&(*this)[i], sizeof(cv::Point2f));
 
   //read the additional info

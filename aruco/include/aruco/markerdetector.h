@@ -393,8 +393,8 @@ private:
   void removeElements(std::vector<T>& vinout, const std::vector<bool>& toRemove)
   {
     // remove the invalid ones by setting the valid in the positions left by the invalids
-    size_t indexValid = 0;
-    for (size_t i = 0; i < toRemove.size(); i++)
+    std::size_t indexValid = 0;
+    for (std::size_t i = 0; i < toRemove.size(); i++)
     {
       if (!toRemove[i])
       {
@@ -411,8 +411,8 @@ private:
   {
     if (clearv)
       v.clear();
-    for (size_t i = 0; i < vv.size(); i++)
-      for (size_t j = 0; j < vv[i].size(); j++)
+    for (std::size_t i = 0; i < vv.size(); i++)
+      for (std::size_t j = 0; j < vv[i].size(); j++)
         v.push_back(vv[i][j]);
   }
 
@@ -478,10 +478,10 @@ private:
       cond_.notify_one();
     }
 
-    size_t size()
+    std::size_t size()
     {
       std::unique_lock<std::mutex> mlock(mutex_);
-      size_t s = queue_.size();
+      std::size_t s = queue_.size();
       return s;
     }
 

@@ -31,15 +31,13 @@
 #include "cvdrawingutils.h"
 #include "cameraparameters.h"
 
-using namespace cv;
-
 namespace aruco
 {
 
 void CvDrawingUtils::draw3dAxis(cv::Mat& Image, const CameraParameters& CP, const cv::Mat& Rvec, const cv::Mat& Tvec,
                                 float axis_size)
 {
-  Mat objectPoints(4, 3, CV_32FC1);
+  cv::Mat objectPoints(4, 3, CV_32FC1);
   objectPoints.at<float>(0, 0) = 0;
   objectPoints.at<float>(0, 1) = 0;
   objectPoints.at<float>(0, 2) = 0;
@@ -53,16 +51,16 @@ void CvDrawingUtils::draw3dAxis(cv::Mat& Image, const CameraParameters& CP, cons
   objectPoints.at<float>(3, 1) = 0;
   objectPoints.at<float>(3, 2) = axis_size;
 
-  std::vector<Point2f> imagePoints;
+  std::vector<cv::Point2f> imagePoints;
   cv::projectPoints(objectPoints, Rvec, Tvec, CP.CameraMatrix, CP.Distorsion, imagePoints);
 
   // draw lines of different colors
-  cv::line(Image, imagePoints[0], imagePoints[1], Scalar(0, 0, 255, 255), 1, CV_AA);
-  cv::line(Image, imagePoints[0], imagePoints[2], Scalar(0, 255, 0, 255), 1, CV_AA);
-  cv::line(Image, imagePoints[0], imagePoints[3], Scalar(255, 0, 0, 255), 1, CV_AA);
-  putText(Image, "x", imagePoints[1], FONT_HERSHEY_SIMPLEX, 0.6, Scalar(0, 0, 255, 255), 2);
-  putText(Image, "y", imagePoints[2], FONT_HERSHEY_SIMPLEX, 0.6, Scalar(0, 255, 0, 255), 2);
-  putText(Image, "z", imagePoints[3], FONT_HERSHEY_SIMPLEX, 0.6, Scalar(255, 0, 0, 255), 2);
+  cv::line(Image, imagePoints[0], imagePoints[1], cv::Scalar(0, 0, 255, 255), 1, CV_AA);
+  cv::line(Image, imagePoints[0], imagePoints[2], cv::Scalar(0, 255, 0, 255), 1, CV_AA);
+  cv::line(Image, imagePoints[0], imagePoints[3], cv::Scalar(255, 0, 0, 255), 1, CV_AA);
+  putText(Image, "x", imagePoints[1], cv::FONT_HERSHEY_SIMPLEX, 0.6, cv::Scalar(0, 0, 255, 255), 2);
+  putText(Image, "y", imagePoints[2], cv::FONT_HERSHEY_SIMPLEX, 0.6, cv::Scalar(0, 255, 0, 255), 2);
+  putText(Image, "z", imagePoints[3], cv::FONT_HERSHEY_SIMPLEX, 0.6, cv::Scalar(255, 0, 0, 255), 2);
 }
 
 /**
@@ -73,7 +71,7 @@ void CvDrawingUtils::draw3dAxis(cv::Mat& Image, const CameraParameters& CP, cons
 void CvDrawingUtils::draw3dAxis(cv::Mat& Image, Marker& m, const CameraParameters& CP)
 {
   float size = m.ssize * 3;
-  Mat objectPoints(4, 3, CV_32FC1);
+  cv::Mat objectPoints(4, 3, CV_32FC1);
   objectPoints.at<float>(0, 0) = 0;
   objectPoints.at<float>(0, 1) = 0;
   objectPoints.at<float>(0, 2) = 0;
@@ -87,16 +85,16 @@ void CvDrawingUtils::draw3dAxis(cv::Mat& Image, Marker& m, const CameraParameter
   objectPoints.at<float>(3, 1) = 0;
   objectPoints.at<float>(3, 2) = size;
 
-  std::vector<Point2f> imagePoints;
+  std::vector<cv::Point2f> imagePoints;
   cv::projectPoints(objectPoints, m.Rvec, m.Tvec, CP.CameraMatrix, CP.Distorsion, imagePoints);
 
   // draw lines of different colors
-  cv::line(Image, imagePoints[0], imagePoints[1], Scalar(0, 0, 255, 255), 1, CV_AA);
-  cv::line(Image, imagePoints[0], imagePoints[2], Scalar(0, 255, 0, 255), 1, CV_AA);
-  cv::line(Image, imagePoints[0], imagePoints[3], Scalar(255, 0, 0, 255), 1, CV_AA);
-  putText(Image, "x", imagePoints[1], FONT_HERSHEY_SIMPLEX, 0.6, Scalar(0, 0, 255, 255), 2);
-  putText(Image, "y", imagePoints[2], FONT_HERSHEY_SIMPLEX, 0.6, Scalar(0, 255, 0, 255), 2);
-  putText(Image, "z", imagePoints[3], FONT_HERSHEY_SIMPLEX, 0.6, Scalar(255, 0, 0, 255), 2);
+  cv::line(Image, imagePoints[0], imagePoints[1], cv::Scalar(0, 0, 255, 255), 1, CV_AA);
+  cv::line(Image, imagePoints[0], imagePoints[2], cv::Scalar(0, 255, 0, 255), 1, CV_AA);
+  cv::line(Image, imagePoints[0], imagePoints[3], cv::Scalar(255, 0, 0, 255), 1, CV_AA);
+  putText(Image, "x", imagePoints[1], cv::FONT_HERSHEY_SIMPLEX, 0.6, cv::Scalar(0, 0, 255, 255), 2);
+  putText(Image, "y", imagePoints[2], cv::FONT_HERSHEY_SIMPLEX, 0.6, cv::Scalar(0, 255, 0, 255), 2);
+  putText(Image, "z", imagePoints[3], cv::FONT_HERSHEY_SIMPLEX, 0.6, cv::Scalar(255, 0, 0, 255), 2);
 }
 
 /**
@@ -106,7 +104,7 @@ void CvDrawingUtils::draw3dAxis(cv::Mat& Image, Marker& m, const CameraParameter
  */
 void CvDrawingUtils::draw3dCube(cv::Mat& Image, Marker& m, const CameraParameters& CP, bool setYperpendicular)
 {
-  Mat objectPoints(8, 3, CV_32FC1);
+  cv::Mat objectPoints(8, 3, CV_32FC1);
   float halfSize = m.ssize / 2.f;
 
   if (setYperpendicular)
@@ -166,18 +164,18 @@ void CvDrawingUtils::draw3dCube(cv::Mat& Image, Marker& m, const CameraParameter
     objectPoints.at<float>(7, 2) = m.ssize;
   }
 
-  std::vector<Point2f> imagePoints;
+  std::vector<cv::Point2f> imagePoints;
   projectPoints(objectPoints, m.Rvec, m.Tvec, CP.CameraMatrix, CP.Distorsion, imagePoints);
 
   // draw lines of different colors
   for (int i = 0; i < 4; i++)
-    cv::line(Image, imagePoints[i], imagePoints[(i + 1) % 4], Scalar(0, 0, 255, 255), 1, CV_AA);
+    cv::line(Image, imagePoints[i], imagePoints[(i + 1) % 4], cv::Scalar(0, 0, 255, 255), 1, CV_AA);
 
   for (int i = 0; i < 4; i++)
-    cv::line(Image, imagePoints[i + 4], imagePoints[4 + (i + 1) % 4], Scalar(0, 0, 255, 255), 1, CV_AA);
+    cv::line(Image, imagePoints[i + 4], imagePoints[4 + (i + 1) % 4], cv::Scalar(0, 0, 255, 255), 1, CV_AA);
 
   for (int i = 0; i < 4; i++)
-    cv::line(Image, imagePoints[i], imagePoints[i + 4], Scalar(0, 0, 255, 255), 1, CV_AA);
+    cv::line(Image, imagePoints[i], imagePoints[i + 4], cv::Scalar(0, 0, 255, 255), 1, CV_AA);
 }
 
 } // namespace aruco

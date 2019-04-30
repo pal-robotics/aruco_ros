@@ -38,8 +38,6 @@
 #include <opencv2/ml.hpp>
 #include <iostream>
 
-using namespace std;
-
 namespace aruco
 {
 
@@ -74,7 +72,7 @@ public:
     return _patchSize;
   }
 
-  bool load(string path)
+  bool load(std::string path)
   {
     if (path.empty())
       return false;
@@ -90,7 +88,7 @@ public:
 #endif /* CV_MAJOR_VERSION >= 3 */
 
     // read in the file the number of classes
-    ifstream svmfile(path.c_str());
+    std::ifstream svmfile(path.c_str());
     if (!svmfile)
       return false;
     _dictSize = -1;
@@ -101,9 +99,9 @@ public:
       std::getline(svmfile, str);
       if (str.find("class_count:") != std::string::npos)
       {
-        stringstream sstr;
+        std::stringstream sstr;
         sstr << str;
-        string cc;
+        std::string cc;
         int nclasses;
         sstr >> cc >> nclasses;
         _dictSize = (nclasses - 1) / 4;
@@ -176,7 +174,7 @@ SVMMarkers::SVMMarkers()
   _impl = new impl::SVMMarkers;
 }
 
-bool SVMMarkers::load(string path)
+bool SVMMarkers::load(std::string path)
 {
   return _impl->load(path);
 }
@@ -186,7 +184,7 @@ bool SVMMarkers::load(string path)
  * Return marker id in 0 rotation, or -1 if not found
  * Assign the detected rotation of the marker to nRotation
  */
-bool SVMMarkers::detect(const cv::Mat &in, int &marker_id, int &nRotations, string &additionalInfo)
+bool SVMMarkers::detect(const cv::Mat &in, int &marker_id, int &nRotations, std::string &additionalInfo)
 {
   bool res = _impl->detect(in, marker_id, nRotations);
   if (res)

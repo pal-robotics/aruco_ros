@@ -44,9 +44,6 @@
 #include <opencv2/highgui/highgui.hpp>
 #endif
 
-using namespace std;
-using namespace cv;
-
 namespace aruco
 {
 
@@ -187,7 +184,7 @@ int MarkerDetector::getMarkerWarpSize()
   return _params._markerWarpPixSize * ndiv; // this is the minimum size that the smallest marker will have
 }
 
-void MarkerDetector::buildPyramid(vector<cv::Mat> &ImagePyramid, const cv::Mat &grey, int minSize)
+void MarkerDetector::buildPyramid(std::vector<cv::Mat> &ImagePyramid, const cv::Mat &grey, int minSize)
 {
   // determine number of pyramid images
   int npyrimg = 1;
@@ -213,9 +210,10 @@ void MarkerDetector::buildPyramid(vector<cv::Mat> &ImagePyramid, const cv::Mat &
 /**
  *
  */
-vector<MarkerDetector::MarkerCandidate> MarkerDetector::thresholdAndDetectRectangles(const cv::Mat & input,
-                                                                                     int thres_param1, int thres_param2,
-                                                                                     bool erode, cv::Mat &auxThresImage)
+std::vector<MarkerDetector::MarkerCandidate> MarkerDetector::thresholdAndDetectRectangles(const cv::Mat & input,
+                                                                                          int thres_param1,
+                                                                                          int thres_param2, bool erode,
+                                                                                          cv::Mat &auxThresImage)
 {
   // ensure that _thresParam1 % 2 == 1
   ScopedTimerEvents tev("hafc " + std::to_string(thres_param1));
@@ -229,20 +227,20 @@ vector<MarkerDetector::MarkerCandidate> MarkerDetector::thresholdAndDetectRectan
     auxImage = auxThresImage;
   if (_params._thresMethod == THRES_AUTO_FIXED)
   {
-    cv::threshold(input, auxImage, static_cast<int>(thres_param2), 255, THRESH_BINARY_INV);
+    cv::threshold(input, auxImage, static_cast<int>(thres_param2), 255, cv::THRESH_BINARY_INV);
   }
   else
-    cv::adaptiveThreshold(input, auxImage, 255., ADAPTIVE_THRESH_MEAN_C, THRESH_BINARY_INV,
+    cv::adaptiveThreshold(input, auxImage, 255., cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY_INV,
                           static_cast<int>(thres_param1), static_cast<int>(thres_param2));
   tev.add("thres");
 
   if (erode)
   {
-    cv::erode(auxImage, auxThresImage, getStructuringElement(MORPH_CROSS, cv::Size(3, 3), cv::Point(1, 1)));
+    cv::erode(auxImage, auxThresImage, getStructuringElement(cv::MORPH_CROSS, cv::Size(3, 3), cv::Point(1, 1)));
     tev.add("erode");
   }
 
-  vector<MarkerCandidate> MarkerCanditates;
+  std::vector<MarkerCandidate> MarkerCanditates;
 
   // calculate the min_max contour sizes
   int thisImageMinSize = int(3.5 * float(_params.lowResMarkerSize));
@@ -252,7 +250,7 @@ vector<MarkerDetector::MarkerCandidate> MarkerDetector::thresholdAndDetectRectan
   std::vector<std::vector<cv::Point>> contours;
   cv::findContours(auxThresImage, contours, cv::noArray(), CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
   tev.add("find-cont");
-  vector<Point> approxCurve;
+  std::vector<cv::Point> approxCurve;
 
 //#define _aruco_debug_detectrectangles
 #ifdef _aruco_debug_detectrectangles
@@ -294,7 +292,7 @@ vector<MarkerDetector::MarkerCandidate> MarkerDetector::thresholdAndDetectRectan
         MarkerCanditates.push_back(MarkerCandidate());
         for (int j = 0; j < 4; j++)
           MarkerCanditates.back().push_back(
-              Point2f(static_cast<float>(approxCurve[j].x), static_cast<float>(approxCurve[j].y)));
+              cv::Point2f(static_cast<float>(approxCurve[j].x), static_cast<float>(approxCurve[j].y)));
 
         // now, if it is eroded, must enlarge 1 bit the corners to go to the real location
         if (erode)
@@ -323,7 +321,7 @@ void MarkerDetector::thresholdAndDetectRectangles_thread()
 {
   while (true)
   {
-//    stringstream sstr;
+//    std::stringstream sstr;
 //    sstr << "thread-" << std::this_thread::get_id() << " "
 //        << std::chrono::high_resolution_clock::now().time_since_epoch().count();
 //    ScopedTimerEvents tev(sstr.str());
@@ -340,28 +338,28 @@ void MarkerDetector::thresholdAndDetectRectangles_thread()
   }
 }
 
-vector<aruco::MarkerDetector::MarkerCandidate> MarkerDetector::thresholdAndDetectRectangles(const cv::Mat &image)
+std::vector<aruco::MarkerDetector::MarkerCandidate> MarkerDetector::thresholdAndDetectRectangles(const cv::Mat &image)
 {
   // compute the different values of param1
-  vector<int> p1_values;
+  std::vector<int> p1_values;
   for (int i =
       static_cast<int>(std::max(3., _params._AdaptiveThresWindowSize - 2. * _params._AdaptiveThresWindowSize_range));
       i <= _params._AdaptiveThresWindowSize + 2 * _params._AdaptiveThresWindowSize_range; i += 2)
     p1_values.push_back(i);
 
-  size_t nimages = p1_values.size();
+  std::size_t nimages = p1_values.size();
   _vcandidates.resize(nimages);
   _thres_Images.resize(nimages + 1);
   _thres_Images.back() = image; // add at the end the original image
 
   // first, thresholded images
   ThresAndDetectRectTASK tad;
-  vector<ThresAndDetectRectTASK> vtad;
+  std::vector<ThresAndDetectRectTASK> vtad;
 
   ThreadTasks task = THRESHOLD_TASK;
   if (_params.enclosedMarker)
     task = ERODE_TASK;
-  for (size_t i = 0; i < p1_values.size(); i++)
+  for (std::size_t i = 0; i < p1_values.size(); i++)
   {
     tad.inIdx = int(_thres_Images.size() - 1);
     tad.param1 = p1_values[i];
@@ -373,7 +371,7 @@ vector<aruco::MarkerDetector::MarkerCandidate> MarkerDetector::thresholdAndDetec
   }
 
   // reserve images
-  for (size_t i = 0; i < nimages; i++)
+  for (std::size_t i = 0; i < nimages; i++)
     _thres_Images[i].create(image.size(), CV_8UC1);
 
   // how many threads will be used?
@@ -381,7 +379,7 @@ vector<aruco::MarkerDetector::MarkerCandidate> MarkerDetector::thresholdAndDetec
   if (_params.maxThreads <= 0) // if allowed to use all , take max()-1, since the buildpyramid must be working at this moment
     nthreads = std::thread::hardware_concurrency() - 1;
   else
-    nthreads = max(1, _params.maxThreads - 1);
+    nthreads = std::max(1, _params.maxThreads - 1);
 
   tad.task = EXIT_TASK;
   for (int i = 0; i < nthreads; i++)
@@ -400,7 +398,7 @@ vector<aruco::MarkerDetector::MarkerCandidate> MarkerDetector::thresholdAndDetec
     ScopeTimer Timer("parallel");
 
     // run the tasks (in parallel)
-    vector<std::thread> threads;
+    std::vector<std::thread> threads;
     for (int i = 0; i < nthreads; i++)
       threads.push_back(std::thread(&MarkerDetector::thresholdAndDetectRectangles_thread, this));
 
@@ -409,20 +407,20 @@ vector<aruco::MarkerDetector::MarkerCandidate> MarkerDetector::thresholdAndDetec
       th.join();
   }
 
-  vector<MarkerCandidate> joined;
+  std::vector<MarkerCandidate> joined;
   joinVectors(_vcandidates, joined);
   return joined;
 }
 
-vector<MarkerDetector::MarkerCandidate> MarkerDetector::prefilterCandidates(
-    vector<aruco::MarkerDetector::MarkerCandidate> &MarkerCanditates, cv::Size imgSize)
+std::vector<MarkerDetector::MarkerCandidate> MarkerDetector::prefilterCandidates(
+    std::vector<aruco::MarkerDetector::MarkerCandidate> &MarkerCanditates, cv::Size imgSize)
 {
   /***********************************************************************************************
    * CANDIDATE PREFILTERING- Merge and Remove candidates so that only reliable ones are returned *
    ***********************************************************************************************/
 
   // sort the points in anti-clockwise order
-  valarray<bool> swapped(false, MarkerCanditates.size()); // used later
+  std::valarray<bool> swapped(false, MarkerCanditates.size()); // used later
   for (unsigned int i = 0; i < MarkerCanditates.size(); i++)
   {
     // trace a line between the first and second point.
@@ -436,31 +434,31 @@ vector<MarkerDetector::MarkerCandidate> MarkerDetector::prefilterCandidates(
     if (o < 0.0)
     {
       // if the third point is in the left side, then sort in anti-clockwise order
-      swap(MarkerCanditates[i][1], MarkerCanditates[i][3]);
+      std::swap(MarkerCanditates[i][1], MarkerCanditates[i][3]);
       swapped[i] = true;
     }
   }
 
   // remove these elements which corners are too close to each other
   // first detect candidates to be removed
-  vector<pair<int, int>> TooNearCandidates;
+  std::vector<std::pair<int, int>> TooNearCandidates;
   for (unsigned int i = 0; i < MarkerCanditates.size(); i++)
   {
     // calculate the average distance of each corner to the nearest corner of the other marker candidate
     for (unsigned int j = i + 1; j < MarkerCanditates.size(); j++)
     {
-      valarray<float> vdist(4);
+      std::valarray<float> vdist(4);
       for (int c = 0; c < 4; c++)
         vdist[c] = cv::norm(MarkerCanditates[i][c] - MarkerCanditates[j][c]);
 
       // if distance is too small
       if (vdist[0] < 6 && vdist[1] < 6 && vdist[2] < 6 && vdist[3] < 6)
-        TooNearCandidates.push_back(pair<int, int>(i, j));
+        TooNearCandidates.push_back(std::pair<int, int>(i, j));
     }
   }
 
   // mark for removal the element of  the pair with smaller perimeter
-  vector<bool> toRemove(MarkerCanditates.size(), false);
+  std::vector<bool> toRemove(MarkerCanditates.size(), false);
   for (unsigned int i = 0; i < TooNearCandidates.size(); i++)
   {
     if (perimeter(MarkerCanditates[TooNearCandidates[i].first])
@@ -474,10 +472,10 @@ vector<MarkerDetector::MarkerCandidate> MarkerDetector::prefilterCandidates(
   // remove markers with corners too near the image limits
   int borderDistThresX = static_cast<int>(_params.borderDistThres * float(imgSize.width));
   int borderDistThresY = static_cast<int>(_params.borderDistThres * float(imgSize.height));
-  for (size_t i = 0; i < MarkerCanditates.size(); i++)
+  for (std::size_t i = 0; i < MarkerCanditates.size(); i++)
   {
     // delete if any of the corners is too near image border
-    for (size_t c = 0; c < MarkerCanditates[i].size(); c++)
+    for (std::size_t c = 0; c < MarkerCanditates[i].size(); c++)
     {
       if (MarkerCanditates[i][c].x < borderDistThresX || MarkerCanditates[i][c].y < borderDistThresY
           || MarkerCanditates[i][c].x > imgSize.width - borderDistThresX
@@ -489,9 +487,9 @@ vector<MarkerDetector::MarkerCandidate> MarkerDetector::prefilterCandidates(
   }
 
   // move to output only valid ones
-  vector<MarkerCandidate> finalCandidates;
+  std::vector<MarkerCandidate> finalCandidates;
   finalCandidates.reserve(MarkerCanditates.size());
-  for (size_t i = 0; i < MarkerCanditates.size(); i++)
+  for (std::size_t i = 0; i < MarkerCanditates.size(); i++)
     if (!toRemove[i])
       finalCandidates.push_back(MarkerCanditates[i]);
   return finalCandidates;
@@ -536,7 +534,7 @@ int Otsu(std::vector<float> &hist)
       mean0 /= w0;
       mean1 /= w1;
       float var = w0 * w1 * (mean0 - mean1) * (mean0 - mean1);
-//      cout << t << " : " << var << "|" << w0 << " " << w1 << " " << mean0 << " " << mean1 << endl;
+//      std::cout << t << " : " << var << "|" << w0 << " " << w1 << " " << mean0 << " " << mean1 << std::endl;
       if (var > maxVar)
       {
         maxVar = var;
@@ -551,8 +549,8 @@ int Otsu(std::vector<float> &hist)
 /***********************************************
  * Main detection function. Performs all steps *
  ***********************************************/
-void MarkerDetector::detect(const cv::Mat& input, vector<Marker>& detectedMarkers, Mat camMatrix, Mat distCoeff,
-                            float markerSizeMeters, bool setYPerpendicular)
+void MarkerDetector::detect(const cv::Mat& input, std::vector<Marker>& detectedMarkers, cv::Mat camMatrix,
+                            cv::Mat distCoeff, float markerSizeMeters, bool setYPerpendicular)
 {
   // clear input data
   detectedMarkers.clear();
@@ -627,7 +625,7 @@ void MarkerDetector::detect(const cv::Mat& input, vector<Marker>& detectedMarker
     /**************************************************
      * THRESHOLD IMAGES AND DETECT INITIAL RECTANGLES *
      **************************************************/
-    vector<MarkerCandidate> MarkerCanditates;
+    std::vector<MarkerCandidate> MarkerCanditates;
     MarkerCanditates = thresholdAndDetectRectangles(imgToBeThresHolded);
     thres = _thres_Images[0];
 
@@ -635,9 +633,9 @@ void MarkerDetector::detect(const cv::Mat& input, vector<Marker>& detectedMarker
         {
           // only executes when compiled in DEBUG mode if debug level is at least 10
           // show the thresholded images
-          for (size_t i = 0; i < _thres_Images.size(); i++)
+          for (std::size_t i = 0; i < _thres_Images.size(); i++)
           {
-            stringstream sstr; sstr << "thres-" << i;
+            std::stringstream sstr; sstr << "thres-" << i;
             cv::namedWindow(sstr.str(),cv::WINDOW_NORMAL);
             cv::imshow(sstr.str(),_thres_Images[i]);
           }
@@ -685,7 +683,7 @@ void MarkerDetector::detect(const cv::Mat& input, vector<Marker>& detectedMarker
     for (auto &b : hist)
       b = 0;
     float desiredarea = std::pow(static_cast<float>(markerWarpSize), 2.f);
-    for (size_t i = 0; i < MarkerCanditates.size(); i++)
+    for (std::size_t i = 0; i < MarkerCanditates.size(); i++)
     {
       // Find projective homography
       cv::Mat canonicalMarker, canonicalMarkerAux;
@@ -698,10 +696,10 @@ void MarkerDetector::detect(const cv::Mat& input, vector<Marker>& detectedMarker
         // To reduce computing time, let us find in the image pyramid, the best configuration to save time
 
         // indicates how much bigger observation is wrt to desired patch
-        size_t imgPyrIdx = 0;
-        for (size_t p = 1; p < imagePyramid.size(); p++)
+        std::size_t imgPyrIdx = 0;
+        for (std::size_t p = 1; p < imagePyramid.size(); p++)
         {
-          if (MarkerCanditates[i].getArea() / pow(4, p) >= desiredarea)
+          if (MarkerCanditates[i].getArea() / std::pow(4, p) >= desiredarea)
             imgPyrIdx = p;
           else
             break;
@@ -711,22 +709,22 @@ void MarkerDetector::detect(const cv::Mat& input, vector<Marker>& detectedMarker
         // move points to the image level p
         float ratio = float(inToWarp.cols) / float(imgToBeThresHolded.cols);
         for (auto& p : points2d_pyr)
-          p *= ratio; // 1. / pow(2, imgPyrIdx);
+          p *= ratio; // 1. / std::pow(2, imgPyrIdx);
 
       }
 
-      warp(inToWarp, canonicalMarker, Size(markerWarpSize, markerWarpSize), points2d_pyr);
+      warp(inToWarp, canonicalMarker, cv::Size(markerWarpSize, markerWarpSize), points2d_pyr);
       int id, nRotations;
       double min, Max;
       cv::minMaxIdx(canonicalMarker, &min, &Max);
       canonicalMarker.copyTo(canonicalMarkerAux);
-      string additionalInfo;
+      std::string additionalInfo;
 
       _debug_exec(10,
           // only executes when compiled in DEBUG mode if debug level is at least 10
           // show the thresholded images
-          stringstream sstr; sstr << "test-" << i;
-          cout << "test" << i << endl;
+          std::stringstream sstr; sstr << "test-" << i;
+          std::cout << "test" << i << std::endl;
           cv::namedWindow(sstr.str(), cv::WINDOW_NORMAL);
           cv::imshow(sstr.str(), canonicalMarkerAux);
           cv::waitKey(0);
@@ -744,10 +742,10 @@ void MarkerDetector::detect(const cv::Mat& input, vector<Marker>& detectedMarker
         _debug_exec(10,
             // only executes when compiled in DEBUG mode if debug level is at least 10
             // show the thresholded images
-            stringstream sstr; sstr << "can-" << detectedMarkers.back().id;
+            std::stringstream sstr; sstr << "can-" << detectedMarkers.back().id;
             cv::namedWindow(sstr.str(), cv::WINDOW_NORMAL);
             cv::imshow(sstr.str(), canonicalMarker);
-            cout << "ID=" << id << " " << detectedMarkers.back() << endl;
+            std::cout << "ID=" << id << " " << detectedMarkers.back() << std::endl;
         );
         if (_params._thresMethod == THRES_AUTO_FIXED)
           addToImageHist(canonicalMarker, hist);
@@ -792,7 +790,7 @@ void MarkerDetector::detect(const cv::Mat& input, vector<Marker>& detectedMarker
       if (detectedMarkers.size() > 0 /* &&_params.enclosedMarker */ && input.size() == imgToBeThresHolded.size())
       {
         int halfwsize = 2 * float(input.cols) / float(imgToBeThresHolded.cols) + 0.5;
-        vector<Point2f> Corners;
+        std::vector<cv::Point2f> Corners;
         for (unsigned int i = 0; i < detectedMarkers.size(); i++)
           for (int c = 0; c < 4; c++)
             Corners.push_back(detectedMarkers[i][c]);
@@ -814,7 +812,7 @@ void MarkerDetector::detect(const cv::Mat& input, vector<Marker>& detectedMarker
 
       // there might be still the case that a marker is detected twice because of the double border indicated earlier,
       // detect and remove these cases
-      vector<bool> toRemove(detectedMarkers.size(), false);
+      std::vector<bool> toRemove(detectedMarkers.size(), false);
 
       for (int i = 0; i < int(detectedMarkers.size()) - 1; i++)
       {
@@ -881,7 +879,7 @@ void MarkerDetector::enlargeMarkerCandidate(MarkerCandidate &cand, int fact)
     // sort so that the nearest to x is first
     if (cand[startp].x > cand[endp].x)
     {
-      swap(startp, endp);
+      std::swap(startp, endp);
     }
     const float _180 = 3.14159f;
 
@@ -894,7 +892,7 @@ void MarkerDetector::enlargeMarkerCandidate(MarkerCandidate &cand, int fact)
 
     // compute the angle
     auto v1 = cand[endp] - cand[startp];
-    float angle = atan2(v1.y, v1.x);
+    float angle = std::atan2(v1.y, v1.x);
     if (_22 < angle && angle < 3 * _22)
     {
       // a
@@ -971,20 +969,20 @@ int MarkerDetector::getMinMarkerSizePix(cv::Size orginput_imageSize) const
  *
  *
  */
-bool MarkerDetector::warp(Mat& in, Mat& out, Size size, vector<Point2f> points)
+bool MarkerDetector::warp(cv::Mat& in, cv::Mat& out, cv::Size size, std::vector<cv::Point2f> points)
 {
   if (points.size() != 4)
     throw cv::Exception(9001, "point.size() != 4", "MarkerDetector::warp", __FILE__, __LINE__);
 
   // obtain the perspective transform
-  Point2f pointsRes[4], pointsIn[4];
+  cv::Point2f pointsRes[4], pointsIn[4];
   for (int i = 0; i < 4; i++)
     pointsIn[i] = points[i];
-  pointsRes[0] = (Point2f(0, 0));
-  pointsRes[1] = Point2f(static_cast<float>(size.width - 1), 0.f);
-  pointsRes[2] = Point2f(static_cast<float>(size.width - 1), static_cast<float>(size.height - 1));
-  pointsRes[3] = Point2f(0.f, static_cast<float>(size.height - 1));
-  Mat M = getPerspectiveTransform(pointsIn, pointsRes);
+  pointsRes[0] = (cv::Point2f(0, 0));
+  pointsRes[1] = cv::Point2f(static_cast<float>(size.width - 1), 0.f);
+  pointsRes[2] = cv::Point2f(static_cast<float>(size.width - 1), static_cast<float>(size.height - 1));
+  pointsRes[3] = cv::Point2f(0.f, static_cast<float>(size.height - 1));
+  cv::Mat M = getPerspectiveTransform(pointsIn, pointsRes);
   cv::warpPerspective(in, out, M, size, cv::INTER_LINEAR);
 //  cv::warpPerspective(in, out, M, size, cv::INTER_NEAREST);
   return true;
@@ -996,13 +994,13 @@ bool MarkerDetector::warp(Mat& in, Mat& out, Size size, vector<Point2f> points)
  *
  *
  */
-int MarkerDetector::perimeter(const vector<Point2f>& a)
+int MarkerDetector::perimeter(const std::vector<cv::Point2f>& a)
 {
   int sum = 0;
   for (unsigned int i = 0; i < a.size(); i++)
   {
     int i2 = (i + 1) % a.size();
-    sum += static_cast<int>(sqrt(
+    sum += static_cast<int>(std::sqrt(
         (a[i].x - a[i2].x) * (a[i].x - a[i2].x) + (a[i].y - a[i2].y) * (a[i].y - a[i2].y)));
   }
 
@@ -1011,7 +1009,7 @@ int MarkerDetector::perimeter(const vector<Point2f>& a)
 
 /**
  */
-void MarkerDetector::interpolate2Dline(const std::vector<Point2f>& inPoints, Point3f& outLine)
+void MarkerDetector::interpolate2Dline(const std::vector<cv::Point2f>& inPoints, cv::Point3f& outLine)
 {
   float minX, maxX, minY, maxY;
   minX = maxX = inPoints[0].x;
@@ -1031,9 +1029,9 @@ void MarkerDetector::interpolate2Dline(const std::vector<Point2f>& inPoints, Poi
 
   // create matrices of equation system
   const int pointsCount = static_cast<int>(inPoints.size());
-  Mat A(pointsCount, 2, CV_32FC1, Scalar(0));
-  Mat B(pointsCount, 1, CV_32FC1, Scalar(0));
-  Mat X;
+  cv::Mat A(pointsCount, 2, CV_32FC1, cv::Scalar(0));
+  cv::Mat B(pointsCount, 1, CV_32FC1, cv::Scalar(0));
+  cv::Mat X;
 
   if (maxX - minX > maxY - minY)
   {
@@ -1046,9 +1044,9 @@ void MarkerDetector::interpolate2Dline(const std::vector<Point2f>& inPoints, Poi
     }
 
     // solve system
-    solve(A, B, X, DECOMP_SVD);
+    solve(A, B, X, cv::DECOMP_SVD);
     // return Ax + By + C
-    outLine = Point3f(X.at<float>(0, 0), -1., X.at<float>(1, 0));
+    outLine = cv::Point3f(X.at<float>(0, 0), -1., X.at<float>(1, 0));
   }
   else
   {
@@ -1061,20 +1059,20 @@ void MarkerDetector::interpolate2Dline(const std::vector<Point2f>& inPoints, Poi
     }
 
     // solve system
-    solve(A, B, X, DECOMP_SVD);
+    solve(A, B, X, cv::DECOMP_SVD);
     // return Ax + By + C
-    outLine = Point3f(-1., X.at<float>(0, 0), X.at<float>(1, 0));
+    outLine = cv::Point3f(-1., X.at<float>(0, 0), X.at<float>(1, 0));
   }
 }
 
 /**
  */
-Point2f MarkerDetector::getCrossPoint(const cv::Point3f& line1, const cv::Point3f& line2)
+cv::Point2f MarkerDetector::getCrossPoint(const cv::Point3f& line1, const cv::Point3f& line2)
 {
   // create matrices of equation system
-  Mat A(2, 2, CV_32FC1, Scalar(0));
-  Mat B(2, 1, CV_32FC1, Scalar(0));
-  Mat X;
+  cv::Mat A(2, 2, CV_32FC1, cv::Scalar(0));
+  cv::Mat B(2, 1, CV_32FC1, cv::Scalar(0));
+  cv::Mat X;
 
   A.at<float>(0, 0) = line1.x;
   A.at<float>(0, 1) = line1.y;
@@ -1085,23 +1083,23 @@ Point2f MarkerDetector::getCrossPoint(const cv::Point3f& line1, const cv::Point3
   B.at<float>(1, 0) = -line2.z;
 
   // solve system
-  solve(A, B, X, DECOMP_SVD);
-  return Point2f(X.at<float>(0, 0), X.at<float>(1, 0));
+  solve(A, B, X, cv::DECOMP_SVD);
+  return cv::Point2f(X.at<float>(0, 0), X.at<float>(1, 0));
 }
 
-void MarkerDetector::cornerUpsample(vector<Marker>& MarkerCanditates, cv::Size lowResImageSize)
+void MarkerDetector::cornerUpsample(std::vector<Marker>& MarkerCanditates, cv::Size lowResImageSize)
 {
   cornerUpsample_SUBP(MarkerCanditates, lowResImageSize);
 }
 
-void MarkerDetector::cornerUpsample_SUBP(vector<Marker>& MarkerCanditates, cv::Size lowResImageSize)
+void MarkerDetector::cornerUpsample_SUBP(std::vector<Marker>& MarkerCanditates, cv::Size lowResImageSize)
 {
   if (MarkerCanditates.size() == 0)
     return;
   // first, determine the image in the pyramid nearest to this one
   int startPyrImg = 0;
 
-  for (size_t i = 0; i < imagePyramid.size(); i++)
+  for (std::size_t i = 0; i < imagePyramid.size(); i++)
   {
     if (lowResImageSize.width < imagePyramid[i].cols)
       startPyrImg = i;
@@ -1124,7 +1122,7 @@ void MarkerDetector::cornerUpsample_SUBP(vector<Marker>& MarkerCanditates, cv::S
       }
 
     int halfwsize = 0.5 + 2.5 * factor;
-    vector<cv::Point2f> p2d;
+    std::vector<cv::Point2f> p2d;
     p2d.reserve(MarkerCanditates.size() * 4);
     for (auto &m : MarkerCanditates)
       for (auto &point : m)
@@ -1151,9 +1149,9 @@ void MarkerDetector::cornerUpsample_SUBP(vector<Marker>& MarkerCanditates, cv::S
  *
  *
  */
-void MarkerDetector::drawAllContours(Mat input, std::vector<std::vector<cv::Point>>& contours)
+void MarkerDetector::drawAllContours(cv::Mat input, std::vector<std::vector<cv::Point>>& contours)
 {
-  drawContours(input, contours, -1, Scalar(255, 0, 255));
+  drawContours(input, contours, -1, cv::Scalar(255, 0, 255));
 }
 
 /**
@@ -1162,7 +1160,7 @@ void MarkerDetector::drawAllContours(Mat input, std::vector<std::vector<cv::Poin
  *
  *
  */
-void MarkerDetector::drawContour(Mat& in, vector<Point>& contour, Scalar color)
+void MarkerDetector::drawContour(cv::Mat& in, std::vector<cv::Point>& contour, cv::Scalar color)
 {
   for (unsigned int i = 0; i < contour.size(); i++)
   {
@@ -1170,7 +1168,7 @@ void MarkerDetector::drawContour(Mat& in, vector<Point>& contour, Scalar color)
   }
 }
 
-void MarkerDetector::drawApproxCurve(Mat& in, vector<Point>& contour, Scalar color, int thickness)
+void MarkerDetector::drawApproxCurve(cv::Mat& in, std::vector<cv::Point>& contour, cv::Scalar color, int thickness)
 {
   for (unsigned int i = 0; i < contour.size(); i++)
   {
@@ -1184,7 +1182,7 @@ void MarkerDetector::drawApproxCurve(Mat& in, vector<Point>& contour, Scalar col
  *
  *
  */
-void MarkerDetector::draw(Mat out, const vector<Marker>& markers)
+void MarkerDetector::draw(cv::Mat out, const std::vector<Marker>& markers)
 {
   for (unsigned int i = 0; i < markers.size(); i++)
   {
@@ -1205,12 +1203,12 @@ void MarkerDetector::setDictionary(int dict_type, float error_correction_rate)
   markerIdDetector = MarkerLabeler::create((Dictionary::DICT_TYPES)dict_type, error_correction_rate);
 }
 
-void MarkerDetector::setDictionary(string dict_type, float error_correction_rate)
+void MarkerDetector::setDictionary(std::string dict_type, float error_correction_rate)
 {
   markerIdDetector = MarkerLabeler::create(dict_type, std::to_string(error_correction_rate));
 }
 
-cv::Mat MarkerDetector::getThresholdedImage(uint32_t idx)
+cv::Mat MarkerDetector::getThresholdedImage(std::uint32_t idx)
 {
   if (_thres_Images.size() == 0)
     return cv::Mat();

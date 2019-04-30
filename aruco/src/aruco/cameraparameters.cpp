@@ -34,8 +34,6 @@
 #include <fstream>
 #include <iostream>
 
-using namespace std;
-
 namespace aruco
 {
 
@@ -121,27 +119,27 @@ cv::Point3f CameraParameters::getCameraLocation(cv::Mat Rvec, cv::Mat Tvec)
 /**
  * Saves this to a file
  */
-void CameraParameters::saveToFile(string path, bool inXML)
+void CameraParameters::saveToFile(std::string path, bool inXML)
 {
   if (!isValid())
     throw cv::Exception(9006, "invalid object", "CameraParameters::saveToFile", __FILE__, __LINE__);
   if (!inXML)
   {
-    ofstream file(path.c_str());
+    std::ofstream file(path.c_str());
     if (!file)
       throw cv::Exception(9006, "could not open file:" + path, "CameraParameters::saveToFile", __FILE__,
       __LINE__);
-    file << "# ArUco 1.0 CameraParameters" << endl;
-    file << "fx = " << CameraMatrix.at<float>(0, 0) << endl;
-    file << "cx = " << CameraMatrix.at<float>(0, 2) << endl;
-    file << "fy = " << CameraMatrix.at<float>(1, 1) << endl;
-    file << "cy = " << CameraMatrix.at<float>(1, 2) << endl;
-    file << "k1 = " << Distorsion.at<float>(0, 0) << endl;
-    file << "k2 = " << Distorsion.at<float>(1, 0) << endl;
-    file << "p1 = " << Distorsion.at<float>(2, 0) << endl;
-    file << "p2 = " << Distorsion.at<float>(3, 0) << endl;
-    file << "width = " << CamSize.width << endl;
-    file << "height = " << CamSize.height << endl;
+    file << "# ArUco 1.0 CameraParameters" << std::endl;
+    file << "fx = " << CameraMatrix.at<float>(0, 0) << std::endl;
+    file << "cx = " << CameraMatrix.at<float>(0, 2) << std::endl;
+    file << "fy = " << CameraMatrix.at<float>(1, 1) << std::endl;
+    file << "cy = " << CameraMatrix.at<float>(1, 2) << std::endl;
+    file << "k1 = " << Distorsion.at<float>(0, 0) << std::endl;
+    file << "k2 = " << Distorsion.at<float>(1, 0) << std::endl;
+    file << "p1 = " << Distorsion.at<float>(2, 0) << std::endl;
+    file << "p2 = " << Distorsion.at<float>(3, 0) << std::endl;
+    file << "width = " << CamSize.width << std::endl;
+    file << "height = " << CamSize.height << std::endl;
   }
   else
   {
@@ -179,7 +177,7 @@ void CameraParameters::resize(cv::Size size)
  *
  *
  */
-void CameraParameters::readFromXMLFile(string filePath)
+void CameraParameters::readFromXMLFile(std::string filePath)
 {
   cv::FileStorage fs(filePath, cv::FileStorage::READ);
   if (!fs.isOpened())
@@ -243,7 +241,7 @@ void CameraParameters::glGetProjectionMatrix(cv::Size orgImgSize, cv::Size size,
 {
   if (cv::countNonZero(Distorsion) != 0)
     std::cerr << "CameraParameters::glGetProjectionMatrix :: The camera has distortion coefficients " << __FILE__ << " "
-        << __LINE__ << endl;
+        << __LINE__ << std::endl;
   if (isValid() == false)
     throw cv::Exception(9100, "invalid camera parameters", "CameraParameters::glGetProjectionMatrix", __FILE__,
     __LINE__);
@@ -266,7 +264,7 @@ void CameraParameters::glGetProjectionMatrix(cv::Size orgImgSize, cv::Size size,
  */
 double CameraParameters::norm(double a, double b, double c)
 {
-  return (sqrt(a * a + b * b + c * c));
+  return (std::sqrt(a * a + b * b + c * c));
 }
 
 /**
@@ -510,10 +508,10 @@ cv::Mat CameraParameters::getRTMatrix(const cv::Mat& R_, const cv::Mat& T_, int 
 std::ostream &operator<<(std::ostream &str, const CameraParameters&cp)
 {
   str << cp.CamSize.width << " " << cp.CamSize.height << " ";
-  for (size_t i = 0; i < cp.CameraMatrix.total(); i++)
+  for (std::size_t i = 0; i < cp.CameraMatrix.total(); i++)
     str << cp.CameraMatrix.ptr<float>(0)[i] << " ";
   str << cp.Distorsion.total() << " ";
-  for (size_t i = 0; i < cp.Distorsion.total(); i++)
+  for (std::size_t i = 0; i < cp.Distorsion.total(); i++)
     str << cp.Distorsion.ptr<float>(0)[i] << " ";
   return str;
 
@@ -523,12 +521,12 @@ std::istream &operator>>(std::istream &str, CameraParameters&cp)
 {
   str >> cp.CamSize.width >> cp.CamSize.height;
   cp.CameraMatrix.create(3, 3, CV_32F);
-  for (size_t i = 0; i < cp.CameraMatrix.total(); i++)
+  for (std::size_t i = 0; i < cp.CameraMatrix.total(); i++)
     str >> cp.CameraMatrix.ptr<float>(0)[i];
   int t;
   str >> t;
   cp.Distorsion.create(1, t, CV_32F);
-  for (size_t i = 0; i < cp.Distorsion.total(); i++)
+  for (std::size_t i = 0; i < cp.Distorsion.total(); i++)
     str >> cp.Distorsion.ptr<float>(0)[i];
   return str;
 }

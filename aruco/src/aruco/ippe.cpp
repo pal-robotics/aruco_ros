@@ -30,9 +30,6 @@
 #include <opencv2/calib3d.hpp>
 #include <opencv2/imgproc.hpp>
 
-using namespace cv;
-using namespace std;
-
 namespace aruco
 {
 
@@ -95,8 +92,8 @@ cv::Mat getRTMatrix(const cv::Mat& R_, const cv::Mat& T_, int forceType)
   }
 }
 
-vector<cv::Mat> solvePnP(const vector<cv::Point3f>& objPoints, const std::vector<cv::Point2f>& imgPoints,
-                         cv::InputArray cameraMatrix, cv::InputArray distCoeffs)
+std::vector<cv::Mat> solvePnP(const std::vector<cv::Point3f>& objPoints, const std::vector<cv::Point2f>& imgPoints,
+                              cv::InputArray cameraMatrix, cv::InputArray distCoeffs)
 {
   cv::Mat Rvec, Tvec;
   float markerLength = static_cast<float>(cv::norm(objPoints[1] - objPoints[0]));
@@ -115,9 +112,8 @@ std::vector<std::pair<cv::Mat, double> > solvePnP_(float size, const std::vector
   cv::Mat Rvec, Tvec, Rvec2, Tvec2;
   float reprojErr1, reprojErr2;
   solvePoseOfCentredSquare(size, imgPoints, cameraMatrix, distCoeffs, Rvec, Tvec, reprojErr1, Rvec2, Tvec2, reprojErr2);
-  return
-  { make_pair(getRTMatrix(Rvec,Tvec,CV_32F),reprojErr1), make_pair(getRTMatrix(Rvec2,Tvec2,CV_32F),reprojErr2)};
-
+  return std::vector<std::pair<cv::Mat, double>> {std::make_pair(getRTMatrix(Rvec, Tvec, CV_32F), reprojErr1),
+                                                  std::make_pair(getRTMatrix(Rvec2, Tvec2, CV_32F), reprojErr2)};
 }
 
 std::vector<std::pair<cv::Mat, double>> solvePnP_(const std::vector<cv::Point3f>& objPoints,
@@ -131,22 +127,21 @@ std::vector<std::pair<cv::Mat, double>> solvePnP_(const std::vector<cv::Point3f>
 
   solvePoseOfCentredSquare(markerLength, imgPoints, cameraMatrix, distCoeffs, Rvec, Tvec, reprojErr1, Rvec2, Tvec2,
                            reprojErr2);
-  return
-  { make_pair(getRTMatrix(Rvec, Tvec, CV_32F), reprojErr1),
-    make_pair(getRTMatrix(Rvec2, Tvec2, CV_32F), reprojErr2)};
+  return std::vector<std::pair<cv::Mat, double>> {std::make_pair(getRTMatrix(Rvec, Tvec, CV_32F), reprojErr1),
+                                                  std::make_pair(getRTMatrix(Rvec2, Tvec2, CV_32F), reprojErr2)};
 }
 
-void solvePoseOfCentredSquare(float squareLength, InputArray imagePoints, InputArray cameraMatrix,
-                              InputArray distCoeffs, OutputArray _rvec1, OutputArray _tvec1, float& reprojErr1,
-                              OutputArray _rvec2, OutputArray _tvec2, float& reprojErr2)
+void solvePoseOfCentredSquare(float squareLength, cv::InputArray imagePoints, cv::InputArray cameraMatrix,
+                              cv::InputArray distCoeffs, cv::OutputArray _rvec1, cv::OutputArray _tvec1,
+                              float& reprojErr1, cv::OutputArray _rvec2, cv::OutputArray _tvec2, float& reprojErr2)
 {
   cv::Mat undistortedPoints; // undistorted version of imagePoints
   cv::Mat modelPoints(4, 1, CV_32FC3);
   // set coordinate system in the middle of the marker, with Z pointing out
-  modelPoints.ptr<Vec3f>(0)[0] = Vec3f(-squareLength / 2.0f, squareLength / 2.0f, 0);
-  modelPoints.ptr<Vec3f>(0)[1] = Vec3f(squareLength / 2.0f, squareLength / 2.0f, 0);
-  modelPoints.ptr<Vec3f>(0)[2] = Vec3f(squareLength / 2.0f, -squareLength / 2.0f, 0);
-  modelPoints.ptr<Vec3f>(0)[3] = Vec3f(-squareLength / 2.0f, -squareLength / 2.0f, 0);
+  modelPoints.ptr<cv::Vec3f>(0)[0] = cv::Vec3f(-squareLength / 2.0f, squareLength / 2.0f, 0);
+  modelPoints.ptr<cv::Vec3f>(0)[1] = cv::Vec3f(squareLength / 2.0f, squareLength / 2.0f, 0);
+  modelPoints.ptr<cv::Vec3f>(0)[2] = cv::Vec3f(squareLength / 2.0f, -squareLength / 2.0f, 0);
+  modelPoints.ptr<cv::Vec3f>(0)[3] = cv::Vec3f(-squareLength / 2.0f, -squareLength / 2.0f, 0);
 
   //(Ra, ta), (Rb, tb) are the two pose solutions from IPPE.
   _rvec1.create(3, 1, CV_64FC1);
@@ -220,8 +215,8 @@ void solvePoseOfCentredSquare(float squareLength, InputArray imagePoints, InputA
   }
 }
 
-int IPPEvalBestPose(InputArray _R1, InputArray _R2, InputArray _t1, InputArray _t2, InputArray _objectPoints,
-                    InputArray _undistortedPoints)
+int IPPEvalBestPose(cv::InputArray _R1, cv::InputArray _R2, cv::InputArray _t1, cv::InputArray _t2,
+                    cv::InputArray _objectPoints, cv::InputArray _undistortedPoints)
 {
   cv::Mat modelPoints = _objectPoints.getMat();
   cv::Mat imgPoints = _undistortedPoints.getMat();
@@ -243,36 +238,36 @@ int IPPEvalBestPose(InputArray _R1, InputArray _R2, InputArray _t1, InputArray _
   for (int i = 0; i < numPts; i++)
   {
     // projection with first pose solution:
-    px = static_cast<float>(R1.at<double>(0, 0) * modelPoints.at<Vec3f>(i)(0))
-        + static_cast<float>(R1.at<double>(0, 1) * modelPoints.at<Vec3f>(i)(1))
-        + static_cast<float>(R1.at<double>(0, 2) * modelPoints.at<Vec3f>(i)(2) + t1.at<double>(0));
-    py = static_cast<float>(R1.at<double>(1, 0) * modelPoints.at<Vec3f>(i)(0))
-        + static_cast<float>(R1.at<double>(1, 1) * modelPoints.at<Vec3f>(i)(1))
-        + static_cast<float>(R1.at<double>(1, 2) * modelPoints.at<Vec3f>(i)(2) + t1.at<double>(1));
-    pz = static_cast<float>(R1.at<double>(2, 0) * modelPoints.at<Vec3f>(i)(0))
-        + static_cast<float>(R1.at<double>(2, 1) * modelPoints.at<Vec3f>(i)(1))
-        + static_cast<float>(R1.at<double>(2, 2) * modelPoints.at<Vec3f>(i)(2) + t1.at<double>(2));
+    px = static_cast<float>(R1.at<double>(0, 0) * modelPoints.at<cv::Vec3f>(i)(0))
+        + static_cast<float>(R1.at<double>(0, 1) * modelPoints.at<cv::Vec3f>(i)(1))
+        + static_cast<float>(R1.at<double>(0, 2) * modelPoints.at<cv::Vec3f>(i)(2) + t1.at<double>(0));
+    py = static_cast<float>(R1.at<double>(1, 0) * modelPoints.at<cv::Vec3f>(i)(0))
+        + static_cast<float>(R1.at<double>(1, 1) * modelPoints.at<cv::Vec3f>(i)(1))
+        + static_cast<float>(R1.at<double>(1, 2) * modelPoints.at<cv::Vec3f>(i)(2) + t1.at<double>(1));
+    pz = static_cast<float>(R1.at<double>(2, 0) * modelPoints.at<cv::Vec3f>(i)(0))
+        + static_cast<float>(R1.at<double>(2, 1) * modelPoints.at<cv::Vec3f>(i)(1))
+        + static_cast<float>(R1.at<double>(2, 2) * modelPoints.at<cv::Vec3f>(i)(2) + t1.at<double>(2));
 
-    dx = px / pz - imgPoints.at<Vec2f>(i)(0);
-    dy = py / pz - imgPoints.at<Vec2f>(i)(1);
+    dx = px / pz - imgPoints.at<cv::Vec2f>(i)(0);
+    dy = py / pz - imgPoints.at<cv::Vec2f>(i)(1);
 
-    reprojError1 = reprojError1 + sqrt(dx * dx + dy * dy);
+    reprojError1 = reprojError1 + std::sqrt(dx * dx + dy * dy);
 
     // projection with second pose solution:
-    px = static_cast<float>(R2.at<double>(0, 0) * modelPoints.at<Vec3f>(i)(0))
-        + static_cast<float>(R2.at<double>(0, 1) * modelPoints.at<Vec3f>(i)(1))
-        + static_cast<float>(R2.at<double>(0, 2) * modelPoints.at<Vec3f>(i)(2) + t2.at<double>(0));
-    py = static_cast<float>(R2.at<double>(1, 0) * modelPoints.at<Vec3f>(i)(0))
-        + static_cast<float>(R2.at<double>(1, 1) * modelPoints.at<Vec3f>(i)(1))
-        + static_cast<float>(R2.at<double>(1, 2) * modelPoints.at<Vec3f>(i)(2) + t2.at<double>(1));
-    pz = static_cast<float>(R2.at<double>(2, 0) * modelPoints.at<Vec3f>(i)(0))
-        + static_cast<float>(R2.at<double>(2, 1) * modelPoints.at<Vec3f>(i)(1))
-        + static_cast<float>(R2.at<double>(2, 2) * modelPoints.at<Vec3f>(i)(2) + t2.at<double>(2));
+    px = static_cast<float>(R2.at<double>(0, 0) * modelPoints.at<cv::Vec3f>(i)(0))
+        + static_cast<float>(R2.at<double>(0, 1) * modelPoints.at<cv::Vec3f>(i)(1))
+        + static_cast<float>(R2.at<double>(0, 2) * modelPoints.at<cv::Vec3f>(i)(2) + t2.at<double>(0));
+    py = static_cast<float>(R2.at<double>(1, 0) * modelPoints.at<cv::Vec3f>(i)(0))
+        + static_cast<float>(R2.at<double>(1, 1) * modelPoints.at<cv::Vec3f>(i)(1))
+        + static_cast<float>(R2.at<double>(1, 2) * modelPoints.at<cv::Vec3f>(i)(2) + t2.at<double>(1));
+    pz = static_cast<float>(R2.at<double>(2, 0) * modelPoints.at<cv::Vec3f>(i)(0))
+        + static_cast<float>(R2.at<double>(2, 1) * modelPoints.at<cv::Vec3f>(i)(1))
+        + static_cast<float>(R2.at<double>(2, 2) * modelPoints.at<cv::Vec3f>(i)(2) + t2.at<double>(2));
 
-    dx = px / pz - imgPoints.at<Vec2f>(i)(0);
-    dy = py / pz - imgPoints.at<Vec2f>(i)(1);
+    dx = px / pz - imgPoints.at<cv::Vec2f>(i)(0);
+    dy = py / pz - imgPoints.at<cv::Vec2f>(i)(1);
 
-    reprojError2 = reprojError2 + sqrt(dx * dx + dy * dy);
+    reprojError2 = reprojError2 + std::sqrt(dx * dx + dy * dy);
   }
   if (reprojError1 < reprojError2)
   {
@@ -284,7 +279,8 @@ int IPPEvalBestPose(InputArray _R1, InputArray _R2, InputArray _t1, InputArray _
   }
 }
 
-float IPPEvalReprojectionError(InputArray _R, InputArray _t, InputArray _objectPoints, InputArray _undistortedPoints)
+float IPPEvalReprojectionError(cv::InputArray _R, cv::InputArray _t, cv::InputArray _objectPoints,
+                               cv::InputArray _undistortedPoints)
 {
   cv::Mat modelPoints = _objectPoints.getMat();
   cv::Mat imgPoints = _undistortedPoints.getMat();
@@ -300,25 +296,25 @@ float IPPEvalReprojectionError(InputArray _R, InputArray _t, InputArray _objectP
   // now loop over each correspondence and compute the reprojection error
   for (int i = 0; i < numPts; i++)
   {
-    px = static_cast<float>(R.at<double>(0, 0) * modelPoints.at<Vec3f>(i)(0))
-        + static_cast<float>(R.at<double>(0, 1) * modelPoints.at<Vec3f>(i)(1))
-        + static_cast<float>(R.at<double>(0, 2) * modelPoints.at<Vec3f>(i)(2) + t.at<double>(0));
-    py = static_cast<float>(R.at<double>(1, 0) * modelPoints.at<Vec3f>(i)(0))
-        + static_cast<float>(R.at<double>(1, 1) * modelPoints.at<Vec3f>(i)(1))
-        + static_cast<float>(R.at<double>(1, 2) * modelPoints.at<Vec3f>(i)(2) + t.at<double>(1));
-    pz = static_cast<float>(R.at<double>(2, 0) * modelPoints.at<Vec3f>(i)(0))
-        + static_cast<float>(R.at<double>(2, 1) * modelPoints.at<Vec3f>(i)(1))
-        + static_cast<float>(R.at<double>(2, 2) * modelPoints.at<Vec3f>(i)(2) + t.at<double>(2));
+    px = static_cast<float>(R.at<double>(0, 0) * modelPoints.at<cv::Vec3f>(i)(0))
+        + static_cast<float>(R.at<double>(0, 1) * modelPoints.at<cv::Vec3f>(i)(1))
+        + static_cast<float>(R.at<double>(0, 2) * modelPoints.at<cv::Vec3f>(i)(2) + t.at<double>(0));
+    py = static_cast<float>(R.at<double>(1, 0) * modelPoints.at<cv::Vec3f>(i)(0))
+        + static_cast<float>(R.at<double>(1, 1) * modelPoints.at<cv::Vec3f>(i)(1))
+        + static_cast<float>(R.at<double>(1, 2) * modelPoints.at<cv::Vec3f>(i)(2) + t.at<double>(1));
+    pz = static_cast<float>(R.at<double>(2, 0) * modelPoints.at<cv::Vec3f>(i)(0))
+        + static_cast<float>(R.at<double>(2, 1) * modelPoints.at<cv::Vec3f>(i)(1))
+        + static_cast<float>(R.at<double>(2, 2) * modelPoints.at<cv::Vec3f>(i)(2) + t.at<double>(2));
 
-    dx = px / pz - imgPoints.at<Vec2f>(i)(0);
-    dy = py / pz - imgPoints.at<Vec2f>(i)(1);
+    dx = px / pz - imgPoints.at<cv::Vec2f>(i)(0);
+    dy = py / pz - imgPoints.at<cv::Vec2f>(i)(1);
 
-    reprojError = reprojError + sqrt(dx * dx + dy * dy);
+    reprojError = reprojError + std::sqrt(dx * dx + dy * dy);
   }
   return reprojError;
 }
 
-void IPPERot2vec(InputArray _R, OutputArray _r)
+void IPPERot2vec(cv::InputArray _R, cv::OutputArray _r)
 {
   cv::Mat R = _R.getMat();
   cv::Mat rvec = _r.getMat();
@@ -342,7 +338,8 @@ void IPPERot2vec(InputArray _R, OutputArray _r)
   }
 }
 
-void IPPComputeTranslation(InputArray _objectPoints, InputArray _imgPoints, InputArray _R, OutputArray _t)
+void IPPComputeTranslation(cv::InputArray _objectPoints, cv::InputArray _imgPoints, cv::InputArray _R,
+                           cv::OutputArray _t)
 {
   // This is solved by building the linear system At = b, where t corresponds to the (ALL_DICTS) translation.
   // This is then inverted with the associated normal equations to give t = inv(transpose(A)*A)*transpose(A)*b
@@ -382,21 +379,21 @@ void IPPComputeTranslation(InputArray _objectPoints, InputArray _imgPoints, Inpu
   // now loop through each point and increment the coefficients:
   for (int i = 0; i < numPts; i++)
   {
-    rx = R.at<double>(0, 0) * modelPoints.at<Vec3f>(i)(0) + R.at<double>(0, 1) * modelPoints.at<Vec3f>(i)(1)
-        + R.at<double>(0, 2) * modelPoints.at<Vec3f>(i)(2);
-    ry = R.at<double>(1, 0) * modelPoints.at<Vec3f>(i)(0) + R.at<double>(1, 1) * modelPoints.at<Vec3f>(i)(1)
-        + R.at<double>(1, 2) * modelPoints.at<Vec3f>(i)(2);
-    rz = R.at<double>(2, 0) * modelPoints.at<Vec3f>(i)(0) + R.at<double>(2, 1) * modelPoints.at<Vec3f>(i)(1)
-        + R.at<double>(2, 2) * modelPoints.at<Vec3f>(i)(2);
-    a2 = -imgPoints.at<Vec2f>(i)(0);
-    b2 = -imgPoints.at<Vec2f>(i)(1);
+    rx = R.at<double>(0, 0) * modelPoints.at<cv::Vec3f>(i)(0) + R.at<double>(0, 1) * modelPoints.at<cv::Vec3f>(i)(1)
+        + R.at<double>(0, 2) * modelPoints.at<cv::Vec3f>(i)(2);
+    ry = R.at<double>(1, 0) * modelPoints.at<cv::Vec3f>(i)(0) + R.at<double>(1, 1) * modelPoints.at<cv::Vec3f>(i)(1)
+        + R.at<double>(1, 2) * modelPoints.at<cv::Vec3f>(i)(2);
+    rz = R.at<double>(2, 0) * modelPoints.at<cv::Vec3f>(i)(0) + R.at<double>(2, 1) * modelPoints.at<cv::Vec3f>(i)(1)
+        + R.at<double>(2, 2) * modelPoints.at<cv::Vec3f>(i)(2);
+    a2 = -imgPoints.at<cv::Vec2f>(i)(0);
+    b2 = -imgPoints.at<cv::Vec2f>(i)(1);
     ATA02 = ATA02 + a2;
     ATA12 = ATA12 + b2;
     ATA20 = ATA20 + a2;
     ATA21 = ATA21 + b2;
     ATA22 = ATA22 + a2 * a2 + b2 * b2;
-    bx = (imgPoints.at<Vec2f>(i)(0)) * rz - rx;
-    by = (imgPoints.at<Vec2f>(i)(1)) * rz - ry;
+    bx = (imgPoints.at<cv::Vec2f>(i)(0)) * rz - rx;
+    by = (imgPoints.at<cv::Vec2f>(i)(1)) * rz - ry;
     ATb0 = ATb0 + bx;
     ATb1 = ATb1 + by;
     ATb2 = ATb2 + a2 * bx + b2 * by;
@@ -416,14 +413,14 @@ void IPPComputeTranslation(InputArray _objectPoints, InputArray _imgPoints, Inpu
   S22 = ATA00 * ATA11;
 
   // solve t:
-  Mat t = _t.getMat();
+  cv::Mat t = _t.getMat();
   t.at<double>(0) = detAInv * (S00 * ATb0 + S01 * ATb1 + S02 * ATb2);
   t.at<double>(1) = detAInv * (S10 * ATb0 + S11 * ATb1 + S12 * ATb2);
   t.at<double>(2) = detAInv * (S20 * ATb0 + S21 * ATb1 + S22 * ATb2);
 }
 
-void IPPComputeRotations(double j00, double j01, double j10, double j11, double p, double q, OutputArray _R1,
-                         OutputArray _R2)
+void IPPComputeRotations(double j00, double j01, double j10, double j11, double p, double q, cv::OutputArray _R1,
+                         cv::OutputArray _R2)
 {
   // Note that it is very hard to understand what is going on here from the code, so if you want to have a clear
   // explanation then please refer to the IPPE paper (Algorithm 1 and its description).
@@ -437,10 +434,10 @@ void IPPComputeRotations(double j00, double j01, double j10, double j11, double 
   double b0, b1, gamma, dtinv;
   double s, t, sp, krs0, krs1, krs0_2, krs1_2, costh, sinth;
 
-  s = sqrt(p * p + q * q + 1);
-  t = sqrt(p * p + q * q);
+  s = std::sqrt(p * p + q * q + 1);
+  t = std::sqrt(p * p + q * q);
   costh = 1 / s;
-  sinth = sqrt(1 - 1 / (s * s));
+  sinth = std::sqrt(1 - 1 / (s * s));
 
   krs0 = p / t;
   krs1 = q / t;
@@ -480,7 +477,7 @@ void IPPComputeRotations(double j00, double j01, double j10, double j11, double 
   ata01 = a00 * a10 + a01 * a11;
   ata11 = a10 * a10 + a11 * a11;
 
-  gamma = sqrt(0.5 * (ata00 + ata11 + sqrt((ata00 - ata11) * (ata00 - ata11) + 4.0 * ata01 * ata01)));
+  gamma = std::sqrt(0.5 * (ata00 + ata11 + std::sqrt((ata00 - ata11) * (ata00 - ata11) + 4.0 * ata01 * ata01)));
 
   // reconstruct the full rotation matrices:
   rtilde00 = a00 / gamma;
@@ -493,8 +490,8 @@ void IPPComputeRotations(double j00, double j01, double j10, double j11, double 
   rtilde10_2 = rtilde10 * rtilde10;
   rtilde11_2 = rtilde11 * rtilde11;
 
-  b0 = sqrt(-rtilde00_2 - rtilde10_2 + 1);
-  b1 = sqrt(-rtilde01_2 - rtilde11_2 + 1);
+  b0 = std::sqrt(-rtilde00_2 - rtilde10_2 + 1);
+  b1 = std::sqrt(-rtilde01_2 - rtilde11_2 + 1);
   sp = (-rtilde00 * rtilde01 - rtilde10 * rtilde11);
 
   if (sp < 0)
@@ -503,8 +500,8 @@ void IPPComputeRotations(double j00, double j01, double j10, double j11, double 
   }
 
   // save results:
-  Mat R1 = _R1.getMat();
-  Mat R2 = _R2.getMat();
+  cv::Mat R1 = _R1.getMat();
+  cv::Mat R2 = _R2.getMat();
 
   R1.at<double>(0, 0) = (rtilde00) * rv00 + (rtilde10) * rv01 + (b0) * rv02;
   R1.at<double>(0, 1) = (rtilde01) * rv00 + (rtilde11) * rv01 + (b1) * rv02;
@@ -533,23 +530,23 @@ void IPPComputeRotations(double j00, double j01, double j10, double j11, double 
       + (rtilde00 * rtilde11 - rtilde01 * rtilde10) * rv22;
 }
 
-void homographyFromSquarePoints(InputArray _targetPts, double halfLength, OutputArray H_)
+void homographyFromSquarePoints(cv::InputArray _targetPts, double halfLength, cv::OutputArray H_)
 {
   cv::Mat pts = _targetPts.getMat();
   H_.create(3, 3, CV_64FC1);
-  Mat H = H_.getMat();
+  cv::Mat H = H_.getMat();
 
-  double p1x = -pts.at<Vec2f>(0)(0);
-  double p1y = -pts.at<Vec2f>(0)(1);
+  double p1x = -pts.at<cv::Vec2f>(0)(0);
+  double p1y = -pts.at<cv::Vec2f>(0)(1);
 
-  double p2x = -pts.at<Vec2f>(1)(0);
-  double p2y = -pts.at<Vec2f>(1)(1);
+  double p2x = -pts.at<cv::Vec2f>(1)(0);
+  double p2y = -pts.at<cv::Vec2f>(1)(1);
 
-  double p3x = -pts.at<Vec2f>(2)(0);
-  double p3y = -pts.at<Vec2f>(2)(1);
+  double p3x = -pts.at<cv::Vec2f>(2)(0);
+  double p3y = -pts.at<cv::Vec2f>(2)(1);
 
-  double p4x = -pts.at<Vec2f>(3)(0);
-  double p4y = -pts.at<Vec2f>(3)(1);
+  double p4x = -pts.at<cv::Vec2f>(3)(0);
+  double p4y = -pts.at<cv::Vec2f>(3)(1);
 
   // analytic solution:
   double detsInv = -1

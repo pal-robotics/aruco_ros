@@ -34,9 +34,6 @@
 
 #include <fstream>
 
-using namespace std;
-using namespace cv;
-
 namespace aruco
 {
 
@@ -62,7 +59,7 @@ MarkerMap::MarkerMap()
  *
  *
  */
-MarkerMap::MarkerMap(string filePath)
+MarkerMap::MarkerMap(std::string filePath)
 {
   mInfoType = NONE;
   readFromFile(filePath);
@@ -72,7 +69,7 @@ MarkerMap::MarkerMap(string filePath)
  *
  *
  */
-void MarkerMap::saveToFile(string sfile)
+void MarkerMap::saveToFile(std::string sfile)
 {
   cv::FileStorage fs(sfile, cv::FileStorage::WRITE);
   saveToFile(fs);
@@ -87,12 +84,12 @@ void MarkerMap::saveToFile(cv::FileStorage& fs)
   fs << "aruco_bc_nmarkers" << (int)size();
   fs << "aruco_bc_mInfoType" << (int)mInfoType;
   fs << "aruco_bc_markers" << "[";
-  for (size_t i = 0; i < size(); i++)
+  for (std::size_t i = 0; i < size(); i++)
   {
     fs << "{:" << "id" << at(i).id;
 
     fs << "corners" << "[:";
-    for (size_t c = 0; c < at(i).size(); c++)
+    for (std::size_t c = 0; c < at(i).size(); c++)
       fs << at(i)[c];
     fs << "]";
     fs << "}";
@@ -104,18 +101,20 @@ void MarkerMap::saveToFile(cv::FileStorage& fs)
  *
  *
  */
-void MarkerMap::readFromFile(string sfile)
+void MarkerMap::readFromFile(std::string sfile)
 {
   try
   {
     cv::FileStorage fs(sfile, cv::FileStorage::READ);
     if (!fs.isOpened())
-      throw cv::Exception(81818, "MarkerMap::readFromFile", string(" file not opened ") + sfile, __FILE__, __LINE__);
+      throw cv::Exception(81818, "MarkerMap::readFromFile", std::string(" file not opened ") + sfile, __FILE__,
+                          __LINE__);
     readFromFile(fs);
   }
   catch (std::exception& ex)
   {
-    throw cv::Exception(81818, "MarkerMap::readFromFile", ex.what() + string(" file=)") + sfile, __FILE__, __LINE__);
+    throw cv::Exception(81818, "MarkerMap::readFromFile", ex.what() + std::string(" file=)") + sfile, __FILE__,
+                        __LINE__);
   }
 }
 
@@ -133,13 +132,13 @@ void MarkerMap::readFromFile(cv::FileStorage& fs)
   fs["aruco_bc_mInfoType"] >> mInfoType;
   cv::FileNode markers = fs["aruco_bc_markers"];
   int i = 0;
-  for (FileNodeIterator it = markers.begin(); it != markers.end(); ++it, i++)
+  for (cv::FileNodeIterator it = markers.begin(); it != markers.end(); ++it, i++)
   {
     at(i).id = (*it)["id"];
-    FileNode FnCorners = (*it)["corners"];
-    for (FileNodeIterator itc = FnCorners.begin(); itc != FnCorners.end(); ++itc)
+    cv::FileNode FnCorners = (*it)["corners"];
+    for (cv::FileNodeIterator itc = FnCorners.begin(); itc != FnCorners.end(); ++itc)
     {
-      vector<float> coordinates3d;
+      std::vector<float> coordinates3d;
       (*itc) >> coordinates3d;
       if (coordinates3d.size() != 3)
         throw cv::Exception(81818, "MarkerMap::readFromFile", "invalid file type 3", __FILE__, __LINE__);
@@ -156,7 +155,7 @@ void MarkerMap::readFromFile(cv::FileStorage& fs)
  */
 int MarkerMap::getIndexOfMarkerId(int id) const
 {
-  for (size_t i = 0; i < size(); i++)
+  for (std::size_t i = 0; i < size(); i++)
     if (at(i).id == id)
       return static_cast<int>(i);
   return -1;
@@ -166,7 +165,7 @@ int MarkerMap::getIndexOfMarkerId(int id) const
  */
 const Marker3DInfo& MarkerMap::getMarker3DInfo(int id) const
 {
-  for (size_t i = 0; i < size(); i++)
+  for (std::size_t i = 0; i < size(); i++)
     if (at(i).id == id)
       return at(i);
   throw cv::Exception(111, "MarkerMap::getMarker3DInfo", "Marker with the id given is not found", __FILE__, __LINE__);
@@ -186,8 +185,8 @@ void __glGetModelViewMatrix(double modelview_matrix[16], const cv::Mat& Rvec, co
   if (invalid)
     throw cv::Exception(9002, "extrinsic parameters are not set", "Marker::getModelViewMatrix", __FILE__,
     __LINE__);
-  Mat Rot(3, 3, CV_32FC1), Jacob;
-  Rodrigues(Rvec, Rot, Jacob);
+  cv::Mat Rot(3, 3, CV_32FC1), Jacob;
+  cv::Rodrigues(Rvec, Rot, Jacob);
 
   double para[3][4];
   for (int i = 0; i < 3; i++)
@@ -294,7 +293,7 @@ void __OgreGetPoseParameters(double position[3], double orientation[4], const cv
   if (fTrace > 0.0)
   {
     // |w| > 1/2, may as well choose w > 1/2
-    fRoot = sqrt(fTrace + 1.0); // 2w
+    fRoot = std::sqrt(fTrace + 1.0); // 2w
     orientation[0] = 0.5 * fRoot;
     fRoot = 0.5 / fRoot; // 1/(4w)
     orientation[1] = (axes[2][1] - axes[1][2]) * fRoot;
@@ -313,7 +312,7 @@ void __OgreGetPoseParameters(double position[3], double orientation[4], const cv
     unsigned int j = s_iNext[i];
     unsigned int k = s_iNext[j];
 
-    fRoot = sqrt(axes[i][i] - axes[j][j] - axes[k][k] + 1.0);
+    fRoot = std::sqrt(axes[i][i] - axes[j][j] - axes[k][k] + 1.0);
     double* apkQuat[3] = {&orientation[1], &orientation[2], &orientation[3]};
     *apkQuat[i] = 0.5 * fRoot;
     fRoot = 0.5 / fRoot;
@@ -329,7 +328,7 @@ void MarkerMap::getIdList(std::vector<int>& ids, bool append) const
 {
   if (!append)
     ids.clear();
-  for (size_t i = 0; i < size(); i++)
+  for (std::size_t i = 0; i < size(); i++)
     ids.push_back(at(i).id);
 }
 
@@ -346,8 +345,8 @@ MarkerMap MarkerMap::convertToMeters(float markerSize_meters)
 
   // now, get the size of a pixel, and change scale
   float pixSize = markerSize_meters / float(markerSizePix);
-  cout << markerSize_meters << " " << float(markerSizePix) << " " << pixSize << endl;
-  for (size_t i = 0; i < BInfo.size(); i++)
+  std::cout << markerSize_meters << " " << float(markerSizePix) << " " << pixSize << std::endl;
+  for (std::size_t i = 0; i < BInfo.size(); i++)
     for (int c = 0; c < 4; c++)
     {
       BInfo[i][c] *= pixSize;
@@ -373,10 +372,10 @@ cv::Mat MarkerMap::getImage(float METER2PIX) const
   {
     for (auto p : b.points)
     {
-      pmin.x = min(int(p.x), pmin.x);
-      pmin.y = min(int(p.y), pmin.y);
-      pmax.x = max(int(p.x + 0.5), pmax.x);
-      pmax.y = max(int(p.y + 0.5), pmax.y);
+      pmin.x = std::min(int(p.x), pmin.x);
+      pmin.y = std::min(int(p.y), pmin.y);
+      pmax.x = std::max(int(p.x + 0.5), pmax.x);
+      pmax.y = std::max(int(p.y + 0.5), pmax.y);
       assert(p.z == 0);
     }
   }
@@ -385,7 +384,7 @@ cv::Mat MarkerMap::getImage(float METER2PIX) const
   cv::Mat image(cv::Size(psize.x, psize.y), CV_8UC1);
   image.setTo(cv::Scalar::all(255));
 
-  vector<Marker3DInfo> p3d = *this;
+  std::vector<Marker3DInfo> p3d = *this;
 
   // the points must be moved from a real reference system to image reference system (y positive is inverse)
   for (auto& m : p3d)
@@ -415,13 +414,13 @@ cv::Mat MarkerMap::getImage(float METER2PIX) const
   return image;
 }
 
-std::vector<int> MarkerMap::getIndices(const vector<aruco::Marker>& markers) const
+std::vector<int> MarkerMap::getIndices(const std::vector<aruco::Marker>& markers) const
 {
   std::vector<int> indices;
-  for (size_t i = 0; i < markers.size(); i++)
+  for (std::size_t i = 0; i < markers.size(); i++)
   {
     bool found = false;
-    for (size_t j = 0; j < size() && !found; j++)
+    for (std::size_t j = 0; j < size() && !found; j++)
     {
       if (markers[i].id == at(j).id)
       {
@@ -436,7 +435,7 @@ std::vector<int> MarkerMap::getIndices(const vector<aruco::Marker>& markers) con
 void MarkerMap::toStream(std::ostream& str)
 {
   str << mInfoType << " " << size() << " ";
-  for (size_t i = 0; i < size(); i++)
+  for (std::size_t i = 0; i < size(); i++)
   {
     at(i).toStream(str);
   }
@@ -448,24 +447,24 @@ void MarkerMap::fromStream(std::istream& str)
   int s;
   str >> mInfoType >> s;
   resize(s);
-  for (size_t i = 0; i < size(); i++)
+  for (std::size_t i = 0; i < size(); i++)
     at(i).fromStream(str);
   str >> dictionary;
 }
 
-pair<cv::Mat, cv::Mat> MarkerMap::calculateExtrinsics(const std::vector<aruco::Marker>& markers, float markerSize,
-                                                      cv::Mat CameraMatrix, cv::Mat Distorsion)
+std::pair<cv::Mat, cv::Mat> MarkerMap::calculateExtrinsics(const std::vector<aruco::Marker>& markers, float markerSize,
+                                                           cv::Mat CameraMatrix, cv::Mat Distorsion)
 {
-  vector<cv::Point2f> p2d;
+  std::vector<cv::Point2f> p2d;
   MarkerMap m_meters;
   if (isExpressedInPixels())
     m_meters = convertToMeters(markerSize);
   else
     m_meters = *this;
-  vector<cv::Point3f> p3d;
+  std::vector<cv::Point3f> p3d;
   for (auto marker : markers)
   {
-    auto it = find(m_meters.begin(), m_meters.end(), marker.id);
+    auto it = std::find(m_meters.begin(), m_meters.end(), marker.id);
     if (it != m_meters.end())
     {
       // is the marker part of the map?
@@ -482,7 +481,7 @@ pair<cv::Mat, cv::Mat> MarkerMap::calculateExtrinsics(const std::vector<aruco::M
     // no points in the vector
     cv::solvePnPRansac(p3d, p2d, CameraMatrix, Distorsion, rvec, tvec);
   }
-  return make_pair(rvec, tvec);
+  return std::make_pair(rvec, tvec);
 }
 
 } // namespace aruco

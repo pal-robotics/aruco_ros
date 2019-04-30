@@ -48,7 +48,6 @@
 
 #include <dynamic_reconfigure/server.h>
 #include <aruco_ros/ArucoThresholdConfig.h>
-using namespace aruco;
 
 class ArucoSimple
 {
@@ -57,8 +56,8 @@ private:
   aruco::CameraParameters camParam;
   tf::StampedTransform rightToLeft;
   bool useRectifiedImages;
-  MarkerDetector mDetector;
-  std::vector<Marker> markers;
+  aruco::MarkerDetector mDetector;
+  std::vector<aruco::Marker> markers;
   ros::Subscriber cam_info_sub;
   bool cam_info_received;
   image_transport::Publisher image_pub;
@@ -209,7 +208,7 @@ public:
         // ok, let's detect
         mDetector.detect(inImage, markers, camParam, marker_size, false);
         // for each marker, draw info and its boundaries in the image
-        for (size_t i = 0; i < markers.size(); ++i)
+        for (std::size_t i = 0; i < markers.size(); ++i)
         {
           // only publishing the selected marker
           if (markers[i].id == marker_id)
@@ -275,9 +274,9 @@ public:
         // draw a 3d cube in each marker if there is 3d info
         if (camParam.isValid() && marker_size != -1)
         {
-          for (size_t i = 0; i < markers.size(); ++i)
+          for (std::size_t i = 0; i < markers.size(); ++i)
           {
-            CvDrawingUtils::draw3dAxis(inImage, markers[i], camParam);
+            aruco::CvDrawingUtils::draw3dAxis(inImage, markers[i], camParam);
           }
         }
 

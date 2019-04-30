@@ -49,15 +49,12 @@
 #include <dynamic_reconfigure/server.h>
 #include <aruco_ros/ArucoThresholdConfig.h>
 
-using namespace cv;
-using namespace aruco;
-
 cv::Mat inImage;
 aruco::CameraParameters camParam;
 bool useRectifiedImages, normalizeImageIllumination;
 int dctComponentsToRemove;
-MarkerDetector mDetector;
-std::vector<Marker> markers;
+aruco::MarkerDetector mDetector;
+std::vector<aruco::Marker> markers;
 ros::Subscriber cam_info_sub;
 bool cam_info_received;
 image_transport::Publisher image_pub;
@@ -119,7 +116,7 @@ void image_callback(const sensor_msgs::ImageConstPtr& msg)
         }
 
         // but drawing all the detected markers
-        markers[i].draw(inImage, Scalar(0, 0, 255), 2);
+        markers[i].draw(inImage, cv::Scalar(0, 0, 255), 2);
       }
 
       // paint a circle in the center of the image
@@ -170,7 +167,7 @@ void image_callback(const sensor_msgs::ImageConstPtr& msg)
       {
         for (unsigned int i = 0; i < markers.size(); ++i)
         {
-          CvDrawingUtils::draw3dCube(inImage, markers[i], camParam);
+          aruco::CvDrawingUtils::draw3dCube(inImage, markers[i], camParam);
         }
       }
 
@@ -212,7 +209,7 @@ void cam_info_callback(const sensor_msgs::CameraInfo &msg)
   cam_info_sub.shutdown();
 }
 
-void reconf_callback(aruco_ros::ArucoThresholdConfig &config, uint32_t level)
+void reconf_callback(aruco_ros::ArucoThresholdConfig &config, std::uint32_t level)
 {
   mDetector.setDetectionMode(aruco::DetectionMode(config.detection_mode), config.min_image_size);
   normalizeImageIllumination = config.normalizeImage;

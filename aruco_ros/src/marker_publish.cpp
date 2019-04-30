@@ -171,7 +171,7 @@ public:
         marker_msg_->header.stamp = curr_stamp;
         marker_msg_->header.seq++;
 
-        for (size_t i = 0; i < markers_.size(); ++i)
+        for (std::size_t i = 0; i < markers_.size(); ++i)
         {
           aruco_msgs::Marker & marker_i = marker_msg_->markers.at(i);
           marker_i.header.stamp = curr_stamp;
@@ -192,7 +192,7 @@ public:
           }
 
           // now find the transform for each detected marker
-          for (size_t i = 0; i < markers_.size(); ++i)
+          for (std::size_t i = 0; i < markers_.size(); ++i)
           {
             aruco_msgs::Marker & marker_i = marker_msg_->markers.at(i);
             tf::Transform transform = aruco_ros::arucoMarker2Tf(markers_[i]);
@@ -210,14 +210,14 @@ public:
       if (publishMarkersList)
       {
         marker_list_msg_.data.resize(markers_.size());
-        for (size_t i = 0; i < markers_.size(); ++i)
+        for (std::size_t i = 0; i < markers_.size(); ++i)
           marker_list_msg_.data[i] = markers_[i].id;
 
         marker_list_pub_.publish(marker_list_msg_);
       }
 
       // draw detected markers on the image for visualization
-      for (size_t i = 0; i < markers_.size(); ++i)
+      for (std::size_t i = 0; i < markers_.size(); ++i)
       {
         markers_[i].draw(inImage_, cv::Scalar(0, 0, 255), 2);
       }
@@ -225,7 +225,7 @@ public:
       // draw a 3D cube in each marker if there is 3D info
       if (camParam_.isValid() && marker_size_ != -1)
       {
-        for (size_t i = 0; i < markers_.size(); ++i)
+        for (std::size_t i = 0; i < markers_.size(); ++i)
           aruco::CvDrawingUtils::draw3dAxis(inImage_, markers_[i], camParam_);
       }
 
