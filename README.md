@@ -23,6 +23,10 @@ Software package and ROS wrappers of the [Aruco][1] Augmented Reality marker det
 
 <img align="right" src="https://raw.github.com/pal-robotics/aruco_ros/master/aruco_ros/etc/reem_gazebo_floating_marker_world.png"/>
 
+### Generate markers
+
+`rosrun aruco optimalmarkers`
+
 ### ROS API
 
 #### Messages
