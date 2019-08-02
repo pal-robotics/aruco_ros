@@ -1,0 +1,15 @@
+<launch>
+
+    <node pkg="aruco_ros" type="aruco_generic" name="aruco_generic" output="screen">
+        <remap from="/camera_info" to="/camera/rgb/camera_info" />
+        <remap from="/image" to="/camera/rgb/image_rect_color" />
+        <param name="image_is_rectified" value="True"/>
+        <param name="marker_size"        value="0.05"/>
+        <param name="marker_id"          value="0"/>
+        <param name="reference_frame"    value=""/>   <!-- frame in which the marker pose will be refered -->
+        <param name="camera_frame"       value="camera_rgb_optical_frame"/>
+        <param name="marker_frame"       value="marker_frame" />
+        <param name="corner_refinement"  value="LINES" />
+    </node>
+
+</launch>
