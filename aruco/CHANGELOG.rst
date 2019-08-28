@@ -2,6 +2,12 @@
 Changelog for package aruco
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix dependency
+* Remove build warnings
+* Contributors: Victor Lopez
+
 0.2.3 (2018-04-20)
 ------------------
 * Remove debug log msg

@@ -2,6 +2,14 @@
 Changelog for package aruco_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Remove build warnings
+* Merge pull request `#65 <https://github.com/pal-robotics/aruco_ros//issues/65>`_ from 7675t/add_rotate_axis_param
+  Add rotate_marker_axis parameter
+* Add rotate_marker_axis parameter
+* Contributors: Ryosuke Tajima, Victor Lopez
+
 0.2.3 (2018-04-20)
 ------------------
 * Force marker_publisher to build after all dependencies.
