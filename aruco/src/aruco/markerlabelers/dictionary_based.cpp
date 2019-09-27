@@ -52,8 +52,8 @@ void DictionaryBased::setParams(const Dictionary& dic, float max_correction_rate
   else
     vdic.push_back(dic);
 
-  for (auto &dic : vdic)
-    nbits_dict[dic.nbits()].push_back(&dic);
+  for (auto &dic2 : vdic)
+    nbits_dict[dic2.nbits()].push_back(&dic2);
 
   _max_correction_rate = std::max(0.f, std::min(1.0f, max_correction_rate));
 }

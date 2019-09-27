@@ -166,7 +166,7 @@ private:
   //--------
   eVector curr_z, x64;
   double currErr, prevErr, minErr;
-  Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> I, J;
+  Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> I, _J;
   double mu, v;
   std::function<void(const eVector &)> _step_callback;
   std::function<bool(const eVector &)> _stopFunction;
@@ -261,7 +261,7 @@ void LevMarq<T>::init(eVector &z, F_z_x f_z_x)
   I.setIdentity();
   f_z_x(curr_z, x64);
   minErr = currErr = prevErr = x64.cwiseProduct(x64).sum();
-  J.resize(x64.rows(), z.rows());
+  _J.resize(x64.rows(), z.rows());
   mu = -1;
 }
 
@@ -270,9 +270,9 @@ void LevMarq<T>::init(eVector &z, F_z_x f_z_x)
 template<typename T>
 bool LevMarq<T>::step(F_z_x f_z_x, F_z_J f_J)
 {
-  f_J(curr_z, J);
-  Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> Jt = J.transpose();
-  Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> JtJ = (Jt * J);
+  f_J(curr_z, _J);
+  Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> Jt = _J.transpose();
+  Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> JtJ = (Jt * _J);
 
   eVector B = -Jt * x64;
   if (mu < 0)

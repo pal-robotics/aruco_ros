@@ -184,11 +184,11 @@ int MarkerDetector::getMarkerWarpSize()
   return _params._markerWarpPixSize * ndiv; // this is the minimum size that the smallest marker will have
 }
 
-void MarkerDetector::buildPyramid(std::vector<cv::Mat> &ImagePyramid, const cv::Mat &grey, int minSize)
+void MarkerDetector::buildPyramid(std::vector<cv::Mat> &ImagePyramid, const cv::Mat &grey_img, int minSize)
 {
   // determine number of pyramid images
   int npyrimg = 1;
-  cv::Size imgpsize = grey.size();
+  cv::Size imgpsize = grey_img.size();
   while (imgpsize.width > minSize)
   {
     imgpsize = cv::Size(imgpsize.width / _params.pyrfactor, imgpsize.height / _params.pyrfactor);
@@ -196,10 +196,10 @@ void MarkerDetector::buildPyramid(std::vector<cv::Mat> &ImagePyramid, const cv::
   }
 
   ImagePyramid.resize(npyrimg);
-  imagePyramid[0] = grey;
+  imagePyramid[0] = grey_img;
 
   // now, create pyramid images
-  imgpsize = grey.size();
+  imgpsize = grey_img.size();
   for (int i = 1; i < npyrimg; i++)
   {
     cv::Size nsize(ImagePyramid[i - 1].cols / _params.pyrfactor, ImagePyramid[i - 1].rows / _params.pyrfactor);
