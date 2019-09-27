@@ -12,9 +12,11 @@ catkin_package(
   INCLUDE_DIRS include
   LIBRARIES aruco
 )
+include_directories(
+  include/aruco/)
 
 include_directories(
-  include/aruco/
+  SYSTEM
   ${catkin_INCLUDE_DIRS}
   ${OpenCV_INCLUDE_DIRS}
   ${EIGEN3_INCLUDE_DIRS}
