@@ -2,8 +2,8 @@
 Changelog for package aruco
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.0 (2019-09-27)
+------------------
 * Fix shadowed variables
 * Add SYSTEN to include dirs
 * Merge pull request `#68 <https://github.com/pal-robotics/aruco_ros//issues/68>`_ from aPonza/ros_format
