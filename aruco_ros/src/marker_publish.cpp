@@ -61,6 +61,10 @@ private:
   std::string reference_frame_;
   double marker_size_;
   bool rotate_marker_axis_;
+  double min_marker_size_;
+  double max_marker_size_;
+  double threshold_param_1_;
+  double threshold_param_2_;
 
   // ROS pub-sub
   ros::NodeHandle nh_;
@@ -97,6 +101,11 @@ public:
       nh_.param<std::string>("reference_frame", reference_frame_, "");
       nh_.param<std::string>("camera_frame", camera_frame_, "");
       nh_.param<bool>("rotate_marker_axis", rotate_marker_axis_, true);
+      nh_.param<double>("min_marker_size", min_marker_size_, 0.015);
+      nh_.param<double>("max_marker_size", max_marker_size_, 0.08);
+      nh_.param<double>("threshold_param_1", threshold_param_1_, 7);
+      nh_.param<double>("threshold_param_2", threshold_param_2_, 7);
+      
       ROS_ASSERT(not (camera_frame_.empty() and not reference_frame_.empty()));
       if(reference_frame_.empty())
         reference_frame_ = camera_frame_;
@@ -105,6 +114,43 @@ public:
     {
       camParam_ = aruco::CameraParameters();
     }
+
+    std::string refinementMethod;
+    nh_.param<std::string>("corner_refinement", refinementMethod, "LINES");
+    if ( refinementMethod == "SUBPIX" )
+      mDetector_.setCornerRefinementMethod(aruco::MarkerDetector::SUBPIX);
+    else if ( refinementMethod == "HARRIS" )
+      mDetector_.setCornerRefinementMethod(aruco::MarkerDetector::HARRIS);
+    else if ( refinementMethod == "NONE" )
+      mDetector_.setCornerRefinementMethod(aruco::MarkerDetector::NONE); 
+    else      
+      mDetector_.setCornerRefinementMethod(aruco::MarkerDetector::LINES); 
+
+    ROS_INFO_STREAM("Corner refinement method: " << mDetector_.getCornerRefinementMethod());
+
+    std::string thresholdMethod;
+    nh_.param<std::string>("threshold_method", thresholdMethod, "ADPT_THRES");
+    if ( thresholdMethod == "FIXED_THRES" )
+      mDetector_.setThresholdMethod(aruco::MarkerDetector::FIXED_THRES);
+    else if ( thresholdMethod == "ADPT_THRES" )
+      mDetector_.setThresholdMethod(aruco::MarkerDetector::ADPT_THRES);
+    else if ( thresholdMethod == "CANNY" )
+      mDetector_.setThresholdMethod(aruco::MarkerDetector::CANNY);
+    else      
+      mDetector_.setThresholdMethod(aruco::MarkerDetector::ADPT_THRES);
+    ROS_INFO_STREAM("Threshold method: " << mDetector_.getThresholdMethod());
+
+    mDetector_.setThresholdParams(threshold_param_1_, threshold_param_2_);
+    double th1, th2;
+    mDetector_.getThresholdParams(th1, th2);
+    ROS_INFO_STREAM("Threshold parameter: " << " th1: " << th1 << " th2: " << th2);
+    
+    mDetector_.setMinMaxSize(min_marker_size_, max_marker_size_);
+    float mins, maxs;
+    mDetector_.getMinMaxSize(mins, maxs);
+    ROS_INFO_STREAM("Marker size min: " << mins << "  max: " << maxs);
+
+    ROS_INFO_STREAM("Desired speed: " << mDetector_.getDesiredSpeed());
 
     image_pub_ = it_.advertise("result", 1);
     debug_pub_ = it_.advertise("debug", 1);
