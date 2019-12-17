@@ -163,11 +163,11 @@ void MarkerDetector::detect(const cv::Mat& input, std::vector<Marker>& detectedM
     // must resize camera parameters if we want to compute properly marker poses
     CameraParameters cp_aux = camParams;
     cp_aux.resize(input.size());
-    detect(input, detectedMarkers, cp_aux.CameraMatrix, cp_aux.Distorsion, markerSizeMeters, setYPerpendicular);
+    detect(input, detectedMarkers, cp_aux.CameraMatrix, cp_aux.Distorsion, cp_aux.ExtrinsicMatrix, markerSizeMeters, setYPerpendicular);
   }
   else
   {
-    detect(input, detectedMarkers, camParams.CameraMatrix, camParams.Distorsion, markerSizeMeters, setYPerpendicular);
+    detect(input, detectedMarkers, camParams.CameraMatrix, camParams.Distorsion, camParams.ExtrinsicMatrix, markerSizeMeters, setYPerpendicular);
   }
 }
 
@@ -550,7 +550,7 @@ int Otsu(std::vector<float> &hist)
  * Main detection function. Performs all steps *
  ***********************************************/
 void MarkerDetector::detect(const cv::Mat& input, std::vector<Marker>& detectedMarkers, cv::Mat camMatrix,
-                            cv::Mat distCoeff, float markerSizeMeters, bool setYPerpendicular)
+                            cv::Mat distCoeff, cv::Mat extrinsics, float markerSizeMeters, bool setYPerpendicular)
 {
   // clear input data
   detectedMarkers.clear();
@@ -839,7 +839,7 @@ void MarkerDetector::detect(const cv::Mat& input, std::vector<Marker>& detectedM
       if (camMatrix.rows != 0 && markerSizeMeters > 0)
       {
         for (unsigned int i = 0; i < detectedMarkers.size(); i++)
-          detectedMarkers[i].calculateExtrinsics(markerSizeMeters, camMatrix, distCoeff, setYPerpendicular);
+          detectedMarkers[i].calculateExtrinsics(markerSizeMeters, camMatrix, distCoeff, extrinsics, setYPerpendicular);
         Timer.add("Pose Estimation");
       }
 

@@ -51,6 +51,9 @@ public:
 
   // size of the image
   cv::Size CamSize;
+  
+  // 3x1 matrix (Tx, Ty, Tz), usually 0 for non-stereo cameras or stereo left cameras
+  cv::Mat ExtrinsicMatrix;
 
   /**
    * Empty constructor

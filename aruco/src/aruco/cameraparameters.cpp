@@ -41,6 +41,7 @@ CameraParameters::CameraParameters()
 {
   CameraMatrix = cv::Mat();
   Distorsion = cv::Mat();
+  ExtrinsicMatrix = cv::Mat();
   CamSize = cv::Size(-1, -1);
 }
 
@@ -61,6 +62,7 @@ CameraParameters::CameraParameters(const CameraParameters& CI)
 {
   CI.CameraMatrix.copyTo(CameraMatrix);
   CI.Distorsion.copyTo(Distorsion);
+  CI.ExtrinsicMatrix.copyTo(ExtrinsicMatrix);
   CamSize = CI.CamSize;
 }
 
@@ -70,6 +72,7 @@ CameraParameters& CameraParameters::operator=(const CameraParameters& CI)
 {
   CI.CameraMatrix.copyTo(CameraMatrix);
   CI.Distorsion.copyTo(Distorsion);
+  CI.ExtrinsicMatrix.copyTo(ExtrinsicMatrix); 
   CamSize = CI.CamSize;
   return *this;
 }
@@ -78,6 +81,18 @@ CameraParameters& CameraParameters::operator=(const CameraParameters& CI)
  */
 void CameraParameters::setParams(cv::Mat cameraMatrix, cv::Mat distorsionCoeff, cv::Size size)
 {
+  cv::Mat auxCamMatrix;
+  ExtrinsicMatrix = cv::Mat::zeros(1, 3, CV_64FC1);
+  if (cameraMatrix.rows == 3 && cameraMatrix.cols == 4)
+  {
+    ExtrinsicMatrix.at<double>(0,0) = cameraMatrix.at<double>(0, 3);
+    ExtrinsicMatrix.at<double>(0,1) = cameraMatrix.at<double>(1, 3);
+    ExtrinsicMatrix.at<double>(0,2) = cameraMatrix.at<double>(2, 3);
+    
+    //Change size to 3x3
+    auxCamMatrix = cameraMatrix(cv::Rect(0,0,3,3)).clone();
+    cameraMatrix = auxCamMatrix;
+  }
   if (cameraMatrix.rows != 3 || cameraMatrix.cols != 3)
     throw cv::Exception(9000, "invalid input cameraMatrix", "CameraParameters::setParams", __FILE__, __LINE__);
   cameraMatrix.convertTo(CameraMatrix, CV_32FC1);
@@ -138,6 +153,9 @@ void CameraParameters::saveToFile(std::string path, bool inXML)
     file << "k2 = " << Distorsion.at<float>(1, 0) << std::endl;
     file << "p1 = " << Distorsion.at<float>(2, 0) << std::endl;
     file << "p2 = " << Distorsion.at<float>(3, 0) << std::endl;
+    file << "tx = " << ExtrinsicMatrix.at<float>(0, 0) << std::endl;
+    file << "ty = " << ExtrinsicMatrix.at<float>(1, 0) << std::endl;
+    file << "tz = " << ExtrinsicMatrix.at<float>(2, 0) << std::endl;
     file << "width = " << CamSize.width << std::endl;
     file << "height = " << CamSize.height << std::endl;
   }
@@ -147,7 +165,9 @@ void CameraParameters::saveToFile(std::string path, bool inXML)
     fs << "image_width" << CamSize.width;
     fs << "image_height" << CamSize.height;
     fs << "camera_matrix" << CameraMatrix;
-    fs << "distortion_coefficients" << Distorsion;
+    fs << "distortion_coefficients" << Distorsion;  
+    fs << "extrinsics" << ExtrinsicMatrix;
+
   }
 }
 
@@ -183,12 +203,13 @@ void CameraParameters::readFromXMLFile(std::string filePath)
   if (!fs.isOpened())
     throw std::runtime_error("CameraParameters::readFromXMLFile could not open file:" + filePath);
   int w = -1, h = -1;
-  cv::Mat MCamera, MDist;
+  cv::Mat MCamera, MDist, MExtrinsics;
 
   fs["image_width"] >> w;
   fs["image_height"] >> h;
   fs["distortion_coefficients"] >> MDist;
   fs["camera_matrix"] >> MCamera;
+  fs["extrinsics"] >> MExtrinsics;
 
   if (MCamera.cols == 0 || MCamera.rows == 0)
   {
@@ -513,6 +534,8 @@ std::ostream &operator<<(std::ostream &str, const CameraParameters&cp)
   str << cp.Distorsion.total() << " ";
   for (std::size_t i = 0; i < cp.Distorsion.total(); i++)
     str << cp.Distorsion.ptr<float>(0)[i] << " ";
+  for (std::size_t i = 0; i < cp.ExtrinsicMatrix.total(); i++)
+    str << cp.ExtrinsicMatrix.ptr<float>(0)[i] << " ";
   return str;
 
 }
@@ -528,6 +551,9 @@ std::istream &operator>>(std::istream &str, CameraParameters&cp)
   cp.Distorsion.create(1, t, CV_32F);
   for (std::size_t i = 0; i < cp.Distorsion.total(); i++)
     str >> cp.Distorsion.ptr<float>(0)[i];
+  cp.Distorsion.create(1, 3, CV_32F);
+  for (std::size_t i = 0; i < cp.ExtrinsicMatrix.total(); i++)
+    str >> cp.ExtrinsicMatrix.ptr<float>(0)[i];
   return str;
 }
 

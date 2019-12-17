@@ -316,7 +316,7 @@ void Marker::calculateExtrinsics(float markerSize, const CameraParameters& CP, b
   if (!CP.isValid())
     throw cv::Exception(9004, "!CP.isValid(): invalid camera parameters. It is not possible to calculate extrinsics",
                         "calculateExtrinsics", __FILE__, __LINE__);
-  calculateExtrinsics(markerSize, CP.CameraMatrix, CP.Distorsion, setYPerpendicular);
+  calculateExtrinsics(markerSize, CP.CameraMatrix, CP.Distorsion, CP.ExtrinsicMatrix, setYPerpendicular);
 }
 
 void print(cv::Point3f p, std::string cad)
@@ -326,7 +326,7 @@ void print(cv::Point3f p, std::string cad)
 
 /**
  */
-void Marker::calculateExtrinsics(float markerSizeMeters, cv::Mat camMatrix, cv::Mat distCoeff, bool setYPerpendicular)
+void Marker::calculateExtrinsics(float markerSizeMeters, cv::Mat camMatrix, cv::Mat distCoeff, cv::Mat Extrinsics, bool setYPerpendicular)
 {
   if (!isValid())
     throw cv::Exception(9004, "!isValid(): invalid marker. It is not possible to calculate extrinsics",
@@ -342,7 +342,13 @@ void Marker::calculateExtrinsics(float markerSizeMeters, cv::Mat camMatrix, cv::
   cv::solvePnP(objpoints, *this, camMatrix, distCoeff, raux, taux);
   raux.convertTo(Rvec, CV_32F);
   taux.convertTo(Tvec, CV_32F);
-
+  float tx = -1 * (Extrinsics.at<double>(0,0) / camMatrix.at<float>(0,0));
+  Tvec.at<float>(0) += tx;
+  float ty = -1 * (Extrinsics.at<double>(0,1) / camMatrix.at<float>(1,1));
+  Tvec.at<float>(1) += ty;
+  float tz = -1 * (Extrinsics.at<double>(0,2) / camMatrix.at<float>(2,2));
+  Tvec.at<float>(2) += tz;
+  
   // rotate the X axis so that Y is perpendicular to the marker plane
   if (setYPerpendicular)
     rotateXAxis(Rvec);

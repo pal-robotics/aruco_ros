@@ -4,11 +4,12 @@
 #include <iostream>
 #include <tf/transform_datatypes.h>
 #include <opencv2/calib3d.hpp>
+#include <cv_bridge/cv_bridge.h>
 
 aruco::CameraParameters aruco_ros::rosCameraInfo2ArucoCamParams(const sensor_msgs::CameraInfo& cam_info,
                                                                 bool useRectifiedParameters)
 {
-  cv::Mat cameraMatrix(3, 3, CV_64FC1);
+  cv::Mat cameraMatrix(3, 4, CV_64FC1);
   cv::Mat distorsionCoeff(4, 1, CV_64FC1);
   cv::Size size(cam_info.width, cam_info.height);
 
@@ -18,12 +19,15 @@ aruco::CameraParameters aruco_ros::rosCameraInfo2ArucoCamParams(const sensor_msg
     cameraMatrix.at<double>(0, 0) = cam_info.P[0];
     cameraMatrix.at<double>(0, 1) = cam_info.P[1];
     cameraMatrix.at<double>(0, 2) = cam_info.P[2];
+    cameraMatrix.at<double>(0, 3) = cam_info.P[3];
     cameraMatrix.at<double>(1, 0) = cam_info.P[4];
     cameraMatrix.at<double>(1, 1) = cam_info.P[5];
     cameraMatrix.at<double>(1, 2) = cam_info.P[6];
+    cameraMatrix.at<double>(1, 3) = cam_info.P[7];
     cameraMatrix.at<double>(2, 0) = cam_info.P[8];
     cameraMatrix.at<double>(2, 1) = cam_info.P[9];
     cameraMatrix.at<double>(2, 2) = cam_info.P[10];
+    cameraMatrix.at<double>(2, 3) = cam_info.P[11];
 
     for (int i = 0; i < 4; ++i)
       distorsionCoeff.at<double>(i, 0) = 0;

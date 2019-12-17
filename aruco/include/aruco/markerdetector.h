@@ -224,11 +224,12 @@ public:
    * @param detectedMarkers output vector with the markers detected
    * @param camMatrix intrinsic camera information.
    * @param distCoeff camera distortion coefficient. If set Mat() if is assumed no camera distortion
+   * @param extrinsics translation (tx,ty,tz) from right stereo camera to left. Empty if no stereo or left camera
    * @param markerSizeMeters size of the marker sides expressed in meters
    * @param setYPerperdicular If set the Y axis will be perpendicular to the surface. Otherwise, it will be the Z axis
    */
   void detect(const cv::Mat& input, std::vector<Marker>& detectedMarkers, cv::Mat camMatrix = cv::Mat(),
-              cv::Mat distCoeff = cv::Mat(), float markerSizeMeters = -1, bool setYPerperdicular = false);
+              cv::Mat distCoeff = cv::Mat(), cv::Mat extrinsics = cv::Mat(), float markerSizeMeters = -1, bool setYPerperdicular = false);
 
 //  /**
 //   * Sets operating params

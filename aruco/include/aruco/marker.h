@@ -113,7 +113,7 @@ public:
    * @param Distortion matrix with distortion parameters (k1, k2, p1, p2)
    * @param setYPerpendicular If set the Y axis will be perpendicular to the surface. Otherwise, it will be the Z axis
    */
-  void calculateExtrinsics(float markerSize, cv::Mat CameraMatrix, cv::Mat Distorsion = cv::Mat(),
+  void calculateExtrinsics(float markerSize, cv::Mat CameraMatrix, cv::Mat Distorsion = cv::Mat(), cv::Mat Extrinsics = cv::Mat(),
                            bool setYPerpendicular = true);
 
   /**
