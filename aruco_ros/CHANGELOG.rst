@@ -30,8 +30,8 @@ Changelog for package aruco_ros
 * Replace assert by error message to keep library functional
 * Contributors: Andrea Ponza, Bence Magyar, Christopher Hrabia, Jordi Pages, Jorge Nicho, Ugnius Malūkas, Victor Lopez, Voidminded
 
-Forthcoming
------------
+2.1.0 (2020-01-21)
+------------------
 * Migrate to tf2 and add utilities
 * Add support for camera extrinsics when dealing with stereo cameras
 * Contributors: Victor Lopez
