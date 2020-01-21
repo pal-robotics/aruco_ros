@@ -112,9 +112,10 @@ public:
    * @param CameraMatrix matrix with camera parameters (fx, fy, cx, cy)
    * @param Distortion matrix with distortion parameters (k1, k2, p1, p2)
    * @param setYPerpendicular If set the Y axis will be perpendicular to the surface. Otherwise, it will be the Z axis
+   * @param correctFisheye Correct fisheye distortion
    */
   void calculateExtrinsics(float markerSize, cv::Mat CameraMatrix, cv::Mat Distorsion = cv::Mat(), cv::Mat Extrinsics = cv::Mat(),
-                           bool setYPerpendicular = true);
+                           bool setYPerpendicular = true, bool correctFisheye = false);
 
   /**
    * Given the extrinsic camera parameters returns the GL_MODELVIEW matrix for OpenGL.

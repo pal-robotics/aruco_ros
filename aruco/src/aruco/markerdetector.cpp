@@ -142,10 +142,10 @@ std::vector<aruco::Marker> MarkerDetector::detect(const cv::Mat& input)
 }
 
 std::vector<aruco::Marker> MarkerDetector::detect(const cv::Mat& input, const CameraParameters& camParams,
-                                                  float markerSizeMeters, bool setYPerperdicular)
+                                                  float markerSizeMeters, bool setYPerperdicular, bool correctFisheye)
 {
   std::vector<Marker> detectedMarkers;
-  detect(input, detectedMarkers, camParams, markerSizeMeters, setYPerperdicular);
+  detect(input, detectedMarkers, camParams, markerSizeMeters, setYPerperdicular, correctFisheye);
   return detectedMarkers;
 }
 
@@ -156,18 +156,18 @@ std::vector<aruco::Marker> MarkerDetector::detect(const cv::Mat& input, const Ca
  *
  */
 void MarkerDetector::detect(const cv::Mat& input, std::vector<Marker>& detectedMarkers, CameraParameters camParams,
-                            float markerSizeMeters, bool setYPerpendicular)
+                            float markerSizeMeters, bool setYPerpendicular, bool correctFisheye)
 {
   if (camParams.CamSize != input.size() && camParams.isValid() && markerSizeMeters > 0)
   {
     // must resize camera parameters if we want to compute properly marker poses
     CameraParameters cp_aux = camParams;
     cp_aux.resize(input.size());
-    detect(input, detectedMarkers, cp_aux.CameraMatrix, cp_aux.Distorsion, cp_aux.ExtrinsicMatrix, markerSizeMeters, setYPerpendicular);
+    detect(input, detectedMarkers, cp_aux.CameraMatrix, cp_aux.Distorsion, cp_aux.ExtrinsicMatrix, markerSizeMeters, setYPerpendicular, correctFisheye);
   }
   else
   {
-    detect(input, detectedMarkers, camParams.CameraMatrix, camParams.Distorsion, camParams.ExtrinsicMatrix, markerSizeMeters, setYPerpendicular);
+    detect(input, detectedMarkers, camParams.CameraMatrix, camParams.Distorsion, camParams.ExtrinsicMatrix, markerSizeMeters, setYPerpendicular, correctFisheye);
   }
 }
 
@@ -550,7 +550,7 @@ int Otsu(std::vector<float> &hist)
  * Main detection function. Performs all steps *
  ***********************************************/
 void MarkerDetector::detect(const cv::Mat& input, std::vector<Marker>& detectedMarkers, cv::Mat camMatrix,
-                            cv::Mat distCoeff, cv::Mat extrinsics, float markerSizeMeters, bool setYPerpendicular)
+                            cv::Mat distCoeff, cv::Mat extrinsics, float markerSizeMeters, bool setYPerpendicular, bool correctFisheye)
 {
   // clear input data
   detectedMarkers.clear();
@@ -839,7 +839,7 @@ void MarkerDetector::detect(const cv::Mat& input, std::vector<Marker>& detectedM
       if (camMatrix.rows != 0 && markerSizeMeters > 0)
       {
         for (unsigned int i = 0; i < detectedMarkers.size(); i++)
-          detectedMarkers[i].calculateExtrinsics(markerSizeMeters, camMatrix, distCoeff, extrinsics, setYPerpendicular);
+          detectedMarkers[i].calculateExtrinsics(markerSizeMeters, camMatrix, distCoeff, extrinsics, setYPerpendicular, correctFisheye);
         Timer.add("Pose Estimation");
       }
 

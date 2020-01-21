@@ -87,6 +87,7 @@ public:
     int minSize_pix = -1;
     bool enclosedMarker = false; // special treatment for enclosed markers
 
+
     void setThresholdMethod(ThresMethod method, int thresHold = -1, int wsize = 15, int wsize_range = 0)
     {
       _AdaptiveThresWindowSize = wsize;
@@ -191,11 +192,12 @@ public:
    * extrinsics of the markers are not detected.
    * @param setYPerperdicular If set the Y axis will be perpendicular to the surface. Otherwise, it will be the Z
    * axis
+   * @param correctFisheye Correct fisheye distortion
    * @return vector with the detected markers
    */
   std::vector<aruco::Marker> detect(const cv::Mat& input);
   std::vector<aruco::Marker> detect(const cv::Mat& input, const CameraParameters& camParams, float markerSizeMeters,
-                                    bool setYPerperdicular = false);
+                                    bool setYPerperdicular = false, bool correctFisheye = false);
 
   /**
    * Detects the markers in the image passed
@@ -208,9 +210,10 @@ public:
    * @param camParams Camera parameters
    * @param markerSizeMeters size of the marker sides expressed in meters
    * @param setYPerperdicular If set the Y axis will be perpendicular to the surface. Otherwise, it will be the Z axis
+   * @param correctFisheye Correct fisheye distortion
    */
   void detect(const cv::Mat& input, std::vector<Marker>& detectedMarkers, CameraParameters camParams,
-              float markerSizeMeters = -1, bool setYPerperdicular = false);
+              float markerSizeMeters = -1, bool setYPerperdicular = false, bool correctFisheye = false);
 
   /**
    * Detects the markers in the image passed
@@ -227,9 +230,10 @@ public:
    * @param extrinsics translation (tx,ty,tz) from right stereo camera to left. Empty if no stereo or left camera
    * @param markerSizeMeters size of the marker sides expressed in meters
    * @param setYPerperdicular If set the Y axis will be perpendicular to the surface. Otherwise, it will be the Z axis
+   * @param correctFisheye Correct fisheye distortion
    */
   void detect(const cv::Mat& input, std::vector<Marker>& detectedMarkers, cv::Mat camMatrix = cv::Mat(),
-              cv::Mat distCoeff = cv::Mat(), cv::Mat extrinsics = cv::Mat(), float markerSizeMeters = -1, bool setYPerperdicular = false);
+              cv::Mat distCoeff = cv::Mat(), cv::Mat extrinsics = cv::Mat(), float markerSizeMeters = -1, bool setYPerperdicular = false, bool correctFisheye = false);
 
 //  /**
 //   * Sets operating params

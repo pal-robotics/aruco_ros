@@ -326,7 +326,7 @@ void print(cv::Point3f p, std::string cad)
 
 /**
  */
-void Marker::calculateExtrinsics(float markerSizeMeters, cv::Mat camMatrix, cv::Mat distCoeff, cv::Mat Extrinsics, bool setYPerpendicular)
+void Marker::calculateExtrinsics(float markerSizeMeters, cv::Mat camMatrix, cv::Mat distCoeff, cv::Mat Extrinsics, bool setYPerpendicular, bool correctFisheye)
 {
   if (!isValid())
     throw cv::Exception(9004, "!isValid(): invalid marker. It is not possible to calculate extrinsics",
@@ -339,7 +339,16 @@ void Marker::calculateExtrinsics(float markerSizeMeters, cv::Mat camMatrix, cv::
   std::vector<cv::Point3f> objpoints = get3DPoints(markerSizeMeters);
 
   cv::Mat raux, taux;
-  cv::solvePnP(objpoints, *this, camMatrix, distCoeff, raux, taux);
+  if (correctFisheye)
+  {
+    std::vector<cv::Point2f> undistorted;
+    cv::fisheye::undistortPoints(*this, undistorted, camMatrix, distCoeff);
+    cv::solvePnP(objpoints, undistorted, cv::Mat::eye(camMatrix.size(), camMatrix.type()), cv::Mat::zeros(distCoeff.size(), distCoeff.type()), raux, taux);
+  }
+  else
+  {
+    cv::solvePnP(objpoints, *this, camMatrix, distCoeff, raux, taux);
+  }
   raux.convertTo(Rvec, CV_32F);
   taux.convertTo(Tvec, CV_32F);
   float tx = -1 * (Extrinsics.at<double>(0,0) / camMatrix.at<float>(0,0));
