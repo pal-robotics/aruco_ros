@@ -21,6 +21,12 @@ Changelog for package aruco
 * forcing opencv3 build for kinetic
 * Contributors: Andrea Ponza, Bence Magyar, Christopher Hrabia, Jordi Pages, Victor Lopez
 
+Forthcoming
+-----------
+* Add param to correct fisheye distortion with special CV functions
+* Add support for camera extrinsics when dealing with stereo cameras
+* Contributors: Victor Lopez
+
 2.0.2 (2019-11-09)
 ------------------
 
