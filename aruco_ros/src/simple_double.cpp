@@ -75,7 +75,7 @@ void image_callback(const sensor_msgs::ImageConstPtr& msg)
   static tf::TransformBroadcaster br;
   if (cam_info_received)
   {
-    ros::Time curr_stamp(ros::Time::now());
+    ros::Time curr_stamp = msg->header.stamp;
     cv_bridge::CvImagePtr cv_ptr;
     try
     {

@@ -150,7 +150,7 @@ public:
     if (!publishMarkers && !publishMarkersList && !publishImage && !publishDebug)
       return;
 
-    ros::Time curr_stamp(ros::Time::now());
+    ros::Time curr_stamp = msg->header.stamp;
     cv_bridge::CvImagePtr cv_ptr;
     try
     {
