@@ -1,0 +1,4 @@
+%YAML:1.0
+aruco_boards:
+   - { frame_id: "/board1", filename: "board_1.yml"}
+   - { frame_id: "/board2", filename: "board_2.yml"}

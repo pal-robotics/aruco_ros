@@ -21,5 +21,7 @@ namespace aruco_ros
   //FIXME: make parameter const as soon as the used function is also const
   tf::Transform arucoMarker2Tf(const aruco::Marker& marker, bool rotate_marker_axis=true);
 
+  tf::Transform arucoBoard2Tf(const aruco::Board& board, bool rotate_board_axis=true);
+
 }
 #endif // ARUCO_ROS_UTILS_H
