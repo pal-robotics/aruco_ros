@@ -30,6 +30,11 @@ Changelog for package aruco_ros
 * Replace assert by error message to keep library functional
 * Contributors: Andrea Ponza, Bence Magyar, Christopher Hrabia, Jordi Pages, Jorge Nicho, Ugnius Malūkas, Victor Lopez, Voidminded
 
+Forthcoming
+-----------
+* Use time stamps from image messages
+* Contributors: Markus Vieth
+
 2.1.0 (2020-01-21)
 ------------------
 * Migrate to tf2 and add utilities
