@@ -141,7 +141,7 @@ void image_callback(const sensor_msgs::ImageConstPtr& msg)
             "Mid point between the two markers in the image = (" << (x[0]+x[1])/2 << ", " << (y[0]+y[1])/2 << ")");
 
 //        // paint a circle in the mid point of the normalized coordinates of both markers
-//        cv::circle(inImage, cv::Point((u[0] + u[1]) / 2, (v[0] + v[1]) / 2), 3, cv::Scalar(0, 0, 255), CV_FILLED);
+//        cv::circle(inImage, cv::Point((u[0] + u[1]) / 2, (v[0] + v[1]) / 2), 3, cv::Scalar(0, 0, 255), cv::FILLED);
 
         // compute the midpoint in 3D:
         float midPoint3D[3]; // 3D point
@@ -158,7 +158,7 @@ void image_callback(const sensor_msgs::ImageConstPtr& msg)
             "3D Mid point between the two markers in undistorted pixel coordinates = (" << u[0] << ", " << v[0] << ")");
 
         // paint a circle in the mid point of the normalized coordinates of both markers
-        cv::circle(inImage, cv::Point(u[0], v[0]), 3, cv::Scalar(0, 0, 255), CV_FILLED);
+        cv::circle(inImage, cv::Point(u[0], v[0]), 3, cv::Scalar(0, 0, 255), cv::FILLED);
 
       }
 

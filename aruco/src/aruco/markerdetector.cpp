@@ -248,14 +248,14 @@ std::vector<MarkerDetector::MarkerCandidate> MarkerDetector::thresholdAndDetectR
   // if image is eroded, minSize must be adapted
   std::vector<cv::Vec4i> hierarchy;
   std::vector<std::vector<cv::Point>> contours;
-  cv::findContours(auxThresImage, contours, cv::noArray(), CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
+  cv::findContours(auxThresImage, contours, cv::noArray(), cv::RETR_LIST, cv::CHAIN_APPROX_NONE);
   tev.add("find-cont");
   std::vector<cv::Point> approxCurve;
 
 //#define _aruco_debug_detectrectangles
 #ifdef _aruco_debug_detectrectangles
   cv::Mat simage;
-  cv::cvtColor(input,simage,CV_GRAY2BGR);
+  cv::cvtColor(input,simage,cv::COLOR_GRAY2BGR);
 #endif
 
   // for each contour, analyze if it is a parallelepiped likely to be the marker
@@ -560,7 +560,7 @@ void MarkerDetector::detect(const cv::Mat& input, std::vector<Marker>& detectedM
 
   // it must be a 3 channel image
   if (input.type() == CV_8UC3)
-    cv::cvtColor(input, grey, CV_BGR2GRAY);
+    cv::cvtColor(input, grey, cv::COLOR_BGR2GRAY);
 //  convertToGray(input, grey);
   else
     grey = input;
@@ -649,7 +649,7 @@ void MarkerDetector::detect(const cv::Mat& input, std::vector<Marker>& detectedM
         // only executes when compiled in DEBUG mode if debug level is at least 10
         // show the thresholded images
         cv::Mat imrect;
-        cv::cvtColor(imgToBeThresHolded, imrect, CV_GRAY2BGR);
+        cv::cvtColor(imgToBeThresHolded, imrect, cv::COLOR_GRAY2BGR);
         for (auto m : MarkerCanditates)
           m.draw(imrect, cv::Scalar(0, 245, 0));
         cv::imshow("rect-nofiltered", imrect);
@@ -663,7 +663,7 @@ void MarkerDetector::detect(const cv::Mat& input, std::vector<Marker>& detectedM
         // only executes when compiled in DEBUG mode if debug level is at least 10
         // show the thresholded images
         cv::Mat imrect;
-        cv::cvtColor(imgToBeThresHolded, imrect, CV_GRAY2BGR);
+        cv::cvtColor(imgToBeThresHolded, imrect, cv::COLOR_GRAY2BGR);
         for (auto m : MarkerCanditates)
           m.draw(imrect, cv::Scalar(0, 245, 0));
         cv::imshow("rect-filtered", imrect);
@@ -794,8 +794,8 @@ void MarkerDetector::detect(const cv::Mat& input, std::vector<Marker>& detectedM
         for (unsigned int i = 0; i < detectedMarkers.size(); i++)
           for (int c = 0; c < 4; c++)
             Corners.push_back(detectedMarkers[i][c]);
-        cornerSubPix(grey, Corners, cvSize(halfwsize, halfwsize), cvSize(-1, -1),
-                     cvTermCriteria(CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, 12, 0.005));
+        cornerSubPix(grey, Corners, cv::Size(halfwsize, halfwsize), cv::Size(-1, -1),
+                     cv::TermCriteria(cv::TermCriteria::MAX_ITER | cv::TermCriteria::EPS, 12, 0.005));
         // copy back
         for (unsigned int i = 0; i < detectedMarkers.size(); i++)
           for (int c = 0; c < 4; c++)
@@ -1131,7 +1131,7 @@ void MarkerDetector::cornerUpsample_SUBP(std::vector<Marker>& MarkerCanditates, 
       }
 
     cv::cornerSubPix(imagePyramid[curpyr], p2d, cv::Size(halfwsize, halfwsize), cv::Size(-1, -1),
-                     cvTermCriteria(CV_TERMCRIT_ITER, 4, 0.5));
+                     cv::TermCriteria(cv::TermCriteria::MAX_ITER, 4, 0.5));
     int cidx = 0;
     for (auto &m : MarkerCanditates)
       for (auto &point : m)
@@ -1186,10 +1186,10 @@ void MarkerDetector::draw(cv::Mat out, const std::vector<Marker>& markers)
 {
   for (unsigned int i = 0; i < markers.size(); i++)
   {
-    cv::line(out, markers[i][0], markers[i][1], cvScalar(255, 0, 0), 2, CV_AA);
-    cv::line(out, markers[i][1], markers[i][2], cvScalar(255, 0, 0), 2, CV_AA);
-    cv::line(out, markers[i][2], markers[i][3], cvScalar(255, 0, 0), 2, CV_AA);
-    cv::line(out, markers[i][3], markers[i][0], cvScalar(255, 0, 0), 2, CV_AA);
+    cv::line(out, markers[i][0], markers[i][1], cv::Scalar(255, 0, 0), 2, cv::LINE_AA);
+    cv::line(out, markers[i][1], markers[i][2], cv::Scalar(255, 0, 0), 2, cv::LINE_AA);
+    cv::line(out, markers[i][2], markers[i][3], cv::Scalar(255, 0, 0), 2, cv::LINE_AA);
+    cv::line(out, markers[i][3], markers[i][0], cv::Scalar(255, 0, 0), 2, cv::LINE_AA);
   }
 }
 

@@ -55,9 +55,9 @@ void CvDrawingUtils::draw3dAxis(cv::Mat& Image, const CameraParameters& CP, cons
   cv::projectPoints(objectPoints, Rvec, Tvec, CP.CameraMatrix, CP.Distorsion, imagePoints);
 
   // draw lines of different colors
-  cv::line(Image, imagePoints[0], imagePoints[1], cv::Scalar(0, 0, 255, 255), 1, CV_AA);
-  cv::line(Image, imagePoints[0], imagePoints[2], cv::Scalar(0, 255, 0, 255), 1, CV_AA);
-  cv::line(Image, imagePoints[0], imagePoints[3], cv::Scalar(255, 0, 0, 255), 1, CV_AA);
+  cv::line(Image, imagePoints[0], imagePoints[1], cv::Scalar(0, 0, 255, 255), 1, cv::LINE_AA);
+  cv::line(Image, imagePoints[0], imagePoints[2], cv::Scalar(0, 255, 0, 255), 1, cv::LINE_AA);
+  cv::line(Image, imagePoints[0], imagePoints[3], cv::Scalar(255, 0, 0, 255), 1, cv::LINE_AA);
   putText(Image, "x", imagePoints[1], cv::FONT_HERSHEY_SIMPLEX, 0.6, cv::Scalar(0, 0, 255, 255), 2);
   putText(Image, "y", imagePoints[2], cv::FONT_HERSHEY_SIMPLEX, 0.6, cv::Scalar(0, 255, 0, 255), 2);
   putText(Image, "z", imagePoints[3], cv::FONT_HERSHEY_SIMPLEX, 0.6, cv::Scalar(255, 0, 0, 255), 2);
@@ -89,9 +89,9 @@ void CvDrawingUtils::draw3dAxis(cv::Mat& Image, Marker& m, const CameraParameter
   cv::projectPoints(objectPoints, m.Rvec, m.Tvec, CP.CameraMatrix, CP.Distorsion, imagePoints);
 
   // draw lines of different colors
-  cv::line(Image, imagePoints[0], imagePoints[1], cv::Scalar(0, 0, 255, 255), 1, CV_AA);
-  cv::line(Image, imagePoints[0], imagePoints[2], cv::Scalar(0, 255, 0, 255), 1, CV_AA);
-  cv::line(Image, imagePoints[0], imagePoints[3], cv::Scalar(255, 0, 0, 255), 1, CV_AA);
+  cv::line(Image, imagePoints[0], imagePoints[1], cv::Scalar(0, 0, 255, 255), 1, cv::LINE_AA);
+  cv::line(Image, imagePoints[0], imagePoints[2], cv::Scalar(0, 255, 0, 255), 1, cv::LINE_AA);
+  cv::line(Image, imagePoints[0], imagePoints[3], cv::Scalar(255, 0, 0, 255), 1, cv::LINE_AA);
   putText(Image, "x", imagePoints[1], cv::FONT_HERSHEY_SIMPLEX, 0.6, cv::Scalar(0, 0, 255, 255), 2);
   putText(Image, "y", imagePoints[2], cv::FONT_HERSHEY_SIMPLEX, 0.6, cv::Scalar(0, 255, 0, 255), 2);
   putText(Image, "z", imagePoints[3], cv::FONT_HERSHEY_SIMPLEX, 0.6, cv::Scalar(255, 0, 0, 255), 2);
@@ -169,13 +169,13 @@ void CvDrawingUtils::draw3dCube(cv::Mat& Image, Marker& m, const CameraParameter
 
   // draw lines of different colors
   for (int i = 0; i < 4; i++)
-    cv::line(Image, imagePoints[i], imagePoints[(i + 1) % 4], cv::Scalar(0, 0, 255, 255), 1, CV_AA);
+    cv::line(Image, imagePoints[i], imagePoints[(i + 1) % 4], cv::Scalar(0, 0, 255, 255), 1, cv::LINE_AA);
 
   for (int i = 0; i < 4; i++)
-    cv::line(Image, imagePoints[i + 4], imagePoints[4 + (i + 1) % 4], cv::Scalar(0, 0, 255, 255), 1, CV_AA);
+    cv::line(Image, imagePoints[i + 4], imagePoints[4 + (i + 1) % 4], cv::Scalar(0, 0, 255, 255), 1, cv::LINE_AA);
 
   for (int i = 0; i < 4; i++)
-    cv::line(Image, imagePoints[i], imagePoints[i + 4], cv::Scalar(0, 0, 255, 255), 1, CV_AA);
+    cv::line(Image, imagePoints[i], imagePoints[i + 4], cv::Scalar(0, 0, 255, 255), 1, cv::LINE_AA);
 }
 
 } // namespace aruco
