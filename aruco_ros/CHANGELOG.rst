@@ -30,6 +30,11 @@ Changelog for package aruco_ros
 * Replace assert by error message to keep library functional
 * Contributors: Andrea Ponza, Bence Magyar, Christopher Hrabia, Jordi Pages, Jorge Nicho, Ugnius Malūkas, Victor Lopez, Voidminded
 
+Forthcoming
+-----------
+* fixes pal-robotics/aruco_ros/#89
+* Contributors: 444lhc
+
 2.1.1 (2020-09-17)
 ------------------
 * Use time stamps from image messages
