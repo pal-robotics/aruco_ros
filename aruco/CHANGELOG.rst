@@ -21,8 +21,8 @@ Changelog for package aruco
 * forcing opencv3 build for kinetic
 * Contributors: Andrea Ponza, Bence Magyar, Christopher Hrabia, Jordi Pages, Victor Lopez
 
-Forthcoming
------------
+3.0.0 (2021-07-16)
+------------------
 * fixes pal-robotics/aruco_ros/#89
 * Contributors: 444lhc
 

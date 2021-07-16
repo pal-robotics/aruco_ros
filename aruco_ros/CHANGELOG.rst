@@ -30,8 +30,8 @@ Changelog for package aruco_ros
 * Replace assert by error message to keep library functional
 * Contributors: Andrea Ponza, Bence Magyar, Christopher Hrabia, Jordi Pages, Jorge Nicho, Ugnius Malūkas, Victor Lopez, Voidminded
 
-Forthcoming
------------
+3.0.0 (2021-07-16)
+------------------
 * fixes pal-robotics/aruco_ros/#89
 * Contributors: 444lhc
 
