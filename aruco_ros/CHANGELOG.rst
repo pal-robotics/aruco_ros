@@ -30,6 +30,14 @@ Changelog for package aruco_ros
 * Replace assert by error message to keep library functional
 * Contributors: Andrea Ponza, Bence Magyar, Christopher Hrabia, Jordi Pages, Jorge Nicho, Ugnius Malūkas, Victor Lopez, Voidminded
 
+Forthcoming
+-----------
+* Merge branch 'fix_camera_matrix_gallium' into 'gallium-devel'
+  fix the issue with the improper camera matrix with non rectified images
+  See merge request ros-overlays/aruco_ros!2
+* fix the issue with the improper camera matrix with non rectified images
+* Contributors: Sai Kishor Kothakota, saikishor
+
 3.0.0 (2021-07-16)
 ------------------
 * fixes pal-robotics/aruco_ros/#89
