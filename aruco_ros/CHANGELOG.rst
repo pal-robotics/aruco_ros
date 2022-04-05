@@ -30,8 +30,8 @@ Changelog for package aruco_ros
 * Replace assert by error message to keep library functional
 * Contributors: Andrea Ponza, Bence Magyar, Christopher Hrabia, Jordi Pages, Jorge Nicho, Ugnius Malūkas, Victor Lopez, Voidminded
 
-Forthcoming
------------
+3.0.2 (2022-04-05)
+------------------
 * Merge pull request #103 from bmagyar/make-sai-maintainer
   Make Sai maintainer of all aruco_ros packages
 * Make Sai maintainer of all
