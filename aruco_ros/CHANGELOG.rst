@@ -30,6 +30,12 @@ Changelog for package aruco_ros
 * Replace assert by error message to keep library functional
 * Contributors: Andrea Ponza, Bence Magyar, Christopher Hrabia, Jordi Pages, Jorge Nicho, Ugnius Malūkas, Victor Lopez, Voidminded
 
+Forthcoming
+-----------
+* Make Sai maintainer of all
+* Update license tags in the package.xml
+* Contributors: Bence Magyar, Sai Kishor Kothakota
+
 2.1.2 (2022-02-10)
 ------------------
 * Merge branch 'fix_camera_matrix' into 'ferrum-devel'

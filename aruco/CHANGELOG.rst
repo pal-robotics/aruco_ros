@@ -21,6 +21,12 @@ Changelog for package aruco
 * forcing opencv3 build for kinetic
 * Contributors: Andrea Ponza, Bence Magyar, Christopher Hrabia, Jordi Pages, Victor Lopez
 
+Forthcoming
+-----------
+* Make Sai maintainer of all
+* Update license tags in the package.xml
+* Contributors: Bence Magyar, Sai Kishor Kothakota
+
 2.1.2 (2022-02-10)
 ------------------
 
