@@ -30,8 +30,8 @@ Changelog for package aruco_ros
 * Replace assert by error message to keep library functional
 * Contributors: Andrea Ponza, Bence Magyar, Christopher Hrabia, Jordi Pages, Jorge Nicho, Ugnius Malūkas, Victor Lopez, Voidminded
 
-Forthcoming
------------
+3.0.3 (2022-05-16)
+------------------
 * Merge branch 'missing_catkin_export_dep' into 'gallium-devel'
   added the missing catkin_EXPORTED_TARGETS dependency
   See merge request ros-overlays/aruco_ros!3
