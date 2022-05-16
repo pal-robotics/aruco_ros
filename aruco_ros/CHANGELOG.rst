@@ -30,8 +30,8 @@ Changelog for package aruco_ros
 * Replace assert by error message to keep library functional
 * Contributors: Andrea Ponza, Bence Magyar, Christopher Hrabia, Jordi Pages, Jorge Nicho, Ugnius Malūkas, Victor Lopez, Voidminded
 
-Forthcoming
------------
+2.1.4 (2022-05-16)
+------------------
 * added the missing catkin_EXPORTED_TARGETS dependency
 * Contributors: Sai Kishor Kothakota
 
