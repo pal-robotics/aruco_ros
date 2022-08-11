@@ -93,7 +93,7 @@ public:
 
     aruco::MarkerDetector::Params params = mDetector.getParameters();
     std::string thresh_method;
-    switch (params._thresMethod)
+    switch (params.thresMethod)
     {
       case aruco::MarkerDetector::ThresMethod::THRES_ADAPTIVE:
         thresh_method = "THRESH_ADAPTIVE";
