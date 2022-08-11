@@ -102,17 +102,15 @@ std::vector<aruco::Marker> aruco_ros::detectMarkers(const cv::Mat &img, const ar
 
     // detection results will go into "markers"
     markers.clear();
-
     // ok, let's detect
-    // TODO: add correct fisheye
     if (detector)
     {
-      markers = detector->detect(img, cam_params, marker_size);
+      detector->detect(img, markers, cam_params, marker_size, false, correct_fisheye);
     }
     else
     {
       aruco::MarkerDetector default_detector;
-      markers = default_detector.detect(img, cam_params, marker_size);
+      default_detector.detect(img, markers, cam_params, marker_size, false, correct_fisheye);
     }
     return markers;
   }

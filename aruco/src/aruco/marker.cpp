@@ -311,7 +311,7 @@ namespace aruco
     /**
      */
     void Marker::calculateExtrinsics(float markerSizeMeters, cv::Mat camMatrix, cv::Mat distCoeff,
-                                     bool setYPerpendicular)
+                                     bool setYPerpendicular, bool correctFisheye)
     {
         if (!isValid())
             throw cv::Exception(9004, "!isValid(): invalid marker. It is not possible to calculate extrinsics",
@@ -326,7 +326,17 @@ namespace aruco
 
         cv::Mat raux, taux;
 //        cv::solvePnP(objpoints, *this, camMatrix, distCoeff, raux, taux);
-        solvePnP(objpoints, *this,camMatrix, distCoeff,raux,taux);
+        if (correctFisheye)
+        {
+          std::vector<cv::Point2f> undistorted;
+          cv::fisheye::undistortPoints(*this, undistorted, camMatrix, distCoeff);
+          cv::solvePnP(objpoints, undistorted, cv::Mat::eye(camMatrix.size(), camMatrix.type()), cv::Mat::zeros(distCoeff.size(), distCoeff.type()), raux, taux);
+        }
+        else
+        {
+          cv::solvePnP(objpoints, *this,camMatrix, distCoeff,raux,taux);
+        }
+
         raux.convertTo(Rvec, CV_32F);
         taux.convertTo(Tvec, CV_32F);
         // rotate the X axis so that Y is perpendicular to the marker plane

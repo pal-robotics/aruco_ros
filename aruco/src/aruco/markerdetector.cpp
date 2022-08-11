@@ -120,7 +120,8 @@ std::vector<aruco::Marker> MarkerDetector::detect(const cv::Mat& input)
 
 std::vector<aruco::Marker> MarkerDetector::detect(const cv::Mat& input, const CameraParameters& camParams,
                                                   float markerSizeMeters,
-                                                  bool setYPerperdicular)
+                                                  bool setYPerperdicular,
+                                                  bool correctFisheye)
 {
     return _impl->detect(input,camParams,markerSizeMeters,setYPerperdicular);
 }
@@ -132,7 +133,7 @@ std::vector<aruco::Marker> MarkerDetector::detect(const cv::Mat& input, const Ca
      *
      ************************************/
 void MarkerDetector::detect(const cv::Mat& input, std::vector<Marker>& detectedMarkers, CameraParameters camParams,
-                            float markerSizeMeters, bool setYPerpendicular)
+                            float markerSizeMeters, bool setYPerpendicular, bool correctFisheye)
 {
       _impl->detect(input,detectedMarkers,camParams,markerSizeMeters,setYPerpendicular);
 }
