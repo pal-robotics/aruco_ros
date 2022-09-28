@@ -62,7 +62,9 @@ install(TARGETS aruco
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
 )
+
 install(DIRECTORY include/
    DESTINATION include
 )
 
+ament_package()
