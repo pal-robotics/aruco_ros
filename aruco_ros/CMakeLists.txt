@@ -1,76 +1,83 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.8)
 project(aruco_ros)
 
-find_package(OpenCV REQUIRED)
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
+set(CMAKE_CXX_STANDARD 11) # C++11...
+set(CMAKE_CXX_STANDARD_REQUIRED ON) #...is required...
+set(CMAKE_CXX_EXTENSIONS ON) #...with compiler extensions like gnu++11
 
-find_package(catkin REQUIRED COMPONENTS
-  cv_bridge
-  dynamic_reconfigure
-  geometry_msgs
-  image_transport
-  roscpp
-  rospy
-  tf
-  aruco
-  aruco_msgs
-  sensor_msgs
-  visualization_msgs
+set(THIS_PACKAGE_INCLUDE_DEPENDS
+    OpenCV
+    cv_bridge
+    geometry_msgs
+    image_transport
+    rclcpp
+    rclpy
+    tf2
+    aruco
+    aruco_msgs
+    sensor_msgs
+    visualization_msgs
 )
+find_package(ament_cmake REQUIRED)
+foreach(Dependency IN ITEMS ${THIS_PACKAGE_INCLUDE_DEPENDS})
+  find_package(${Dependency} REQUIRED)
+endforeach()
 
-generate_dynamic_reconfigure_options(
-  cfg/ArucoThreshold.cfg
-)
+#generate_dynamic_reconfigure_options(
+#  cfg/ArucoThreshold.cfg
+#)
 
-add_compile_options(-std=c++11)
+add_library(aruco_ros_utils SHARED src/aruco_ros_utils.cpp)
+target_include_directories(
+  aruco_ros_utils
+  PRIVATE
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>)
 
-catkin_package(
-  INCLUDE_DIRS include
-  LIBRARIES aruco_ros_utils
-  CATKIN_DEPENDS aruco sensor_msgs tf 
-)
-
-include_directories(
-  include)
-include_directories(
-  SYSTEM
-  ${catkin_INCLUDE_DIRS}
+target_include_directories(
+  aruco_ros_utils
+  SYSTEM PRIVATE
   ${OpenCV_INCLUDE_DIRS}
 )
- add_library(aruco_ros_utils src/aruco_ros_utils.cpp)
- target_link_libraries(aruco_ros_utils ${catkin_LIBRARIES})
+ament_target_dependencies(aruco_ros_utils ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
- add_executable(single src/simple_single.cpp
-                       src/aruco_ros_utils.cpp)
- add_dependencies(single ${PROJECT_NAME}_gencfg)
- target_link_libraries(single ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
+add_executable(single src/simple_single.cpp
+                      src/aruco_ros_utils.cpp)
+ament_target_dependencies(single ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_link_libraries(single ${OpenCV_LIBRARIES})
 
- add_executable(double src/simple_double.cpp
-                       src/aruco_ros_utils.cpp)
- add_dependencies(double ${PROJECT_NAME}_gencfg)
- target_link_libraries(double ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
+add_executable(double src/simple_double.cpp
+                      src/aruco_ros_utils.cpp)
+ament_target_dependencies(double ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_link_libraries(double ${OpenCV_LIBRARIES})
 
- add_executable(marker_publisher src/marker_publish.cpp
-                                 src/aruco_ros_utils.cpp)
- add_dependencies(marker_publisher ${PROJECT_NAME}_gencfg ${catkin_EXPORTED_TARGETS})
- target_link_libraries(marker_publisher ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
+add_executable(marker_publisher src/marker_publish.cpp
+                                src/aruco_ros_utils.cpp)
+ament_target_dependencies(marker_publisher ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_link_libraries(marker_publisher ${OpenCV_LIBRARIES})
 
 #############
 ## Install ##
 #############
 
- install(TARGETS single double marker_publisher aruco_ros_utils
-   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
- )
+install(TARGETS single double marker_publisher aruco_ros_utils
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin)
 
 install(DIRECTORY include/
-   DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION}
+   DESTINATION include/aruco_ros
    FILES_MATCHING PATTERN "*.h"
 )
 
 foreach(dir etc launch)
     install(DIRECTORY ${dir}/
-        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/${dir})
+        DESTINATION share/${PROJECT_NAME}/${dir})
 endforeach(dir)
+
+ament_package()
+
 

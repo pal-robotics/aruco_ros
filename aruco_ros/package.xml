@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<package format="2">
+<package format="3">
   <name>aruco_ros</name>
   <version>3.1.2</version>
   <description>
@@ -12,14 +12,13 @@
   <author email="rmsalinas@uco.es">Rafael Muñoz Salinas</author>
   <author email="bence.magyar@pal-robotics.com">Bence Magyar</author>
 
-  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
 
   <depend>cv_bridge</depend>
-  <depend>dynamic_reconfigure</depend>
   <depend>geometry_msgs</depend>
   <depend>image_transport</depend>
-  <depend>roscpp</depend>
-  <depend>tf</depend>
+  <depend>rclcpp</depend>
+  <depend>tf2</depend>
   <depend>aruco</depend>
   <depend>aruco_msgs</depend>
   <depend>sensor_msgs</depend>
