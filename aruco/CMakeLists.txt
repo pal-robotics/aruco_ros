@@ -1,30 +1,23 @@
-cmake_minimum_required(VERSION 3.0.0)
+cmake_minimum_required(VERSION 3.8)
 project(aruco)
 
-find_package(catkin)
-find_package(Eigen3 REQUIRED)
-find_package(OpenCV 4.2.0 REQUIRED)
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
 set(CMAKE_CXX_STANDARD 11) # C++11...
 set(CMAKE_CXX_STANDARD_REQUIRED ON) #...is required...
 set(CMAKE_CXX_EXTENSIONS ON) #...with compiler extensions like gnu++11
 string(REPLACE "-Werror=shadow" "" NEW_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 set(CMAKE_CXX_FLAGS "${NEW_CXX_FLAGS}")
 
-catkin_package(
-  INCLUDE_DIRS include
-  LIBRARIES aruco
-)
-include_directories(
-  include/aruco/)
+# find dependencies
+find_package(ament_cmake)
+find_package(Eigen3 REQUIRED)
+find_package(OpenCV 4.2.0 REQUIRED)
 
-include_directories(
-  SYSTEM
-  ${catkin_INCLUDE_DIRS}
-  ${OpenCV_INCLUDE_DIRS}
-  ${EIGEN3_INCLUDE_DIRS}
-)
-
-add_library(aruco
+add_library(${PROJECT_NAME}
+  SHARED
+  src/aruco/cvdrawingutils.cpp
   src/aruco/cameraparameters.cpp
   src/aruco/cvdrawingutils.cpp
   src/aruco/debug.cpp
@@ -43,21 +36,33 @@ add_library(aruco
   src/aruco/fractallabelers/fractalmarkerset.cpp
   src/aruco/fractallabelers/fractalposetracker.cpp
 )
-target_link_libraries(aruco
-  ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 
+target_include_directories(
+  ${PROJECT_NAME}
+  PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/aruco>
+  $<INSTALL_INTERFACE:include/aruco>
+)
+
+target_include_directories(
+  ${PROJECT_NAME}
+  SYSTEM PUBLIC
+  ${OpenCV_INCLUDE_DIRS}
+  ${EIGEN3_INCLUDE_DIRS}
+)
+
+target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBRARIES})
 
 #############
 ## Install ##
 #############
 
 install(TARGETS aruco
-  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
 )
 install(DIRECTORY include/
-   DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION}
-   FILES_MATCHING PATTERN "*.h"
+   DESTINATION include
 )
 
