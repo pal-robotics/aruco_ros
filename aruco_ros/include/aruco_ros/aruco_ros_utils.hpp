@@ -2,12 +2,12 @@
 #define ARUCO_ROS_UTILS_H
 
 #include <aruco/aruco.h>
-#include <sensor_msgs/CameraInfo.h>
-#include <sensor_msgs/Image.h>
-#include <tf/transform_datatypes.h>
+#include <sensor_msgs/msg/camera_info.hpp>
+#include <sensor_msgs/msg/image.hpp>
+#include <geometry_msgs/msg/pose_stamped.hpp>
 #include <tf2/LinearMath/Transform.h>
 #include <tf2/transform_datatypes.h>
-#include <visualization_msgs/Marker.h>
+#include <visualization_msgs/msg/marker.hpp>
 
 namespace aruco_ros
 {
@@ -19,10 +19,9 @@ namespace aruco_ros
  *                               are set to 0. Otherwise, cam_info.K and cam_info.D are taken.
  * @return
  */
-aruco::CameraParameters rosCameraInfo2ArucoCamParams(const sensor_msgs::CameraInfo& cam_info,
+aruco::CameraParameters rosCameraInfo2ArucoCamParams(const sensor_msgs::msg::CameraInfo& cam_info,
                                                      bool useRectifiedParameters);
 
-tf::Transform arucoMarker2Tf(const aruco::Marker& marker);
 tf2::Transform arucoMarker2Tf2(const aruco::Marker& marker);
 
 std::vector<aruco::Marker> detectMarkers(const cv::Mat& img,
@@ -31,7 +30,7 @@ std::vector<aruco::Marker> detectMarkers(const cv::Mat& img,
                                          aruco::MarkerDetector* detector = nullptr,
                                          bool normalize_ilumination = false, bool correct_fisheye = false);
 
-visualization_msgs::Marker visMarkerFromPose(const geometry_msgs::PoseStamped& pose,
+visualization_msgs::msg::Marker visMarkerFromPose(const geometry_msgs::msg::PoseStamped& pose,
                                              double marker_size, int marker_id = 1);
 
 }

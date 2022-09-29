@@ -31,45 +31,43 @@ endforeach()
 #)
 
 add_library(aruco_ros_utils SHARED src/aruco_ros_utils.cpp)
-target_include_directories(
-  aruco_ros_utils
-  PRIVATE
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>)
+target_include_directories(aruco_ros_utils
+  PUBLIC
+  include)
 
-target_include_directories(
-  aruco_ros_utils
-  SYSTEM PRIVATE
+target_include_directories( aruco_ros_utils
+  SYSTEM PUBLIC
   ${OpenCV_INCLUDE_DIRS}
 )
 ament_target_dependencies(aruco_ros_utils ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_link_libraries(aruco_ros_utils ${OpenCV_LIBRARIES})
 
-add_executable(single src/simple_single.cpp
-                      src/aruco_ros_utils.cpp)
-ament_target_dependencies(single ${THIS_PACKAGE_INCLUDE_DEPENDS})
-target_link_libraries(single ${OpenCV_LIBRARIES})
+# add_executable(single src/simple_single.cpp
+#                       src/aruco_ros_utils.cpp)
+# ament_target_dependencies(single ${THIS_PACKAGE_INCLUDE_DEPENDS})
+# target_link_libraries(single ${OpenCV_LIBRARIES})
 
-add_executable(double src/simple_double.cpp
-                      src/aruco_ros_utils.cpp)
-ament_target_dependencies(double ${THIS_PACKAGE_INCLUDE_DEPENDS})
-target_link_libraries(double ${OpenCV_LIBRARIES})
+# add_executable(double src/simple_double.cpp
+#                       src/aruco_ros_utils.cpp)
+# ament_target_dependencies(double ${THIS_PACKAGE_INCLUDE_DEPENDS})
+# target_link_libraries(double ${OpenCV_LIBRARIES})
 
-add_executable(marker_publisher src/marker_publish.cpp
-                                src/aruco_ros_utils.cpp)
-ament_target_dependencies(marker_publisher ${THIS_PACKAGE_INCLUDE_DEPENDS})
-target_link_libraries(marker_publisher ${OpenCV_LIBRARIES})
+# add_executable(marker_publisher src/marker_publish.cpp
+#                                 src/aruco_ros_utils.cpp)
+# ament_target_dependencies(marker_publisher ${THIS_PACKAGE_INCLUDE_DEPENDS})
+# target_link_libraries(marker_publisher ${OpenCV_LIBRARIES})
 
 #############
 ## Install ##
 #############
 
-install(TARGETS single double marker_publisher aruco_ros_utils
+install(TARGETS aruco_ros_utils #single double marker_publisher
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin)
 
 install(DIRECTORY include/
-   DESTINATION include/aruco_ros
+   DESTINATION include
    FILES_MATCHING PATTERN "*.h"
 )
 
