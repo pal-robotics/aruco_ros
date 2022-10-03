@@ -301,7 +301,7 @@ namespace aruco
             throw cv::Exception(9004,
                                 "!CP.isValid(): invalid camera parameters. It is not possible to calculate extrinsics",
                                 "calculateExtrinsics", __FILE__, __LINE__);
-        calculateExtrinsics(markerSize, CP.CameraMatrix, CP.Distorsion, setYPerpendicular);
+        calculateExtrinsics(markerSize, CP.CameraMatrix, CP.Distorsion, CP.ExtrinsicMatrix, setYPerpendicular);
     }
 
     void print(cv::Point3f p, std::string cad)
@@ -310,7 +310,7 @@ namespace aruco
     }
     /**
      */
-    void Marker::calculateExtrinsics(float markerSizeMeters, cv::Mat camMatrix, cv::Mat distCoeff,
+    void Marker::calculateExtrinsics(float markerSizeMeters, cv::Mat camMatrix, cv::Mat distCoeff, cv::Mat Extrinsics,
                                      bool setYPerpendicular, bool correctFisheye)
     {
         if (!isValid())
@@ -321,40 +321,35 @@ namespace aruco
         if (camMatrix.rows == 0 || camMatrix.cols == 0)
             throw cv::Exception(9004, "CameraMatrix is empty", "calculateExtrinsics", __FILE__, __LINE__);
 
-        vector<cv::Point3f> objpoints = get3DPoints(markerSizeMeters);
-
+        std::vector<cv::Point3f> objpoints = get3DPoints(markerSizeMeters);
 
         cv::Mat raux, taux;
-//        cv::solvePnP(objpoints, *this, camMatrix, distCoeff, raux, taux);
         if (correctFisheye)
         {
-          std::vector<cv::Point2f> undistorted;
-          cv::fisheye::undistortPoints(*this, undistorted, camMatrix, distCoeff);
-          cv::solvePnP(objpoints, undistorted, cv::Mat::eye(camMatrix.size(), camMatrix.type()), cv::Mat::zeros(distCoeff.size(), distCoeff.type()), raux, taux);
+            std::vector<cv::Point2f> undistorted;
+            cv::fisheye::undistortPoints(*this, undistorted, camMatrix, distCoeff);
+            cv::solvePnP(objpoints, undistorted, cv::Mat::eye(camMatrix.size(), camMatrix.type()), cv::Mat::zeros(distCoeff.size(), distCoeff.type()), raux, taux);
         }
         else
         {
-          cv::solvePnP(objpoints, *this,camMatrix, distCoeff,raux,taux);
+            cv::solvePnP(objpoints, *this, camMatrix, distCoeff, raux, taux);
         }
-
         raux.convertTo(Rvec, CV_32F);
         taux.convertTo(Tvec, CV_32F);
+        float tx = -1 * (Extrinsics.at<double>(0,0) / camMatrix.at<float>(0,0));
+        Tvec.at<float>(0) += tx;
+        float ty = -1 * (Extrinsics.at<double>(0,1) / camMatrix.at<float>(1,1));
+        Tvec.at<float>(1) += ty;
+        float tz = -1 * (Extrinsics.at<double>(0,2) / camMatrix.at<float>(2,2));
+        Tvec.at<float>(2) += tz;
+        
         // rotate the X axis so that Y is perpendicular to the marker plane
         if (setYPerpendicular)
             rotateXAxis(Rvec);
         ssize = markerSizeMeters;
-        // cout<<(*this)<<endl;
-
-//        auto setPrecision=[](double f, double prec){
-//            int x=roundf(f*prec);
-//            return  double(x)/prec;
-//        };
-//        for(int i=0;i<3;i++){
-//            Rvec.ptr<float>(0)[i]=setPrecision(Rvec.ptr<float>(0)[i],100);
-//            Tvec.ptr<float>(0)[i]=setPrecision(Tvec.ptr<float>(0)[i],1000);
-//        }
-
+        //  cout << (*this) << endl;
     }
+
 
     std::vector<cv::Point3f> Marker::get3DPoints(float msize)
     {
