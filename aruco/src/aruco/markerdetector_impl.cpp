@@ -142,11 +142,11 @@ void MarkerDetector_Impl::detect(const cv::Mat& input, std::vector<Marker>& dete
         // must resize camera parameters if we want to compute properly marker poses
         CameraParameters cp_aux = camParams;
         cp_aux.resize(input.size());
-        detect(input, detectedMarkers, cp_aux.CameraMatrix, cp_aux.Distorsion, markerSizeMeters, setYPerpendicular, correctFisheye);
+        detect(input, detectedMarkers, cp_aux.CameraMatrix, cp_aux.Distorsion, cp_aux.ExtrinsicMatrix, markerSizeMeters, setYPerpendicular, correctFisheye);
     }
     else
     {
-        detect(input, detectedMarkers, camParams.CameraMatrix, camParams.Distorsion, markerSizeMeters,setYPerpendicular, correctFisheye);
+        detect(input, detectedMarkers, camParams.CameraMatrix, camParams.Distorsion, camParams.ExtrinsicMatrix, markerSizeMeters, setYPerpendicular, correctFisheye);
     }
 }
 int MarkerDetector_Impl::getMarkerWarpSize(){
@@ -699,8 +699,8 @@ int MarkerDetector_Impl::Otsu(std::vector<float> &hist){
 /************************************
      * Main detection function. Performs all steps
      ************************************/
-void MarkerDetector_Impl::detect(const cv::Mat& input, vector<Marker>& detectedMarkers, Mat camMatrix, Mat distCoeff,
-                            float markerSizeMeters, bool setYPerpendicular, bool correctFisheye)
+void MarkerDetector_Impl::detect(const cv::Mat& input, std::vector<Marker>& detectedMarkers, cv::Mat camMatrix,
+                            cv::Mat distCoeff, cv::Mat extrinsics, float markerSizeMeters, bool setYPerpendicular, bool correctFisheye)
 {
     // clear input data
     detectedMarkers.clear();
@@ -1082,7 +1082,7 @@ __ARUCO_TIMER_EVENT__("Corner Refinement");
     if (camMatrix.rows != 0 && markerSizeMeters > 0)
     {
         for (unsigned int i = 0; i < detectedMarkers.size(); i++)
-            detectedMarkers[i].calculateExtrinsics(markerSizeMeters, camMatrix, distCoeff, setYPerpendicular, correctFisheye);
+          detectedMarkers[i].calculateExtrinsics(markerSizeMeters, camMatrix, distCoeff, extrinsics, setYPerpendicular, correctFisheye);
         __ARUCO_TIMER_EVENT__("Pose Estimation");
     }
 

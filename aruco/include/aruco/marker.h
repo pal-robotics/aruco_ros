@@ -83,16 +83,16 @@ Copyright 2020 Rafael Muñoz Salinas. All rights reserved.
          */
         void calculateExtrinsics(float markerSize, const CameraParameters& CP,
                                  bool setYPerpendicular = true);
-        /**Calculates the extrinsics (Rvec and Tvec) of the marker with respect to the camera
+        /**
+         * Calculates the extrinsics (Rvec and Tvec) of the marker with respect to the camera
          * @param markerSize size of the marker side expressed in meters
-         * @param CameraMatrix matrix with camera parameters (fx,fy,cx,cy)
-         * @param Distorsion matrix with distorsion parameters (k1,k2,p1,p2)
-         * @param setYPerpendicular If set the Y axis will be perpendicular to the surface. Otherwise, it will be the Z
-         * axis
+         * @param CameraMatrix matrix with camera parameters (fx, fy, cx, cy)
+         * @param Distortion matrix with distortion parameters (k1, k2, p1, p2)
+         * @param setYPerpendicular If set the Y axis will be perpendicular to the surface. Otherwise, it will be the Z axis
          * @param correctFisheye Correct fisheye distortion
          */
-        void calculateExtrinsics(float markerSize, cv::Mat CameraMatrix, cv::Mat Distorsion = cv::Mat(),
-                                 bool setYPerpendicular = true, bool correctFishete = false);
+        void calculateExtrinsics(float markerSize, cv::Mat CameraMatrix, cv::Mat Distorsion = cv::Mat(), cv::Mat Extrinsics = cv::Mat(),
+                                bool setYPerpendicular = true, bool correctFisheye = false);
 
         /**Given the extrinsic camera parameters returns the GL_MODELVIEW matrix for opengl.
          * Setting this matrix, the reference coordinate system will be set in this marker

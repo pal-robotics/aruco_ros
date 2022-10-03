@@ -124,7 +124,8 @@ public:
        void detect(const cv::Mat& input, std::vector<Marker>& detectedMarkers, CameraParameters camParams,
                    float markerSizeMeters = -1, bool setYPerperdicular = false, bool correctFisheye = false);
 
-       /**Detects the markers in the image passed
+       /**
+        * Detects the markers in the image passed
         *
         * If you provide information about the camera parameters and the size of the marker, then, the extrinsics of
         * the markers are detected
@@ -135,13 +136,14 @@ public:
         * @param detectedMarkers output vector with the markers detected
         * @param camMatrix intrinsic camera information.
         * @param distCoeff camera distorsion coefficient. If set Mat() if is assumed no camera distorion
+        * @param extrinsics translation (tx,ty,tz) from right stereo camera to left. Empty if no stereo or left camera
         * @param markerSizeMeters size of the marker sides expressed in meters
         * @param setYPerperdicular If set the Y axis will be perpendicular to the surface. Otherwise, it will be the Z
         * axis
         * @param correctFisheye Correct fisheye distortion
         */
        void detect(const cv::Mat& input, std::vector<Marker>& detectedMarkers, cv::Mat camMatrix = cv::Mat(),
-                   cv::Mat distCoeff = cv::Mat(), float markerSizeMeters = -1,
+                   cv::Mat distCoeff = cv::Mat(), cv::Mat extrinsics = cv::Mat(), float markerSizeMeters = -1,
                    bool setYPerperdicular = false, bool correctFisheye = false);
 
 

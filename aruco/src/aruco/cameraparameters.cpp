@@ -28,6 +28,7 @@ namespace aruco
     {
         CameraMatrix = cv::Mat();
         Distorsion = cv::Mat();
+        ExtrinsicMatrix = cv::Mat();
         CamSize = cv::Size(-1, -1);
     }
     /**Creates the object from the info passed
@@ -46,6 +47,7 @@ namespace aruco
     {
         CI.CameraMatrix.copyTo(CameraMatrix);
         CI.Distorsion.copyTo(Distorsion);
+        CI.ExtrinsicMatrix.copyTo(ExtrinsicMatrix);
         CamSize = CI.CamSize;
     }
 
@@ -55,6 +57,7 @@ namespace aruco
     {
         CI.CameraMatrix.copyTo(CameraMatrix);
         CI.Distorsion.copyTo(Distorsion);
+        CI.ExtrinsicMatrix.copyTo(ExtrinsicMatrix);
         CamSize = CI.CamSize;
         return *this;
     }
@@ -67,6 +70,19 @@ namespace aruco
      */
     void CameraParameters::setParams(cv::Mat cameraMatrix, cv::Mat distorsionCoeff, cv::Size size)
     {
+        cv::Mat auxCamMatrix;
+        ExtrinsicMatrix = cv::Mat::zeros(1, 3, CV_64FC1);
+        if (cameraMatrix.rows == 3 && cameraMatrix.cols == 4)
+        {
+            ExtrinsicMatrix.at<double>(0,0) = cameraMatrix.at<double>(0, 3);
+            ExtrinsicMatrix.at<double>(0,1) = cameraMatrix.at<double>(1, 3);
+            ExtrinsicMatrix.at<double>(0,2) = cameraMatrix.at<double>(2, 3);
+            
+            //Change size to 3x3
+            auxCamMatrix = cameraMatrix(cv::Rect(0,0,3,3)).clone();
+            cameraMatrix = auxCamMatrix;
+        }
+
         if (cameraMatrix.rows != 3 || cameraMatrix.cols != 3)
             throw cv::Exception(9000, "invalid input cameraMatrix", "CameraParameters::setParams", __FILE__, __LINE__);
         cameraMatrix.convertTo(CameraMatrix, CV_32FC1);
@@ -128,6 +144,9 @@ namespace aruco
             file << "k2 = " << Distorsion.at<float>(1, 0) << endl;
             file << "p1 = " << Distorsion.at<float>(2, 0) << endl;
             file << "p2 = " << Distorsion.at<float>(3, 0) << endl;
+            file << "tx = " << ExtrinsicMatrix.at<float>(0, 0) << std::endl;
+            file << "ty = " << ExtrinsicMatrix.at<float>(1, 0) << std::endl;
+            file << "tz = " << ExtrinsicMatrix.at<float>(2, 0) << std::endl;
             file << "width = " << CamSize.width << endl;
             file << "height = " << CamSize.height << endl;
         }
@@ -138,6 +157,7 @@ namespace aruco
             fs << "image_height" << CamSize.height;
             fs << "camera_matrix" << CameraMatrix;
             fs << "distortion_coefficients" << Distorsion;
+            fs << "extrinsics" << ExtrinsicMatrix;
         }
     }
 
@@ -171,13 +191,14 @@ namespace aruco
         cv::FileStorage fs(filePath, cv::FileStorage::READ);
         if(!fs.isOpened()) throw std::runtime_error("CameraParameters::readFromXMLFile could not open file:"+filePath);
         int w = -1, h = -1;
-        cv::Mat MCamera, MDist;
+        cv::Mat MCamera, MDist, MExtrinsics;
 
 
         fs["image_width"] >> w;
         fs["image_height"] >> h;
         fs["distortion_coefficients"] >> MDist;
         fs["camera_matrix"] >> MCamera;
+        fs["extrinsics"] >> MExtrinsics;
 
         if (MCamera.cols == 0 || MCamera.rows == 0){
             fs["Camera_Matrix"] >> MCamera;
@@ -491,107 +512,36 @@ namespace aruco
             return MTyped;
         }
     }
-    std::ostream &operator<<(std::ostream &str,const CameraParameters&cp){
-        str<<"%YAML:1.0"<<endl<<"---"<<endl;
-        str<<"image_width:"<<cp.CamSize.width<<endl;
-        str<<"image_height:"<<cp.CamSize.height<<endl;
-        str<<"camera_matrix: !!opencv-matrix"<<endl;
-        str<<" rows: 3"<<endl;
-        str<<" cols: 3"<<endl;
-        str<<" dt: f"<<endl;
-        str<<" data: [";
-       const float *ptr=cp.CameraMatrix.ptr<float>(0);
-        for(int i=0;i<9;i++){
-            str<<ptr[i];
-            if(i!=8)str<<", ";
-            else str<<" ";
-        }
-        str<<"]"<<endl;
 
-        str<<"distortion_coefficients: !!opencv-matrix"<<endl;
-           str<<" rows: 1"<<endl;
-           str<<" cols: 5"<<endl;
-           str<<" dt: f"<<endl;
-           str<<" data: [";
-           const float *dif=cp.Distorsion.ptr<float>();
-           for(int i=0;i<5;i++){
-               str<<dif[i];
-               if(i!=4)str<<", ";
-               else str<<" ";
-           }
-           str<<"]"<<endl;
-        return str;
+    std::ostream &operator<<(std::ostream &str, const CameraParameters&cp)
+    {
+    str << cp.CamSize.width << " " << cp.CamSize.height << " ";
+    for (std::size_t i = 0; i < cp.CameraMatrix.total(); i++)
+        str << cp.CameraMatrix.ptr<float>(0)[i] << " ";
+    str << cp.Distorsion.total() << " ";
+    for (std::size_t i = 0; i < cp.Distorsion.total(); i++)
+        str << cp.Distorsion.ptr<float>(0)[i] << " ";
+    for (std::size_t i = 0; i < cp.ExtrinsicMatrix.total(); i++)
+        str << cp.ExtrinsicMatrix.ptr<float>(0)[i] << " ";
+    return str;
+
     }
 
-    std::istream &operator>>(std::istream &str,CameraParameters&cp){
-
-        auto getValue=[](string line){
-            //remove ':'
-            for(auto &c:line) if (c==':') c=' ';
-            stringstream ss;
-            ss<<line;
-            string aux;
-            int val;
-            ss>>aux>>val;
-            return val;
-        };
-
-        auto parseDataLine=[](string line,cv::Mat &data){
-          //remove
-            for(auto &c:line)
-                if (c=='[' || c==']'|| c==',' || c==':') c=' ';
-            //now, read
-            stringstream sstr;sstr<<line;
-            string sdata;
-            sstr>>sdata;
-            for(size_t i=0;i<data.total();i++)
-                sstr>>data.ptr<float>(0)[i];
-        };
-
-        cp.CameraMatrix=cv::Mat::eye(3,3,CV_32F);
-        cp.Distorsion.create(1,5,CV_32F);
-        cp.Distorsion.setTo(cv::Scalar::all(0));
-        string line;
-        std::getline(str,line);
-        if (line.find("%YAML:1.0")==string::npos){
-            std::cerr<<"Invalid input stream"<<std::endl;
-            return str;
-        }
-        bool readingCamera=false,readingDist=false;
-        while(!str.eof()){
-            std::getline(str,line);
-
-
-            if (line.find("image_width")!=string::npos)
-                cp.CamSize.width=getValue(line);
-            else if (line.find("image_height")!=string::npos)
-                cp.CamSize.height=getValue(line);
-            else if (line.find("camera_matrix")!=string::npos){
-                readingCamera=true;
-                //go to data
-            }
-            else if (line.find("distortion_coefficients")!=string::npos){
-                readingDist=true;
-                //go to data
-            }
-            else  if (line.find("data")!=string::npos){
-                if(readingCamera) {
-                    parseDataLine(line,cp.CameraMatrix);
-                    readingCamera=false;
-                }
-                else if(readingDist){
-                    parseDataLine(line,cp.Distorsion);
-                    readingDist=false;
-                }
-            }
-
-
-
-            }
-
-
-
-         return str;
+    std::istream &operator>>(std::istream &str, CameraParameters&cp)
+    {
+    str >> cp.CamSize.width >> cp.CamSize.height;
+    cp.CameraMatrix.create(3, 3, CV_32F);
+    for (std::size_t i = 0; i < cp.CameraMatrix.total(); i++)
+        str >> cp.CameraMatrix.ptr<float>(0)[i];
+    int t;
+    str >> t;
+    cp.Distorsion.create(1, t, CV_32F);
+    for (std::size_t i = 0; i < cp.Distorsion.total(); i++)
+        str >> cp.Distorsion.ptr<float>(0)[i];
+    cp.Distorsion.create(1, 3, CV_32F);
+    for (std::size_t i = 0; i < cp.ExtrinsicMatrix.total(); i++)
+        str >> cp.ExtrinsicMatrix.ptr<float>(0)[i];
+    return str;
     }
 
 };
