@@ -16,6 +16,8 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
     rclcpp
     rclpy
     tf2
+    tf2_ros
+    tf2_geometry_msgs
     aruco
     aruco_msgs
     sensor_msgs
@@ -35,7 +37,7 @@ target_include_directories(aruco_ros_utils
   PUBLIC
   include)
 
-target_include_directories( aruco_ros_utils
+target_include_directories(aruco_ros_utils
   SYSTEM PUBLIC
   ${OpenCV_INCLUDE_DIRS}
 )
@@ -52,10 +54,18 @@ target_link_libraries(aruco_ros_utils ${OpenCV_LIBRARIES})
 # ament_target_dependencies(double ${THIS_PACKAGE_INCLUDE_DEPENDS})
 # target_link_libraries(double ${OpenCV_LIBRARIES})
 
-# add_executable(marker_publisher src/marker_publish.cpp
-#                                 src/aruco_ros_utils.cpp)
-# ament_target_dependencies(marker_publisher ${THIS_PACKAGE_INCLUDE_DEPENDS})
-# target_link_libraries(marker_publisher ${OpenCV_LIBRARIES})
+add_executable(marker_publisher src/marker_publish.cpp
+                                 src/aruco_ros_utils.cpp)
+target_include_directories(marker_publisher
+  PUBLIC
+  include)
+
+target_include_directories(marker_publisher
+  SYSTEM PUBLIC
+  ${OpenCV_INCLUDE_DIRS}
+)
+ament_target_dependencies(marker_publisher ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_link_libraries(marker_publisher ${OpenCV_LIBRARIES})
 
 #############
 ## Install ##

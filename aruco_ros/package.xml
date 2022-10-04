@@ -19,6 +19,8 @@
   <depend>image_transport</depend>
   <depend>rclcpp</depend>
   <depend>tf2</depend>
+  <depend>tf2_ros</depend>
+  <depend>tf2_geometry_msgs</depend>
   <depend>aruco</depend>
   <depend>aruco_msgs</depend>
   <depend>sensor_msgs</depend>
