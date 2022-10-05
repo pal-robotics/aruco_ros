@@ -23,5 +23,3 @@ Copyright 2020 Rafael Muñoz Salinas. All rights reserved.
 
 #define ARUCO_VERSION_MAJOR 3
 #define ARUCO_VERSION_MINOR 0
-
-

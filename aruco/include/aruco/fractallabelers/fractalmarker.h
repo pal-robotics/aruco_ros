@@ -8,57 +8,58 @@
 
 namespace aruco
 {
-    class FractalMarker : public aruco::Marker3DInfo
-    {
-        public:
-            FractalMarker();
-            FractalMarker(int id, cv::Mat m, std::vector<cv::Point3f> corners, std::vector<int> id_submarkers);
+class FractalMarker : public aruco::Marker3DInfo
+{
+public:
+  FractalMarker();
+  FractalMarker(int id, cv::Mat m, std::vector<cv::Point3f> corners,
+                std::vector<int> id_submarkers);
 
-            //Add new submarker
-            void addSubFractalMarker(FractalMarker submarker);
+  // Add new submarker
+  void addSubFractalMarker(FractalMarker submarker);
 
-            //Find inner corners
-            std::vector<cv::Point3f> findInnerCorners();
+  // Find inner corners
+  std::vector<cv::Point3f> findInnerCorners();
 
-            //Marker MAT
-            const cv::Mat mat() const
-            {
-                return _M;
-            }
+  // Marker MAT
+  const cv::Mat mat() const
+  {
+    return _M;
+  }
 
-            //Marker mask (mask applied to submarkers)
-            const cv::Mat mask() const
-            {
-                return _mask;
-            }
+  // Marker mask (mask applied to submarkers)
+  const cv::Mat mask() const
+  {
+    return _mask;
+  }
 
-            //Total number of bits
-            int nBits()
-            {
-                return _M.total();
-            }
+  // Total number of bits
+  int nBits()
+  {
+    return _M.total();
+  }
 
-            //Submarkers ids
-            std::vector<int> subMarkers()
-            {
-                return _submarkers;
-            }
+  // Submarkers ids
+  std::vector<int> subMarkers()
+  {
+    return _submarkers;
+  }
 
-            //Get inner corners
-            std::vector<cv::Point3f> getInnerCorners()
-            {
-                if(innerCorners.empty())
-                    innerCorners = findInnerCorners();
+  // Get inner corners
+  std::vector<cv::Point3f> getInnerCorners()
+  {
+    if (innerCorners.empty())
+      innerCorners = findInnerCorners();
 
-                return innerCorners;
-            }
+    return innerCorners;
+  }
 
-        private:
-            cv::Mat _M;
-            cv::Mat _mask;
-            std::vector<int> _submarkers; //id subfractalmarkers
-            std::vector<cv::Point3f> innerCorners;
-    };
-}
+private:
+  cv::Mat _M;
+  cv::Mat _mask;
+  std::vector<int> _submarkers;  // id subfractalmarkers
+  std::vector<cv::Point3f> innerCorners;
+};
+}  // namespace aruco
 
-#endif // FRACTALMARKER_H
+#endif  // FRACTALMARKER_H

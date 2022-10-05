@@ -34,17 +34,17 @@ Marker3DInfo::Marker3DInfo(int _id) : id(_id)
 {
 }
 /**
-*
-*
-*/
+ *
+ *
+ */
 MarkerMap::MarkerMap()
 {
   mInfoType = NONE;
 }
 /**
-*
-*
-*/
+ *
+ *
+ */
 MarkerMap::MarkerMap(string filePath)
 {
   mInfoType = NONE;
@@ -52,16 +52,16 @@ MarkerMap::MarkerMap(string filePath)
 }
 
 /**
-*
-*
-*/
+ *
+ *
+ */
 void MarkerMap::saveToFile(string sfile)
 {
   cv::FileStorage fs(sfile, cv::FileStorage::WRITE);
   saveToFile(fs);
 }
 /**Saves the board info to a file
-*/
+ */
 void MarkerMap::saveToFile(cv::FileStorage& fs)
 {
   fs << "aruco_bc_dict" << dictionary;
@@ -85,9 +85,9 @@ void MarkerMap::saveToFile(cv::FileStorage& fs)
 }
 
 /**
-*
-*
-*/
+ *
+ *
+ */
 void MarkerMap::readFromFile(string sfile)
 {
   try
@@ -106,7 +106,7 @@ void MarkerMap::readFromFile(string sfile)
 }
 
 /**Reads board info from a file
-*/
+ */
 void MarkerMap::readFromFile(cv::FileStorage& fs)
 {
   int aux = 0;
@@ -308,7 +308,7 @@ void __OgreGetPoseParameters(double position[3], double orientation[4],
 }
 
 /**
-*/
+ */
 void MarkerMap::getIdList(std::vector<int>& ids, bool append) const
 {
   if (!append)
@@ -464,4 +464,4 @@ pair<cv::Mat, cv::Mat> MarkerMap::calculateExtrinsics(const std::vector<aruco::M
     tvec.convertTo(tvec, CV_64F);
   return make_pair(rvec, tvec);
 }
-};
+};  // namespace aruco
