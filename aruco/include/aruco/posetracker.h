@@ -184,6 +184,6 @@ protected:
   float _maxTranslation = -1, _maxAngle = -1;
   double _initial_err;
 };
-};
+};  // namespace aruco
 
 #endif

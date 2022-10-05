@@ -293,7 +293,8 @@ double __aruco_solve_pnp(const std::vector<cv::Point3f>& p3d,
   assert(t_io.type() == CV_32F);
   assert(t_io.total() == r_io.total());
   assert(t_io.total() == 3);
-  auto toSol = [](const cv::Mat& r, const cv::Mat& t) {
+  auto toSol = [](const cv::Mat& r, const cv::Mat& t)
+  {
     typename LevMarq<T>::eVector sol(6);
     for (int i = 0; i < 3; i++)
     {
@@ -302,7 +303,8 @@ double __aruco_solve_pnp(const std::vector<cv::Point3f>& p3d,
     }
     return sol;
   };
-  auto fromSol = [](const typename LevMarq<T>::eVector& sol, cv::Mat& r, cv::Mat& t) {
+  auto fromSol = [](const typename LevMarq<T>::eVector& sol, cv::Mat& r, cv::Mat& t)
+  {
     r.create(1, 3, CV_32F);
     t.create(1, 3, CV_32F);
     for (int i = 0; i < 3; i++)
@@ -313,7 +315,8 @@ double __aruco_solve_pnp(const std::vector<cv::Point3f>& p3d,
   };
 
   cv::Mat Jacb;
-  auto err_f = [&](const typename LevMarq<T>::eVector& sol, typename LevMarq<T>::eVector& err) {
+  auto err_f = [&](const typename LevMarq<T>::eVector& sol, typename LevMarq<T>::eVector& err)
+  {
     std::vector<cv::Point2f> p2d_rej;
     cv::Mat r, t;
     fromSol(sol, r, t);
@@ -332,7 +335,8 @@ double __aruco_solve_pnp(const std::vector<cv::Point3f>& p3d,
     }
   };
   auto jac_f = [&](const typename LevMarq<T>::eVector& sol,
-                   Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>& J) {
+                   Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>& J)
+  {
     (void)(sol);
     J.resize(p3d.size() * 2, 6);
     for (size_t i = 0; i < p3d.size() * 2; i++)

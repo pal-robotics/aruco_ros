@@ -15,9 +15,9 @@ Copyright 2020 Rafael Muñoz Salinas. All rights reserved.
 */
 
 #ifndef ARUCO_CV_VERSIONING
-#define  ARUCO_CV_VERSIONING
+#define ARUCO_CV_VERSIONING
 #include <opencv2/core/core.hpp>
-#if  CV_MAJOR_VERSION >= 4
+#if CV_MAJOR_VERSION >= 4
 #include <opencv2/imgproc.hpp>
 
 #define CV_CAP_PROP_FRAME_COUNT cv::CAP_PROP_FRAME_COUNT
@@ -31,4 +31,3 @@ Copyright 2020 Rafael Muñoz Salinas. All rights reserved.
 #endif
 
 #endif
-

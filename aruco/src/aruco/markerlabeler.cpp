@@ -15,26 +15,29 @@ Copyright 2020 Rafael Muñoz Salinas. All rights reserved.
 */
 #include "markerlabeler.h"
 #include "dictionary_based.h"
- namespace aruco
+namespace aruco
 {
-    cv::Ptr<MarkerLabeler> MarkerLabeler::create(Dictionary::DICT_TYPES dict_type,
-                                                 float error_correction_rate)
-    {
-        Dictionary dict = Dictionary::loadPredefined(dict_type);
-        DictionaryBased* db = new DictionaryBased();
-        db->setParams(dict, error_correction_rate);
-        return db;
-    }
-    cv::Ptr<MarkerLabeler> MarkerLabeler::create(std::string detector, std::string params)
-    {
-        auto _stof=[](std::string str){
-            float f;sscanf(str.c_str(),"%f",&f);return f;
-        };
-        (void)params;
-        Dictionary dict = Dictionary::load(detector);
-        // try with one from file
-        DictionaryBased* db = new DictionaryBased();
-        db->setParams(dict, _stof(params));
-        return db;
-    }
- }
+cv::Ptr<MarkerLabeler> MarkerLabeler::create(Dictionary::DICT_TYPES dict_type,
+                                             float error_correction_rate)
+{
+  Dictionary dict = Dictionary::loadPredefined(dict_type);
+  DictionaryBased* db = new DictionaryBased();
+  db->setParams(dict, error_correction_rate);
+  return db;
+}
+cv::Ptr<MarkerLabeler> MarkerLabeler::create(std::string detector, std::string params)
+{
+  auto _stof = [](std::string str)
+  {
+    float f;
+    sscanf(str.c_str(), "%f", &f);
+    return f;
+  };
+  (void)params;
+  Dictionary dict = Dictionary::load(detector);
+  // try with one from file
+  DictionaryBased* db = new DictionaryBased();
+  db->setParams(dict, _stof(params));
+  return db;
+}
+}  // namespace aruco

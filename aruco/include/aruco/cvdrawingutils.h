@@ -22,22 +22,22 @@ Copyright 2020 Rafael Muñoz Salinas. All rights reserved.
 
 namespace aruco
 {
-    /**\brief A set of functions to draw in opencv images
-     */
-    class ARUCO_EXPORT CvDrawingUtils
-    {
-    public:
+/**\brief A set of functions to draw in opencv images
+ */
+class ARUCO_EXPORT CvDrawingUtils
+{
+public:
+  static void draw3dAxis(cv::Mat& Image, const CameraParameters& CP, const cv::Mat& Rvec,
+                         const cv::Mat& Tvec, float axis_size);
+  static void draw3dAxis(cv::Mat& Image, Marker& m, const CameraParameters& CP, int lineSize = 1);
 
-        static void draw3dAxis(cv::Mat& Image, const CameraParameters& CP, const cv::Mat& Rvec, const cv::Mat& Tvec,
-                               float axis_size);
-        static void draw3dAxis(cv::Mat& Image, Marker& m, const CameraParameters& CP,int lineSize=1);
+  static void draw3dCube(cv::Mat& Image, Marker& m, const CameraParameters& CP,
+                         int lineSize = 1, bool setYperpendicular = false);
 
-        static void draw3dCube(cv::Mat& Image, Marker& m, const CameraParameters& CP,int lineSize=1, bool setYperpendicular = false);
-
-        //    static void draw3dAxis(cv::Mat &Image, MarkerMap &m, const CameraParameters &CP);
-        //    static void draw3dCube(cv::Mat &Image, MarkerMap &m, const CameraParameters &CP, bool setYperpendicular =
-        //    false);
-    };
-}
+  //    static void draw3dAxis(cv::Mat &Image, MarkerMap &m, const CameraParameters &CP);
+  //    static void draw3dCube(cv::Mat &Image, MarkerMap &m, const CameraParameters &CP,
+  //    bool setYperpendicular = false);
+};
+}  // namespace aruco
 
 #endif
