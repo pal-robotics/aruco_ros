@@ -76,18 +76,27 @@ private:
   double marker_size;
   int marker_id;
 
-  image_transport::ImageTransport it;
+  std::unique_ptr<image_transport::ImageTransport> it_;
   image_transport::Subscriber image_sub;
 
   std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
   std::unique_ptr<tf2_ros::Buffer> tf_buffer_;
-  std::unique_ptr<tf2_ros::TransformBroadcaster> tf_static_broadcaster_;
+  std::unique_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
 
 public:
   ArucoSimple() :
-      Node("aruco_simple"), cam_info_received(false), it(shared_from_this()), tf_buffer_(std::make_unique<tf2_ros::Buffer>(this->get_clock())), tf_listener_(std::make_shared<tf2_ros::TransformListener>(*tf_buffer_))
+      Node("aruco_simple"), cam_info_received(false)
   {
-    tf_static_broadcaster_ = std::make_unique<tf2_ros::TransformBroadcaster>(this);
+
+  }
+
+  bool setup()
+  {
+    tf_buffer_ = std::make_unique<tf2_ros::Buffer>(this->get_clock());
+    tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
+
+    it_ = std::make_unique<image_transport::ImageTransport>(shared_from_this());
+    tf_broadcaster_ = std::make_unique<tf2_ros::TransformBroadcaster>(this);
     if (this->has_parameter("corner_refinement"))
       RCLCPP_WARN(this->get_logger(),
           "Corner refinement options have been removed in ArUco 3.0.0, corner_refinement ROS parameter is deprecated");
@@ -126,11 +135,11 @@ public:
     RCLCPP_INFO_STREAM(this->get_logger(), "Marker size min: " << min_marker_size << " of image area");
     RCLCPP_INFO_STREAM(this->get_logger(), "Detection mode: " << detection_mode);
 
-    image_sub = it.subscribe("/image", 1, &ArucoSimple::image_callback, this);
+    image_sub = it_->subscribe("/image", 1, &ArucoSimple::image_callback, this);
     cam_info_sub = this->create_subscription<sensor_msgs::msg::CameraInfo>("/camera_info", 1, std::bind(&ArucoSimple::cam_info_callback, this, std::placeholders::_1));
 
-    image_pub = it.advertise("result", 1);
-    debug_pub = it.advertise("debug", 1);
+    image_pub = it_->advertise("result", 1);
+    debug_pub = it_->advertise("debug", 1);
     pose_pub = this->create_publisher<geometry_msgs::msg::PoseStamped>("pose", 100);
     transform_pub = this->create_publisher<geometry_msgs::msg::TransformStamped>("transform", 100);
     position_pub = this->create_publisher<geometry_msgs::msg::Vector3Stamped>("position", 100);
@@ -154,6 +163,8 @@ public:
              marker_frame.c_str());
 
     // dyn_rec_server.setCallback(boost::bind(&ArucoSimple::reconf_callback, this, _1, _2));
+    RCLCPP_INFO(this->get_logger(), "Setup of aruco_simple node is successful!");
+    return true;
   }
 
   bool getTransform(const std::string& refFrame, const std::string& childFrame, geometry_msgs::msg::TransformStamped& transform)
@@ -231,7 +242,7 @@ public:
             stampedTransform.header.stamp = curr_stamp;
             stampedTransform.child_frame_id = marker_frame;
             tf2::toMsg(transform, stampedTransform.transform);
-            tf_static_broadcaster_->sendTransform(stampedTransform);
+            tf_broadcaster_->sendTransform(stampedTransform);
             geometry_msgs::msg::PoseStamped poseMsg;
             poseMsg.header = stampedTransform.header;
             tf2::toMsg(transform, poseMsg.pose);
@@ -342,6 +353,8 @@ public:
 int main(int argc, char **argv)
 {
   rclcpp::init(argc, argv);
-  rclcpp::spin(std::make_shared<ArucoSimple>());
+  std::shared_ptr<ArucoSimple> aruco_simple = std::make_shared<ArucoSimple>();
+  aruco_simple->setup();
+  rclcpp::spin(aruco_simple);
   rclcpp::shutdown();
 }
