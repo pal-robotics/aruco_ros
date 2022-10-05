@@ -68,7 +68,7 @@ private:
   double marker_size_;
 
   // ROS pub-sub
-  image_transport::ImageTransport it_;
+  std::unique_ptr<image_transport::ImageTransport> it_;
   image_transport::Subscriber image_sub_;
 
   image_transport::Publisher image_pub_;
@@ -85,9 +85,17 @@ private:
 
 public:
   ArucoMarkerPublisher() :
-      Node("marker_publisher"), it_(shared_from_this()), useCamInfo_(true), tf_buffer_(std::make_unique<tf2_ros::Buffer>(this->get_clock())), tf_listener_(std::make_shared<tf2_ros::TransformListener>(*tf_buffer_))
+      Node("marker_publisher"), useCamInfo_(true)
   {
-    image_sub_ = it_.subscribe("/image", 1, &ArucoMarkerPublisher::image_callback, this);
+  }
+
+  bool setup()
+  {
+    tf_buffer_ = std::make_unique<tf2_ros::Buffer>(this->get_clock());
+    tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
+
+    it_ = std::make_unique<image_transport::ImageTransport>(shared_from_this());
+    image_sub_ = it_->subscribe("/image", 1, &ArucoMarkerPublisher::image_callback, this);
 
     this->get_parameter_or<bool>("use_camera_info", useCamInfo_, true);
     if (useCamInfo_)
@@ -111,13 +119,14 @@ public:
       camParam_ = aruco::CameraParameters();
     }
 
-    image_pub_ = it_.advertise("result", 1);
-    debug_pub_ = it_.advertise("debug", 1);
+    image_pub_ = it_->advertise("result", 1);
+    debug_pub_ = it_->advertise("debug", 1);
     marker_pub_ = this->create_publisher<aruco_msgs::msg::MarkerArray>("markers", 100);
     marker_list_pub_ = this->create_publisher<std_msgs::msg::UInt32MultiArray>("markers_list", 10);
 
     marker_msg_ = aruco_msgs::msg::MarkerArray::Ptr(new aruco_msgs::msg::MarkerArray());
     marker_msg_->header.frame_id = reference_frame_;
+    RCLCPP_INFO(this->get_logger(), "Successfully setup the marker publisher!");
   }
 
   bool getTransform(const std::string& refFrame, const std::string& childFrame,   geometry_msgs::msg::TransformStamped& transform)
@@ -269,6 +278,8 @@ public:
 int main(int argc, char **argv)
 {
   rclcpp::init(argc, argv);
-  rclcpp::spin(std::make_shared<ArucoMarkerPublisher>());
+  std::shared_ptr<ArucoMarkerPublisher> marker_pub = std::make_shared<ArucoMarkerPublisher>();
+  marker_pub->setup();
+  rclcpp::spin(marker_pub);
   rclcpp::shutdown();
 }

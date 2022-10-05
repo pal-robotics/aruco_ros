@@ -71,10 +71,13 @@ target_link_libraries(marker_publisher ${OpenCV_LIBRARIES})
 ## Install ##
 #############
 
-install(TARGETS aruco_ros_utils #single double marker_publisher
+install(TARGETS aruco_ros_utils 
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin)
+
+install(TARGETS marker_publisher
+  DESTINATION lib/${PROJECT_NAME})
 
 install(DIRECTORY include/
    DESTINATION include
