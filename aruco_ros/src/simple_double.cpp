@@ -37,30 +37,35 @@
 #include <iostream>
 #include <aruco/aruco.h>
 #include <aruco/cvdrawingutils.h>
+#include <opencv2/core/utility.hpp>
 
-#include <ros/ros.h>
-#include <image_transport/image_transport.h>
+#include <rclcpp/rclcpp.hpp>
+#include <rcpputils/asserts.hpp>
+#include <image_transport/image_transport.hpp>
 #include <cv_bridge/cv_bridge.h>
-#include <sensor_msgs/image_encodings.h>
-#include <aruco_ros/aruco_ros_utils.h>
-#include <tf/transform_broadcaster.h>
-#include <tf/transform_datatypes.h>
+#include <sensor_msgs/image_encodings.hpp>
+#include <aruco_ros/aruco_ros_utils.hpp>
+#include <tf2_ros/transform_broadcaster.h>
+#include <tf2_ros/buffer.h>
+#include <tf2_ros/transform_listener.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
+#include <visualization_msgs/msg/marker.hpp>
+#include <geometry_msgs/msg/vector3_stamped.hpp>
+#include <geometry_msgs/msg/point_stamped.hpp>
 
-#include <dynamic_reconfigure/server.h>
-#include <aruco_ros/ArucoThresholdConfig.h>
-
+rclcpp::Node::SharedPtr node = nullptr;
 cv::Mat inImage;
 aruco::CameraParameters camParam;
 bool useRectifiedImages, normalizeImageIllumination;
 int dctComponentsToRemove;
 aruco::MarkerDetector mDetector;
 std::vector<aruco::Marker> markers;
-ros::Subscriber cam_info_sub;
+rclcpp::Subscription<sensor_msgs::msg::CameraInfo>::SharedPtr cam_info_sub;
 bool cam_info_received;
 image_transport::Publisher image_pub;
 image_transport::Publisher debug_pub;
-ros::Publisher pose_pub1;
-ros::Publisher pose_pub2;
+rclcpp::Publisher<geometry_msgs::msg::Pose>::SharedPtr pose_pub1;
+rclcpp::Publisher<geometry_msgs::msg::Pose>::SharedPtr pose_pub2;
 std::string child_name1;
 std::string parent_name;
 std::string child_name2;
@@ -68,14 +73,14 @@ std::string child_name2;
 double marker_size;
 int marker_id1;
 int marker_id2;
+std::unique_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
 
-void image_callback(const sensor_msgs::ImageConstPtr& msg)
+void image_callback(const sensor_msgs::msg::Image::ConstSharedPtr& msg)
 {
   double ticksBefore = cv::getTickCount();
-  static tf::TransformBroadcaster br;
   if (cam_info_received)
   {
-    ros::Time curr_stamp = msg->header.stamp;
+    builtin_interfaces::msg::Time curr_stamp = msg->header.stamp;
     cv_bridge::CvImagePtr cv_ptr;
     try
     {
@@ -84,7 +89,7 @@ void image_callback(const sensor_msgs::ImageConstPtr& msg)
 
       if (normalizeImageIllumination)
       {
-        ROS_WARN("normalizeImageIllumination is unimplemented!");
+        RCLCPP_WARN(node->get_logger(), "normalizeImageIllumination is unimplemented!");
 //        cv::Mat inImageNorm;
 //        pal_vision_util::dctNormalization(inImage, inImageNorm, dctComponentsToRemove);
 //        inImage = inImageNorm;
@@ -100,19 +105,29 @@ void image_callback(const sensor_msgs::ImageConstPtr& msg)
         // only publishing the selected marker
         if (markers[i].id == marker_id1)
         {
-          tf::Transform transform = aruco_ros::arucoMarker2Tf(markers[i]);
-          br.sendTransform(tf::StampedTransform(transform, curr_stamp, parent_name, child_name1));
-          geometry_msgs::Pose poseMsg;
-          tf::poseTFToMsg(transform, poseMsg);
-          pose_pub1.publish(poseMsg);
+          tf2::Transform transform = aruco_ros::arucoMarker2Tf2(markers[i]);
+          geometry_msgs::msg::TransformStamped m1_transform;
+          m1_transform.header.frame_id = parent_name;
+          m1_transform.header.stamp = curr_stamp;
+          m1_transform.child_frame_id = child_name1;
+          tf2::toMsg(transform, m1_transform.transform);
+          tf_broadcaster_->sendTransform(m1_transform);
+          geometry_msgs::msg::Pose poseMsg;
+          tf2::toMsg(transform, poseMsg);
+          pose_pub1->publish(poseMsg);
         }
         else if (markers[i].id == marker_id2)
         {
-          tf::Transform transform = aruco_ros::arucoMarker2Tf(markers[i]);
-          br.sendTransform(tf::StampedTransform(transform, curr_stamp, parent_name, child_name2));
-          geometry_msgs::Pose poseMsg;
-          tf::poseTFToMsg(transform, poseMsg);
-          pose_pub2.publish(poseMsg);
+          tf2::Transform transform = aruco_ros::arucoMarker2Tf2(markers[i]);
+          geometry_msgs::msg::TransformStamped m2_transform;
+          m2_transform.header.frame_id = parent_name;
+          m2_transform.header.stamp = curr_stamp;
+          m2_transform.child_frame_id = child_name2;
+          tf2::toMsg(transform, m2_transform.transform);
+          tf_broadcaster_->sendTransform(m2_transform);
+          geometry_msgs::msg::Pose poseMsg;
+          tf2::toMsg(transform, poseMsg);
+          pose_pub2->publish(poseMsg);
         }
 
         // but drawing all the detected markers
@@ -127,7 +142,7 @@ void image_callback(const sensor_msgs::ImageConstPtr& msg)
         float x[2], y[2], u[2], v[2];
         for (unsigned int i = 0; i < 2; ++i)
         {
-          ROS_DEBUG_STREAM(
+          RCLCPP_DEBUG_STREAM(node->get_logger(),
               "Marker(" << i << ") at camera coordinates = (" << markers[i].Tvec.at<float>(0,0) << ", " << markers[i].Tvec.at<float>(1,0) << ", " << markers[i].Tvec.at<float>(2,0));
           // normalized coordinates of the marker
           x[i] = markers[i].Tvec.at<float>(0, 0) / markers[i].Tvec.at<float>(2, 0);
@@ -137,7 +152,7 @@ void image_callback(const sensor_msgs::ImageConstPtr& msg)
           v[i] = y[i] * camParam.CameraMatrix.at<float>(1, 1) + camParam.CameraMatrix.at<float>(1, 2);
         }
 
-        ROS_DEBUG_STREAM(
+        RCLCPP_DEBUG_STREAM(node->get_logger(),
             "Mid point between the two markers in the image = (" << (x[0]+x[1])/2 << ", " << (y[0]+y[1])/2 << ")");
 
 //        // paint a circle in the mid point of the normalized coordinates of both markers
@@ -154,7 +169,7 @@ void image_callback(const sensor_msgs::ImageConstPtr& msg)
         u[0] = midPointNormalized[0] * camParam.CameraMatrix.at<float>(0, 0) + camParam.CameraMatrix.at<float>(0, 2);
         v[0] = midPointNormalized[1] * camParam.CameraMatrix.at<float>(1, 1) + camParam.CameraMatrix.at<float>(1, 2);
 
-        ROS_DEBUG_STREAM(
+        RCLCPP_DEBUG_STREAM(node->get_logger(),
             "3D Mid point between the two markers in undistorted pixel coordinates = (" << u[0] << ", " << v[0] << ")");
 
         // paint a circle in the mid point of the normalized coordinates of both markers
@@ -191,77 +206,85 @@ void image_callback(const sensor_msgs::ImageConstPtr& msg)
         debug_pub.publish(debug_msg.toImageMsg());
       }
 
-      ROS_DEBUG("runtime: %f ms", 1000 * (cv::getTickCount() - ticksBefore) / cv::getTickFrequency());
+      RCLCPP_DEBUG(node->get_logger(), "runtime: %f ms", 1000 * (cv::getTickCount() - ticksBefore) / cv::getTickFrequency());
     }
     catch (cv_bridge::Exception& e)
     {
-      ROS_ERROR("cv_bridge exception: %s", e.what());
+      RCLCPP_ERROR(node->get_logger(), "cv_bridge exception: %s", e.what());
       return;
     }
   }
 }
 
-// wait for one camerainfo, then shut down that subscriber
-void cam_info_callback(const sensor_msgs::CameraInfo &msg)
+// wait for one camerainfo and then don't update the info 
+void cam_info_callback(const sensor_msgs::msg::CameraInfo &msg)
 {
-  camParam = aruco_ros::rosCameraInfo2ArucoCamParams(msg, useRectifiedImages);
-  cam_info_received = true;
-  cam_info_sub.shutdown();
+  if(!cam_info_received)
+  {
+    camParam = aruco_ros::rosCameraInfo2ArucoCamParams(msg, useRectifiedImages);
+    cam_info_received = true; 
+  }
 }
 
-void reconf_callback(aruco_ros::ArucoThresholdConfig &config, std::uint32_t level)
-{
-  mDetector.setDetectionMode(aruco::DetectionMode(config.detection_mode), config.min_image_size);
-  normalizeImageIllumination = config.normalizeImage;
-  dctComponentsToRemove = config.dctComponentsToRemove;
-}
+// void reconf_callback(aruco_ros::ArucoThresholdConfig &config, std::uint32_t level)
+// {
+//   mDetector.setDetectionMode(aruco::DetectionMode(config.detection_mode), config.min_image_size);
+//   normalizeImageIllumination = config.normalizeImage;
+//   dctComponentsToRemove = config.dctComponentsToRemove;
+// }
 
 int main(int argc, char **argv)
 {
-  ros::init(argc, argv, "aruco_simple");
-  ros::NodeHandle nh("~");
-  image_transport::ImageTransport it(nh);
+  rclcpp::init(argc, argv);
+  node = std::make_shared<rclcpp::Node>("double");
 
-  dynamic_reconfigure::Server<aruco_ros::ArucoThresholdConfig> server;
-  dynamic_reconfigure::Server<aruco_ros::ArucoThresholdConfig>::CallbackType f_;
-  f_ = boost::bind(&reconf_callback, _1, _2);
-  server.setCallback(f_);
+  image_transport::ImageTransport it(node);
+
+  tf_broadcaster_ = std::make_unique<tf2_ros::TransformBroadcaster>(*node.get());
+
+  // dynamic_reconfigure::Server<aruco_ros::ArucoThresholdConfig> server;
+  // dynamic_reconfigure::Server<aruco_ros::ArucoThresholdConfig>::CallbackType f_;
+  // f_ = boost::bind(&reconf_callback, _1, _2);
+  // server.setCallback(f_);
 
   normalizeImageIllumination = false;
 
-  nh.param<bool>("image_is_rectified", useRectifiedImages, true);
-  ROS_INFO_STREAM("Image is rectified: " << useRectifiedImages);
+  node->get_parameter_or<bool>("image_is_rectified", useRectifiedImages, true);
+  RCLCPP_INFO_STREAM(node->get_logger(), "Image is rectified: " << useRectifiedImages);
 
   image_transport::Subscriber image_sub = it.subscribe("/image", 1, &image_callback);
-  cam_info_sub = nh.subscribe("/camera_info", 1, &cam_info_callback);
+  cam_info_sub = node->create_subscription<sensor_msgs::msg::CameraInfo>("/camera_info", 1, cam_info_callback);
 
   cam_info_received = false;
   image_pub = it.advertise("result", 1);
   debug_pub = it.advertise("debug", 1);
-  pose_pub1 = nh.advertise<geometry_msgs::Pose>("pose", 100);
-  pose_pub2 = nh.advertise<geometry_msgs::Pose>("pose2", 100);
+  pose_pub1 = node->create_publisher<geometry_msgs::msg::Pose>("pose", 100);
+  pose_pub2 = node->create_publisher<geometry_msgs::msg::Pose>("pose2", 100);
 
-  nh.param<double>("marker_size", marker_size, 0.05);
-  nh.param<int>("marker_id1", marker_id1, 582);
-  nh.param<int>("marker_id2", marker_id2, 26);
-  nh.param<bool>("normalizeImage", normalizeImageIllumination, true);
-  nh.param<int>("dct_components_to_remove", dctComponentsToRemove, 2);
+  node->get_parameter_or<double>("marker_size", marker_size, 0.05);
+  node->get_parameter_or<int>("marker_id1", marker_id1, 582);
+  node->get_parameter_or<int>("marker_id2", marker_id2, 26);
+  node->get_parameter_or<bool>("normalizeImage", normalizeImageIllumination, true);
+  node->get_parameter_or<int>("dct_components_to_remove", dctComponentsToRemove, 2);
   if (dctComponentsToRemove == 0)
     normalizeImageIllumination = false;
-  nh.param<std::string>("parent_name", parent_name, "");
-  nh.param<std::string>("child_name1", child_name1, "");
-  nh.param<std::string>("child_name2", child_name2, "");
+
+  node->get_parameter_or<std::string>("parent_name", parent_name, "");
+  node->get_parameter_or<std::string>("child_name1", child_name1, "");
+  node->get_parameter_or<std::string>("child_name2", child_name2, "");
 
   if (parent_name == "" || child_name1 == "" || child_name2 == "")
   {
-    ROS_ERROR("parent_name and/or child_name was not set!");
+    RCLCPP_ERROR(node->get_logger(), "parent_name and/or child_name was not set!");
+    rclcpp::shutdown();
     return -1;
   }
 
-  ROS_INFO("ArUco node started with marker size of %f meters and marker ids to track: %d, %d", marker_size, marker_id1,
+  RCLCPP_INFO(node->get_logger(), "ArUco node started with marker size of %f meters and marker ids to track: %d, %d", marker_size, marker_id1,
            marker_id2);
-  ROS_INFO("ArUco node will publish pose to TF with (%s, %s) and (%s, %s) as (parent,child).", parent_name.c_str(),
+  RCLCPP_INFO(node->get_logger(), "ArUco node will publish pose to TF with (%s, %s) and (%s, %s) as (parent,child).", parent_name.c_str(),
            child_name1.c_str(), parent_name.c_str(), child_name2.c_str());
 
-  ros::spin();
+  rclcpp::spin(node);
+  rclcpp::shutdown();
 }
