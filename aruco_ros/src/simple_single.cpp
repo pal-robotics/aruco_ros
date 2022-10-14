@@ -119,6 +119,16 @@ public:
     // Print parameters of ArUco marker detector:
     RCLCPP_INFO_STREAM(this->get_logger(), "Threshold method: " << thresh_method);
 
+    // Declare node parameters
+    this->declare_parameter<double>("marker_size", 0.05);
+    this->declare_parameter<int>("marker_id", 300);
+    this->declare_parameter<std::string>("reference_frame", "");
+    this->declare_parameter<std::string>("camera_frame", "");
+    this->declare_parameter<std::string>("marker_frame", "");
+    this->declare_parameter<bool>("image_is_rectified", true);
+    this->declare_parameter<float>("min_marker_size", 0.02);
+    this->declare_parameter<std::string>("detection_mode", "");
+
     float min_marker_size; // percentage of image area
     this->get_parameter_or<float>("min_marker_size", min_marker_size, 0.02);
 
