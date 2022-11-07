@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(aruco)
 
+set(DISABLE_PAL_FLAGS TRUE)
 find_package(catkin)
 find_package(Eigen3 REQUIRED)
 find_package(OpenCV 3 REQUIRED)
@@ -23,18 +24,23 @@ include_directories(
 )
 
 add_library(aruco
-  src/aruco/cvdrawingutils.cpp
   src/aruco/cameraparameters.cpp
+  src/aruco/cvdrawingutils.cpp
   src/aruco/debug.cpp
+  src/aruco/dictionary_based.cpp
   src/aruco/dictionary.cpp
+  src/aruco/fractaldetector.cpp
   src/aruco/ippe.cpp
   src/aruco/marker.cpp
+  src/aruco/markerdetector_impl.cpp
   src/aruco/markerdetector.cpp
   src/aruco/markerlabeler.cpp
   src/aruco/markermap.cpp
   src/aruco/posetracker.cpp
-  src/aruco/markerlabelers/dictionary_based.cpp
-  src/aruco/markerlabelers/svmmarkers.cpp
+  src/aruco/fractallabelers/fractallabeler.cpp
+  src/aruco/fractallabelers/fractalmarker.cpp
+  src/aruco/fractallabelers/fractalmarkerset.cpp
+  src/aruco/fractallabelers/fractalposetracker.cpp
 )
 target_link_libraries(aruco
   ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})

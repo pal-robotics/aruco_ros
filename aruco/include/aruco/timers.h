@@ -1,43 +1,32 @@
 /**
- Copyright 2017 Rafael Muñoz Salinas. All rights reserved.
+Copyright 2020 Rafael Muñoz Salinas. All rights reserved.
 
- Redistribution and use in source and binary forms, with or without modification, are
- permitted provided that the following conditions are met:
+  This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation version 3 of the License.
 
- 1. Redistributions of source code must retain the above copyright notice, this list of
- conditions and the following disclaimer.
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
 
- 2. Redistributions in binary form must reproduce the above copyright notice, this list
- of conditions and the following disclaimer in the documentation and/or other materials
- provided with the distribution.
-
- THIS SOFTWARE IS PROVIDED BY Rafael Muñoz Salinas ''AS IS'' AND ANY EXPRESS OR IMPLIED
- WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
- FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL Rafael Muñoz Salinas OR
- CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
- ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
- NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
- ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
- The views and conclusions contained in the software and documentation are those of the
- authors and should not be interpreted as representing official policies, either expressed
- or implied, of Rafael Muñoz Salinas.
- */
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
 
 #ifndef ARUCO_TIMERS_H
 #define ARUCO_TIMERS_H
+
 
 #include <chrono>
 #include <string>
 #include <vector>
 #include <iostream>
-
+#include "aruco_export.h"
 namespace aruco
 {
 
-//timer
+// timer
 struct ScopeTimer
 {
   std::chrono::high_resolution_clock::time_point begin, end;
@@ -46,12 +35,13 @@ struct ScopeTimer
   bool use;
   enum SCALE
   {
-    NSEC, MSEC, SEC
+    NSEC,
+    MSEC,
+    SEC
   };
   SCALE sc;
   ScopeTimer(std::string name_, bool use_ = true, SCALE _sc = MSEC)
   {
-
 #ifdef USE_TIMERS
     name = name_;
     use = use_;
@@ -61,13 +51,11 @@ struct ScopeTimer
     (void)name_;
     (void)use_;
     (void)_sc;
-#endif /* USE_TIMERS */
 
+#endif
   }
-
   ~ScopeTimer()
   {
-
 #ifdef USE_TIMERS
     if (use)
     {
@@ -91,12 +79,13 @@ struct ScopeTimer
       };
 
       std::cout << "Time(" << name << ")= "
-          << double(std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count()) / fact << str
-          << std::endl;
+                << double(
+                       std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count()) /
+                       fact
+                << str << std::endl;
       ;
     }
-#endif /* USE_TIMERS */
-
+#endif
   }
 };
 
@@ -104,9 +93,10 @@ struct ScopedTimerEvents
 {
   enum SCALE
   {
-    NSEC, MSEC, SEC
+    NSEC,
+    MSEC,
+    SEC
   };
-
   SCALE sc;
   std::vector<std::chrono::high_resolution_clock::time_point> vtimes;
   std::vector<std::string> names;
@@ -114,7 +104,6 @@ struct ScopedTimerEvents
 
   ScopedTimerEvents(std::string name = "", bool start = true, SCALE _sc = MSEC)
   {
-
 #ifdef USE_TIMERS
     if (start)
       add("start");
@@ -124,22 +113,18 @@ struct ScopedTimerEvents
     (void)name;
     (void)start;
     (void)_sc;
-#endif /* USE_TIMERS */
-
+#endif
   }
 
   void add(std::string name)
   {
-
 #ifdef USE_TIMERS
     vtimes.push_back(std::chrono::high_resolution_clock::now());
     names.push_back(name);
 #else
     (void)name;
-#endif /* USE_TIMERS */
-
+#endif
   }
-
   void addspaces(std::vector<std::string> &str)
   {
     // get max size
@@ -155,7 +140,6 @@ struct ScopedTimerEvents
 
   ~ScopedTimerEvents()
   {
-
 #ifdef USE_TIMERS
     double fact = 1;
     std::string str;
@@ -180,13 +164,18 @@ struct ScopedTimerEvents
     for (size_t i = 1; i < vtimes.size(); i++)
     {
       std::cout << "Time(" << _name << "|" << names[i] << " ):"
-          << double(std::chrono::duration_cast<std::chrono::nanoseconds>(vtimes[i] - vtimes[i - 1]).count()) / fact
-          << str << " "
-          << double(std::chrono::duration_cast<std::chrono::nanoseconds>(vtimes[i] - vtimes[0]).count()) / fact << str
-          /* << "\t" << vtimes[i].time_since_epoch().count() */<< std::endl;
+                << double(std::chrono::duration_cast<std::chrono::nanoseconds>(
+                              vtimes[i] - vtimes[i - 1])
+                              .count()) /
+                       fact
+                << str << " "
+                << double(std::chrono::duration_cast<std::chrono::nanoseconds>(vtimes[i] -
+                                                                               vtimes[0])
+                              .count()) /
+                       fact
+                << str /*<<"\t"<< vtimes[i].time_since_epoch().count()*/ << std::endl;
     }
-#endif /* USE_TIMERS */
-
+#endif
   }
 };
 
@@ -194,17 +183,21 @@ struct ARUCO_EXPORT Timer
 {
   enum SCALE
   {
-    NSEC, MSEC, SEC
+    NSEC,
+    MSEC,
+    SEC
   };
 
   std::chrono::high_resolution_clock::time_point _s;
   double sum = 0, n = 0;
   std::string _name;
   Timer()
-  {}
+  {
+  }
 
-  Timer(std::string name):_name(name)
-  {}
+  Timer(std::string name) : _name(name)
+  {
+  }
   void setName(std::string name)
   {
     _name = name;
@@ -216,13 +209,12 @@ struct ARUCO_EXPORT Timer
   void end()
   {
     auto e = std::chrono::high_resolution_clock::now();
-    sum += double(std::chrono::duration_cast < std::chrono::nanoseconds > (e - _s).count());
+    sum += double(std::chrono::duration_cast<std::chrono::nanoseconds>(e - _s).count());
     n++;
   }
 
   void print(SCALE sc = MSEC)
   {
-
 #ifdef USE_TIMERS
     double fact = 1;
     std::string str;
@@ -241,12 +233,11 @@ struct ARUCO_EXPORT Timer
         str = "s";
         break;
     };
-
     std::cout << "Time(" << _name << ")= " << (sum / n) / fact << str << std::endl;
-  #else
+#else
     (void)sc;
-#endif /* USE_TIMERS */
 
+#endif
   }
 
   double getAverage(SCALE sc = MSEC) const
@@ -264,11 +255,35 @@ struct ARUCO_EXPORT Timer
         fact = 1e9;
         break;
     };
-
     return (sum / n) / fact;
   }
 };
+inline std::string __pf_aruco_methodName(std::string prettyFunction)
+{
+  std::string res;
+  res.reserve(prettyFunction.size());
+  bool spaceFound = false;
+  for (auto c : prettyFunction)
+  {
+    if (c == ' ' && !spaceFound)
+      spaceFound = true;
+    else if (c != '(' && spaceFound)
+      res.push_back(c);
+    else if (c == '(' && spaceFound)
+      break;
+  }
+  return res;
+}
+#ifdef USE_TIMERS
 
-} // namespace aruco
+#define __ARUCO_ADDTIMER__                                                               \
+  ScopedTimerEvents XTIMER_X(__pf_aruco_methodName(__PRETTY_FUNCTION__));
+#define __ARUCO_TIMER_EVENT__(Y) XTIMER_X.add(Y);
+#else
+#define __ARUCO_ADDTIMER__
+#define __ARUCO_TIMER_EVENT__(Y)
+#endif
+}  // namespace aruco
 
-#endif /* ARUCO_TIMERS_H */
+
+#endif
