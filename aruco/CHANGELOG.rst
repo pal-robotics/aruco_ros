@@ -21,8 +21,8 @@ Changelog for package aruco
 * forcing opencv3 build for kinetic
 * Contributors: Andrea Ponza, Bence Magyar, Christopher Hrabia, Jordi Pages, Victor Lopez
 
-Forthcoming
------------
+2.2.0 (2022-11-07)
+------------------
 * Merge branch 'feat/aruco-3.1.5-migration' into 'ferrum-devel'
   ArUCO 3.1.5 migration
   See merge request ros-overlays/aruco_ros!4
