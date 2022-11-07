@@ -21,6 +21,18 @@ Changelog for package aruco
 * forcing opencv3 build for kinetic
 * Contributors: Andrea Ponza, Bence Magyar, Christopher Hrabia, Jordi Pages, Victor Lopez
 
+Forthcoming
+-----------
+* Merge branch 'feat/aruco-3.1.5-migration-gallium' into 'gallium-devel'
+  ArUCO 3.1.5 migration gallium
+  See merge request ros-overlays/aruco_ros!5
+* replace disable_pal_flags() with set DISABLE_PAL_FLAGS
+* clang formatting
+* add support for extrinsics with stereo cameras
+* Add correct fisheye distortion functionality
+* migrate to 3.1.5
+* Contributors: josecarlos, josegarcia, saikishor
+
 3.0.3 (2022-05-16)
 ------------------
 

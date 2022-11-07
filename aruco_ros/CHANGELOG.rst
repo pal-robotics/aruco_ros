@@ -30,6 +30,15 @@ Changelog for package aruco_ros
 * Replace assert by error message to keep library functional
 * Contributors: Andrea Ponza, Bence Magyar, Christopher Hrabia, Jordi Pages, Jorge Nicho, Ugnius Malūkas, Victor Lopez, Voidminded
 
+Forthcoming
+-----------
+* Merge branch 'feat/aruco-3.1.5-migration-gallium' into 'gallium-devel'
+  ArUCO 3.1.5 migration gallium
+  See merge request ros-overlays/aruco_ros!5
+* Add correct fisheye distortion functionality
+* migrate to 3.1.5
+* Contributors: josegarcia, saikishor
+
 3.0.3 (2022-05-16)
 ------------------
 * Merge branch 'missing_catkin_export_dep' into 'gallium-devel'
