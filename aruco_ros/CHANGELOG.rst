@@ -30,6 +30,15 @@ Changelog for package aruco_ros
 * Replace assert by error message to keep library functional
 * Contributors: Andrea Ponza, Bence Magyar, Christopher Hrabia, Jordi Pages, Jorge Nicho, Ugnius Malūkas, Victor Lopez, Voidminded
 
+Forthcoming
+-----------
+* Merge branch 'feat/aruco-3.1.5-migration' into 'ferrum-devel'
+  ArUCO 3.1.5 migration
+  See merge request ros-overlays/aruco_ros!4
+* Add correct fisheye distortion functionality
+* migrate to 3.1.5
+* Contributors: josegarcia, saikishor
+
 2.1.4 (2022-05-16)
 ------------------
 * added the missing catkin_EXPORTED_TARGETS dependency

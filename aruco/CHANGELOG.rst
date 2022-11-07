@@ -21,6 +21,18 @@ Changelog for package aruco
 * forcing opencv3 build for kinetic
 * Contributors: Andrea Ponza, Bence Magyar, Christopher Hrabia, Jordi Pages, Victor Lopez
 
+Forthcoming
+-----------
+* Merge branch 'feat/aruco-3.1.5-migration' into 'ferrum-devel'
+  ArUCO 3.1.5 migration
+  See merge request ros-overlays/aruco_ros!4
+* replace disable_pal_flags() with set DISABLE_PAL_FLAGS
+* clang formatting
+* add support for extrinsics with stereo cameras
+* Add correct fisheye distortion functionality
+* migrate to 3.1.5
+* Contributors: josecarlos, josegarcia, saikishor
+
 2.1.4 (2022-05-16)
 ------------------
 
