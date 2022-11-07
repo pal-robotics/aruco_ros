@@ -13,7 +13,8 @@
 
  THIS SOFTWARE IS PROVIDED BY Rafael Muñoz Salinas ''AS IS'' AND ANY EXPRESS OR IMPLIED
  WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
- FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL Rafael Muñoz Salinas OR
+ FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL Rafael Muñoz Salinas
+ OR
  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
  SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
@@ -34,17 +35,15 @@
 
 namespace aruco
 {
-
 namespace aruco_private
 {
-
 cv::Mat impl__aruco_getRTMatrix(const cv::Mat& _rvec, const cv::Mat& _tvec)
 {
   assert(_rvec.type() == CV_32F && _rvec.total() == 3);
   assert(_tvec.type() == CV_32F && _tvec.total() == 3);
 
   cv::Mat Matrix(4, 4, CV_32F);
-  float *rt_44 = Matrix.ptr<float>(0);
+  float* rt_44 = Matrix.ptr<float>(0);
 
   // makes a fast conversion to the 4x4 array passed
   float rx = _rvec.ptr<float>(0)[0];
@@ -98,8 +97,9 @@ void impl__aruco_getRTfromMatrix44(const cv::Mat& M, cv::Mat& R, cv::Mat& T)
       T.ptr<double>(0)[i] = M.at<double>(i, 3);
 }
 
-double reprj_error(const std::vector<cv::Point3f> &objPoints, const std::vector<cv::Point2f> points2d,
-                   const CameraParameters &imp, const cv::Mat &rt44)
+double reprj_error(const std::vector<cv::Point3f>& objPoints,
+                   const std::vector<cv::Point2f> points2d, const CameraParameters& imp,
+                   const cv::Mat& rt44)
 {
   std::vector<cv::Point2f> prepj;
   cv::Mat rv, tv;
@@ -122,8 +122,8 @@ double reprj_error(const std::vector<cv::Point3f> &objPoints, const std::vector<
  *
  *
  */
-float rigidBodyTransformation_Horn1987(const std::vector<cv::Point3f>& POrg, const std::vector<cv::Point3f>& PDst,
-                                       cv::Mat& RT_4x4)
+float rigidBodyTransformation_Horn1987(const std::vector<cv::Point3f>& POrg,
+                                       const std::vector<cv::Point3f>& PDst, cv::Mat& RT_4x4)
 {
   struct Quaternion
   {
@@ -158,11 +158,11 @@ float rigidBodyTransformation_Horn1987(const std::vector<cv::Point3f>& POrg, con
   cv::Mat _org(POrg.size(), 3, CV_32F, (float*)&POrg[0]);
   cv::Mat _dst(PDst.size(), 3, CV_32F, (float*)&PDst[0]);
 
-//  _org = _org.reshape(1);
-//  _dst = _dst.reshape(1);
+  //  _org = _org.reshape(1);
+  //  _dst = _dst.reshape(1);
   cv::Mat Mu_s = cv::Mat::zeros(1, 3, CV_32F);
   cv::Mat Mu_m = cv::Mat::zeros(1, 3, CV_32F);
-//  cout << _s << endl << _m << endl;
+  //  cout << _s << endl << _m << endl;
 
   // calculate means
   for (int i = 0; i < _org.rows; i++)
@@ -178,27 +178,29 @@ float rigidBodyTransformation_Horn1987(const std::vector<cv::Point3f>& POrg, con
     Mu_m.ptr<float>(0)[i] /= float(_dst.rows);
   }
 
-//  cout << "Mu_s = " << Mu_s << endl;
-//  cout << "Mu_m = " << Mu_m << endl;
+  //  cout << "Mu_s = " << Mu_s << endl;
+  //  cout << "Mu_m = " << Mu_m << endl;
 
   cv::Mat Mu_st = Mu_s.t() * Mu_m;
-//  cout << "Mu_st = " << Mu_st << endl;
+  //  cout << "Mu_st = " << Mu_st << endl;
   cv::Mat Var_sm = cv::Mat::zeros(3, 3, CV_32F);
   for (int i = 0; i < _org.rows; i++)
-    Var_sm += (_org(cv::Range(i, i + 1), cv::Range(0, 3)).t() * _dst(cv::Range(i, i + 1), cv::Range(0, 3))) - Mu_st;
-//  cout << "Var_sm=" << Var_sm << endl;
+    Var_sm += (_org(cv::Range(i, i + 1), cv::Range(0, 3)).t() *
+               _dst(cv::Range(i, i + 1), cv::Range(0, 3))) -
+              Mu_st;
+  //  cout << "Var_sm=" << Var_sm << endl;
   for (int i = 0; i < 3; i++)
     for (int j = 0; j < 3; j++)
       Var_sm.at<float>(i, j) /= float(_org.rows);
-//  cout << "Var_sm = " << Var_sm << endl;
+  //  cout << "Var_sm = " << Var_sm << endl;
 
   cv::Mat AA = Var_sm - Var_sm.t();
-//  cout << "AA = " << AA << endl;
+  //  cout << "AA = " << AA << endl;
   cv::Mat A(3, 1, CV_32F);
   A.at<float>(0, 0) = AA.at<float>(1, 2);
   A.at<float>(1, 0) = AA.at<float>(2, 0);
   A.at<float>(2, 0) = AA.at<float>(0, 1);
-//  cout << "A =" << A << endl;
+  //  cout << "A =" << A << endl;
   cv::Mat Q_Var_sm(4, 4, CV_32F);
   Q_Var_sm.at<float>(0, 0) = static_cast<float>(trace(Var_sm)[0]);
   for (int i = 1; i < 4; i++)
@@ -210,25 +212,25 @@ float rigidBodyTransformation_Horn1987(const std::vector<cv::Point3f>& POrg, con
 
   cv::Mat Q33 = Q_Var_sm(cv::Range(1, 4), cv::Range(1, 4));
   q33.copyTo(Q33);
-//  cout << "Q_Var_sm" << endl << Q_Var_sm << endl;
+  //  cout << "Q_Var_sm" << endl << Q_Var_sm << endl;
   cv::Mat eigenvalues, eigenvectors;
   eigen(Q_Var_sm, eigenvalues, eigenvectors);
-//  cout << "EEI = " << eigenvalues << endl;
-//  cout << "V = " << (eigenvectors.type() == CV_32F) << " " << eigenvectors << endl;
+  //  cout << "EEI = " << eigenvalues << endl;
+  //  cout << "V = " << (eigenvectors.type() == CV_32F) << " " << eigenvectors << endl;
 
-  Quaternion rot(eigenvectors.at<float>(0, 0), eigenvectors.at<float>(0, 1), eigenvectors.at<float>(0, 2),
-                 eigenvectors.at<float>(0, 3));
+  Quaternion rot(eigenvectors.at<float>(0, 0), eigenvectors.at<float>(0, 1),
+                 eigenvectors.at<float>(0, 2), eigenvectors.at<float>(0, 3));
   cv::Mat RR = rot.getRotation();
-//  cout << "RESULT = " << endl << RR << endl;
+  //  cout << "RESULT = " << endl << RR << endl;
   cv::Mat T = Mu_m.t() - RR * Mu_s.t();
-//  cout << "T = " << T << endl;
+  //  cout << "T = " << T << endl;
 
   RT_4x4 = cv::Mat::eye(4, 4, CV_32F);
   cv::Mat r33 = RT_4x4(cv::Range(0, 3), cv::Range(0, 3));
   RR.copyTo(r33);
   for (int i = 0; i < 3; i++)
     RT_4x4.at<float>(i, 3) = T.ptr<float>(0)[i];
-//  cout << "RESS = " << RT << endl;
+  //  cout << "RESS = " << RT << endl;
 
   // compute the average transform error
   float err = 0;
@@ -244,10 +246,11 @@ float rigidBodyTransformation_Horn1987(const std::vector<cv::Point3f>& POrg, con
     err += static_cast<float>(cv::norm(dest_est - dest_real));
   }
 
-  return err / float(POrg.size());;
+  return err / float(POrg.size());
+  ;
 }
 
-} // namespace aruco_private
+}  // namespace aruco_private
 
 inline double hubber(double e, double _delta)
 {
@@ -260,8 +263,8 @@ inline double hubber(double e, double _delta)
   else
   {
     // outlier
-    double sqrte = sqrt(e); // absolute value of the error
-    return 2 * sqrte * _delta - dsqr; // rho(e)   = 2 * delta * e^(1/2) - delta^2
+    double sqrte = sqrt(e);            // absolute value of the error
+    return 2 * sqrte * _delta - dsqr;  // rho(e)   = 2 * delta * e^(1/2) - delta^2
   }
 }
 
@@ -274,16 +277,17 @@ inline double hubberMono(double e)
   }
   else
     // outlier
-    return 4.895303872 * sqrt(e) - 5.991; // rho(e)   = 2 * delta * e^(1/2) - delta^2
+    return 4.895303872 * sqrt(e) - 5.991;  // rho(e)   = 2 * delta * e^(1/2) - delta^2
 }
 
 inline double getHubberMonoWeight(double SqErr, double Information)
 {
   return sqrt(hubberMono(Information * SqErr) / SqErr);
 }
-template<typename T>
-double __aruco_solve_pnp(const std::vector<cv::Point3f>& p3d, const std::vector<cv::Point2f>& p2d,
-                         const cv::Mat& cam_matrix, const cv::Mat& dist, cv::Mat& r_io, cv::Mat& t_io)
+template <typename T>
+double __aruco_solve_pnp(const std::vector<cv::Point3f>& p3d,
+                         const std::vector<cv::Point2f>& p2d, const cv::Mat& cam_matrix,
+                         const cv::Mat& dist, cv::Mat& r_io, cv::Mat& t_io)
 {
   assert(r_io.type() == CV_32F);
   assert(t_io.type() == CV_32F);
@@ -321,16 +325,17 @@ double __aruco_solve_pnp(const std::vector<cv::Point3f>& p3d, const std::vector<
     int err_idx = 0;
     for (size_t i = 0; i < p3d.size(); i++)
     {
-      cv::Point2f errP=p2d_rej[i] -p2d[i];
+      cv::Point2f errP = p2d_rej[i] - p2d[i];
 
-      double SqErr=(errP.x*errP.x+ errP.y*errP.y);
+      double SqErr = (errP.x * errP.x + errP.y * errP.y);
 
-      float robuse_weight= getHubberMonoWeight(SqErr,1);
-      err(err_idx++) = robuse_weight* errP.x; // p2d_rej[i].x - p2d[i].x;
-      err(err_idx++) = robuse_weight* errP.y; // p2d_rej[i].y - p2d[i].y;
+      float robuse_weight = getHubberMonoWeight(SqErr, 1);
+      err(err_idx++) = robuse_weight * errP.x;  // p2d_rej[i].x - p2d[i].x;
+      err(err_idx++) = robuse_weight * errP.y;  // p2d_rej[i].y - p2d[i].y;
     }
   };
-  auto jac_f = [&](const typename LevMarq<T>::eVector& sol, Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>& J)
+  auto jac_f = [&](const typename LevMarq<T>::eVector& sol,
+                   Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>& J)
   {
     (void)(sol);
     J.resize(p3d.size() * 2, 6);
@@ -338,7 +343,7 @@ double __aruco_solve_pnp(const std::vector<cv::Point3f>& p3d, const std::vector<
     {
       double* jacb = Jacb.ptr<double>(i);
       for (int j = 0; j < 6; j++)
-      J(i, j) = jacb[j];
+        J(i, j) = jacb[j];
     }
   };
 
@@ -353,39 +358,43 @@ double __aruco_solve_pnp(const std::vector<cv::Point3f>& p3d, const std::vector<
   return err;
 }
 
-double __aruco_solve_pnp(const std::vector<cv::Point3f>& p3d, const std::vector<cv::Point2f>& p2d,
-                         const cv::Mat& cam_matrix, const cv::Mat& dist, cv::Mat& r_io, cv::Mat& t_io)
+double __aruco_solve_pnp(const std::vector<cv::Point3f>& p3d,
+                         const std::vector<cv::Point2f>& p2d, const cv::Mat& cam_matrix,
+                         const cv::Mat& dist, cv::Mat& r_io, cv::Mat& t_io)
 {
-
 #ifdef DOUBLE_PRECISION_PNP
   return __aruco_solve_pnp<double>(p3d, p2d, cam_matrix, dist, r_io, t_io);
 #else
   return __aruco_solve_pnp<float>(p3d, p2d, cam_matrix, dist, r_io, t_io);
 #endif
-
 }
 
-bool MarkerPoseTracker::estimatePose(Marker& m, const CameraParameters& _cam_params, float _msize, float minerrorRatio)
+bool MarkerPoseTracker::estimatePose(Marker& m, const CameraParameters& _cam_params,
+                                     float _msize, float minerrorRatio)
 {
   if (_rvec.empty())
   {
     // if no previous data, use from scratch
     cv::Mat rv, tv;
-    auto solutions = solvePnP_(Marker::get3DPoints(_msize), m, _cam_params.CameraMatrix, _cam_params.Distorsion);
+    auto solutions = solvePnP_(Marker::get3DPoints(_msize), m, _cam_params.CameraMatrix,
+                               _cam_params.Distorsion);
     double errorRatio = solutions[1].second / solutions[0].second;
     if (errorRatio < minerrorRatio)
       return false;
 
-//    // is the error ratio big enough
-//    cv::solvePnP(Marker::get3DPoints(_msize), m, _cam_params.CameraMatrix, _cam_params.Distorsion, rv, tv);
-//    __aruco_solve_pnp(Marker::get3DPoints(_msize), m, _cam_params.CameraMatrix, _cam_params.Distorsion, _rvec, _tvec);
-//    rv.convertTo(_rvec, CV_32F);
-//    tv.convertTo(_tvec, CV_32F);
-//    aruco_private::impl__aruco_getRTfromMatrix44(solutions[0].first, _rvec, _tvec);
+    //    // is the error ratio big enough
+    //    cv::solvePnP(Marker::get3DPoints(_msize), m, _cam_params.CameraMatrix,
+    //    _cam_params.Distorsion, rv, tv);
+    //    __aruco_solve_pnp(Marker::get3DPoints(_msize), m, _cam_params.CameraMatrix,
+    //    _cam_params.Distorsion, _rvec, _tvec);
+    //    rv.convertTo(_rvec, CV_32F);
+    //    tv.convertTo(_tvec, CV_32F);
+    //    aruco_private::impl__aruco_getRTfromMatrix44(solutions[0].first, _rvec, _tvec);
   }
   else
   {
-    __aruco_solve_pnp(Marker::get3DPoints(_msize), m, _cam_params.CameraMatrix, _cam_params.Distorsion, _rvec, _tvec);
+    __aruco_solve_pnp(Marker::get3DPoints(_msize), m, _cam_params.CameraMatrix,
+                      _cam_params.Distorsion, _rvec, _tvec);
   }
 
   _rvec.convertTo(m.Rvec, CV_32F);
@@ -397,21 +406,24 @@ bool MarkerPoseTracker::estimatePose(Marker& m, const CameraParameters& _cam_par
 MarkerMapPoseTracker::MarkerMapPoseTracker()
 {
   _isValid = false;
+  _initial_err = -1;
   aruco_minerrratio_valid = 3;
 }
 
-void MarkerMapPoseTracker::setParams(const CameraParameters& cam_params, const MarkerMap& msconf, float markerSize)
+void MarkerMapPoseTracker::setParams(const CameraParameters& cam_params,
+                                     const MarkerMap& msconf, float markerSize)
 {
   _msconf = msconf;
   _cam_params = cam_params;
   if (!cam_params.isValid())
-    throw cv::Exception(9001, "Invalid camera parameters", "MarkerMapPoseTracker::setParams", __FILE__,
-    __LINE__);
+    throw cv::Exception(9001, "Invalid camera parameters",
+                        "MarkerMapPoseTracker::setParams", __FILE__, __LINE__);
   if (_msconf.mInfoType == MarkerMap::PIX && markerSize <= 0)
     throw cv::Exception(9001, "You should indicate the markersize since the MarkerMap is in pixels",
                         "MarkerMapPoseTracker::setParams", __FILE__, __LINE__);
   if (_msconf.mInfoType == MarkerMap::NONE)
-    throw cv::Exception(9001, "Invalid MarkerMap", "MarkerMapPoseTracker::setParams", __FILE__, __LINE__);
+    throw cv::Exception(9001, "Invalid MarkerMap", "MarkerMapPoseTracker::setParams",
+                        __FILE__, __LINE__);
   if (_msconf.mInfoType == MarkerMap::PIX)
     _msconf = _msconf.convertToMeters(markerSize);
 
@@ -425,7 +437,7 @@ void MarkerMapPoseTracker::setParams(const CameraParameters& cam_params, const M
   // now, compute the marker_m2g map
   for (auto m : _map_mm)
   {
-    const Marker3DInfo &m3dinfo = m.second;
+    const Marker3DInfo& m3dinfo = m.second;
     auto p3d_marker = Marker::get3DPoints(m3dinfo.getMarkerSize());
 
     // compute the transform going from global to marker to using Horn
@@ -458,16 +470,17 @@ cv::Mat MarkerMapPoseTracker::relocalization(const std::vector<Marker>& v_m)
     float rt[6];
   };
 
-  cv::Mat pose_f2g_out; //result
+  cv::Mat pose_f2g_out;  // result
 
   // estimate the markers locations and see if there is at least one good enough
   std::vector<minfo> good_marker_locations;
   std::vector<minfo> all_marker_locations;
 
-  for (const Marker &marker : mapMarkers)
+  for (const Marker& marker : mapMarkers)
   {
     // for each visible marker
-    auto mpi = solvePnP_(_map_mm[marker.id].getMarkerSize(), marker, _cam_params.CameraMatrix, _cam_params.Distorsion);
+    auto mpi = solvePnP_(_map_mm[marker.id].getMarkerSize(), marker,
+                         _cam_params.CameraMatrix, _cam_params.Distorsion);
     minfo mi;
     mi.id = marker.id;
     mi.err = mpi[0].second;
@@ -486,7 +499,7 @@ cv::Mat MarkerMapPoseTracker::relocalization(const std::vector<Marker>& v_m)
     // collect all the markers 3D locations
     std::vector<cv::Point2f> markerPoints2d;
     std::vector<cv::Point3f> markerPoints3d;
-    for (const Marker &marker : mapMarkers)
+    for (const Marker& marker : mapMarkers)
     {
       markerPoints2d.insert(markerPoints2d.end(), marker.begin(), marker.end());
       auto p3d = _map_mm[marker.id].points;
@@ -494,24 +507,24 @@ cv::Mat MarkerMapPoseTracker::relocalization(const std::vector<Marker>& v_m)
     }
 
     // take the all poses and select the one that minimizes the global reproj error
-    for (auto & ml : all_marker_locations)
+    for (auto& ml : all_marker_locations)
     {
       auto pose = ml.rt_f2m * marker_m2g[ml.id];
       // now, compute the repj error of all markers using this info
       ml.err = aruco_private::reprj_error(markerPoints3d, markerPoints2d, _cam_params, pose);
     }
     // sort and get the best
-    std::sort(all_marker_locations.begin(), all_marker_locations.end(), [](const minfo &a,const minfo &b)
-    { return a.err<b.err;});
-    std::cerr << "err = " << all_marker_locations.front().err << std::endl;
-    auto &best = all_marker_locations.front();
+    std::sort(all_marker_locations.begin(), all_marker_locations.end(),
+              [](const minfo& a, const minfo& b) { return a.err < b.err; });
+    _initial_err = all_marker_locations.front().err;
+    auto& best = all_marker_locations.front();
     pose_f2g_out = best.rt_f2m * marker_m2g[best.id];
   }
 
   if (pose_f2g_out.empty() && good_marker_locations.size() > 0)
   {
-    std::sort(good_marker_locations.begin(), good_marker_locations.end(), [](const minfo &a,const minfo &b)
-    { return a.err < b.err;});
+    std::sort(good_marker_locations.begin(), good_marker_locations.end(),
+              [](const minfo& a, const minfo& b) { return a.err < b.err; });
     auto best = good_marker_locations[0];
 
     // estimate current location
@@ -551,7 +564,9 @@ bool MarkerMapPoseTracker::estimatePose(const std::vector<Marker>& v_m)
       // relocalization provides an initial position that will be further refined
       auto InitialPose = relocalization(v_m);
       if (InitialPose.empty())
+      {
         return false;
+      }
 
       aruco_private::impl__aruco_getRTfromMatrix44(InitialPose, _rvec, _tvec);
     }
@@ -577,4 +592,4 @@ cv::Mat MarkerPoseTracker::getRTMatrix() const
   return aruco_private::impl__aruco_getRTMatrix(_rvec, _tvec);
 }
 
-} // namespace aruco
+}  // namespace aruco

@@ -99,10 +99,10 @@ std::vector<aruco::Marker> aruco_ros::detectMarkers(const cv::Mat &img, const ar
       //        pal_vision_util::dctNormalization(inImage, inImageNorm,
       //        dctComponentsToRemove); inImage = inImageNorm;
     }
-    
+
     // detection results will go into "markers"
     markers.clear();
-    // ok, let's detect 
+    // ok, let's detect
     if (detector)
     {
       detector->detect(img, markers, cam_params, marker_size, false, correct_fisheye);
