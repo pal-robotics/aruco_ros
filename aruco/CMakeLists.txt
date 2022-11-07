@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(aruco)
 
+set(DISABLE_PAL_FLAGS TRUE)
 find_package(catkin)
 find_package(Eigen3 REQUIRED)
 find_package(OpenCV 3 REQUIRED)
@@ -21,8 +22,6 @@ include_directories(
   ${OpenCV_INCLUDE_DIRS}
   ${EIGEN3_INCLUDE_DIRS}
 )
-
-disable_pal_flags()
 
 add_library(aruco
   src/aruco/cameraparameters.cpp
