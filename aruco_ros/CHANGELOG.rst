@@ -30,6 +30,9 @@ Changelog for package aruco_ros
 * Replace assert by error message to keep library functional
 * Contributors: Andrea Ponza, Bence Magyar, Christopher Hrabia, Jordi Pages, Jorge Nicho, Ugnius Malūkas, Victor Lopez, Voidminded
 
+Forthcoming
+-----------
+
 3.1.0 (2022-11-07)
 ------------------
 * Merge branch 'feat/aruco-3.1.5-migration-gallium' into 'gallium-devel'
