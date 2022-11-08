@@ -21,8 +21,8 @@ Changelog for package aruco
 * forcing opencv3 build for kinetic
 * Contributors: Andrea Ponza, Bence Magyar, Christopher Hrabia, Jordi Pages, Victor Lopez
 
-Forthcoming
------------
+3.1.1 (2022-11-08)
+------------------
 * Merge branch 'fix/remove-markerlabelers' into 'gallium-devel'
   removed markerlabelers folder
   See merge request ros-overlays/aruco_ros!6
