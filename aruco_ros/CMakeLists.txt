@@ -84,6 +84,11 @@ target_include_directories(marker_publisher
 ament_target_dependencies(marker_publisher ${THIS_PACKAGE_INCLUDE_DEPENDS})
 target_link_libraries(marker_publisher ${OpenCV_LIBRARIES})
 
+if(BUILD_TESTING)
+  find_package(ament_lint_auto REQUIRED)
+  ament_lint_auto_find_test_dependencies()
+endif()
+
 #############
 ## Install ##
 #############
