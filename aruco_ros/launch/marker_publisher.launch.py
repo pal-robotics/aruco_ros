@@ -39,7 +39,7 @@ def generate_launch_description():
     aruco_marker_publisher_params = {
         'image_is_rectified': True,
         'marker_size': LaunchConfiguration('marker_size'),
-        'reference_frame': LaunchConfiguration(reference_frame),
+        'reference_frame': LaunchConfiguration('reference_frame'),
         'camera_frame': LaunchConfiguration('side') + '_hand_camera',
     }
 
