@@ -30,8 +30,8 @@ Changelog for package aruco_ros
 * Replace assert by error message to keep library functional
 * Contributors: Andrea Ponza, Bence Magyar, Christopher Hrabia, Jordi Pages, Jorge Nicho, Ugnius Malūkas, Victor Lopez, Voidminded
 
-Forthcoming
------------
+3.1.2 (2022-11-10)
+------------------
 
 3.1.1 (2022-11-08)
 ------------------
