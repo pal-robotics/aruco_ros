@@ -1,19 +1,20 @@
-#include <aruco_ros/aruco_ros_utils.hpp>
-#include <rclcpp/logging.hpp>
 #include <iostream>
-#include <tf2/transform_datatypes.h>
-#include <opencv4/opencv2/calib3d.hpp>
-#include <cv_bridge/cv_bridge.h>
 
-aruco::CameraParameters aruco_ros::rosCameraInfo2ArucoCamParams(const sensor_msgs::msg::CameraInfo& cam_info,
-                                                                bool useRectifiedParameters)
+#include "aruco_ros/aruco_ros_utils.hpp"
+#include "cv_bridge/cv_bridge.h"
+#include "opencv4/opencv2/calib3d.hpp"
+#include "rclcpp/logging.hpp"
+#include "tf2/transform_datatypes.h"
+
+aruco::CameraParameters aruco_ros::rosCameraInfo2ArucoCamParams(
+  const sensor_msgs::msg::CameraInfo & cam_info,
+  bool useRectifiedParameters)
 {
   cv::Mat cameraMatrix(3, 4, CV_64FC1, 0.0);
   cv::Mat distorsionCoeff(4, 1, CV_64FC1);
   cv::Size size(cam_info.width, cam_info.height);
 
-  if (useRectifiedParameters)
-  {
+  if (useRectifiedParameters) {
     cameraMatrix.setTo(0);
     cameraMatrix.at<double>(0, 0) = cam_info.p[0];
     cameraMatrix.at<double>(0, 1) = cam_info.p[1];
@@ -28,34 +29,35 @@ aruco::CameraParameters aruco_ros::rosCameraInfo2ArucoCamParams(const sensor_msg
     cameraMatrix.at<double>(2, 2) = cam_info.p[10];
     cameraMatrix.at<double>(2, 3) = cam_info.p[11];
 
-    for (int i = 0; i < 4; ++i)
+    for (int i = 0; i < 4; ++i) {
       distorsionCoeff.at<double>(i, 0) = 0;
-  }
-  else
-  {
+    }
+  } else {
     cv::Mat cameraMatrixFromK(3, 3, CV_64FC1, 0.0);
-    for (int i = 0; i < 9; ++i)
+    for (int i = 0; i < 9; ++i) {
       cameraMatrixFromK.at<double>(i % 3, i - (i % 3) * 3) = cam_info.k[i];
+    }
     cameraMatrixFromK.copyTo(cameraMatrix(cv::Rect(0, 0, 3, 3)));
 
 
-    if (cam_info.d.size() == 4)
-    {
-      for (int i = 0; i < 4; ++i)
+    if (cam_info.d.size() == 4) {
+      for (int i = 0; i < 4; ++i) {
         distorsionCoeff.at<double>(i, 0) = cam_info.d[i];
-    }
-    else
-    {
-      RCLCPP_WARN(rclcpp::get_logger("aruco_ros"), "length of camera_info D vector is not 4, assuming zero distortion...");
-      for (int i = 0; i < 4; ++i)
+      }
+    } else {
+      RCLCPP_WARN(
+        rclcpp::get_logger(
+          "aruco_ros"), "length of camera_info D vector is not 4, assuming zero distortion...");
+      for (int i = 0; i < 4; ++i) {
         distorsionCoeff.at<double>(i, 0) = 0;
+      }
     }
   }
 
   return aruco::CameraParameters(cameraMatrix, distorsionCoeff, size);
 }
 
-tf2::Transform aruco_ros::arucoMarker2Tf2(const aruco::Marker &marker)
+tf2::Transform aruco_ros::arucoMarker2Tf2(const aruco::Marker & marker)
 {
   cv::Mat rot(3, 3, CV_64FC1);
   cv::Mat Rvec64;
@@ -64,9 +66,10 @@ tf2::Transform aruco_ros::arucoMarker2Tf2(const aruco::Marker &marker)
   cv::Mat tran64;
   marker.Tvec.convertTo(tran64, CV_64FC1);
 
-  tf2::Matrix3x3 tf_rot(rot.at<double>(0, 0), rot.at<double>(0, 1), rot.at<double>(0, 2), rot.at<double>(1, 0),
-                       rot.at<double>(1, 1), rot.at<double>(1, 2), rot.at<double>(2, 0), rot.at<double>(2, 1),
-                       rot.at<double>(2, 2));
+  tf2::Matrix3x3 tf_rot(rot.at<double>(0, 0), rot.at<double>(0, 1), rot.at<double>(0, 2),
+    rot.at<double>(1, 0),
+    rot.at<double>(1, 1), rot.at<double>(1, 2), rot.at<double>(2, 0), rot.at<double>(2, 1),
+    rot.at<double>(2, 2));
 
   tf2::Vector3 tf_orig(tran64.at<double>(0, 0), tran64.at<double>(1, 0), tran64.at<double>(2, 0));
 
@@ -74,13 +77,17 @@ tf2::Transform aruco_ros::arucoMarker2Tf2(const aruco::Marker &marker)
 }
 
 
-std::vector<aruco::Marker> aruco_ros::detectMarkers(const cv::Mat &img, const aruco::CameraParameters &cam_params, float marker_size, aruco::MarkerDetector *detector, bool normalize_ilumination, bool correct_fisheye)
+std::vector<aruco::Marker> aruco_ros::detectMarkers(
+  const cv::Mat & img,
+  const aruco::CameraParameters & cam_params,
+  float marker_size,
+  aruco::MarkerDetector * detector,
+  bool normalize_ilumination,
+  bool correct_fisheye)
 {
   std::vector<aruco::Marker> markers;
-  try
-  {
-    if (normalize_ilumination)
-    {
+  try {
+    if (normalize_ilumination) {
       RCLCPP_WARN(rclcpp::get_logger("aruco_ros"), "normalizeImageIllumination is unimplemented!");
       //        cv::Mat inImageNorm;
       //        pal_vision_util::dctNormalization(inImage, inImageNorm,
@@ -90,27 +97,23 @@ std::vector<aruco::Marker> aruco_ros::detectMarkers(const cv::Mat &img, const ar
     // detection results will go into "markers"
     markers.clear();
     // ok, let's detect
-    if (detector)
-    {
+    if (detector) {
       detector->detect(img, markers, cam_params, marker_size, false, correct_fisheye);
-    }
-    else
-    {
+    } else {
       aruco::MarkerDetector default_detector;
       default_detector.detect(img, markers, cam_params, marker_size, false, correct_fisheye);
     }
     return markers;
-  }
-  catch (cv_bridge::Exception& e)
-  {
+  } catch (cv_bridge::Exception & e) {
     RCLCPP_ERROR(rclcpp::get_logger("aruco_ros"), "cv_bridge exception: %s", e.what());
-    
+
     return markers;
   }
 }
 
 
-visualization_msgs::msg::Marker aruco_ros::visMarkerFromPose(const geometry_msgs::msg::PoseStamped &pose, double marker_size, int marker_id)
+visualization_msgs::msg::Marker aruco_ros::visMarkerFromPose(
+  const geometry_msgs::msg::PoseStamped & pose, double marker_size, int marker_id)
 {
   visualization_msgs::msg::Marker visMarker;
   visMarker.header = pose.header;

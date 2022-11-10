@@ -29,7 +29,8 @@ def generate_launch_description():
 
     reference_frame = DeclareLaunchArgument(
         'reference_frame', default_value='',
-        description='Reference frame. Leave it empty and the pose will be published wrt param parent_name. '
+        description='Reference frame. '
+        'Leave it empty and the pose will be published wrt param parent_name. '
     )
 
     corner_refinement_arg = DeclareLaunchArgument(

@@ -34,21 +34,21 @@
  */
 
 #include <iostream>
-#include <aruco/aruco.h>
-#include <aruco/cvdrawingutils.h>
+#include "aruco/aruco.h"
+#include "aruco/cvdrawingutils.h"
+#include "aruco_ros/aruco_ros_utils.hpp"
+#include "aruco_msgs/msg/marker_array.hpp"
 
-#include <rclcpp/rclcpp.hpp>
-#include <rclcpp/wait_for_message.hpp>
-#include <rcpputils/asserts.hpp>
-#include <image_transport/image_transport.hpp>
-#include <cv_bridge/cv_bridge.h>
-#include <sensor_msgs/image_encodings.hpp>
-#include <aruco_ros/aruco_ros_utils.hpp>
-#include <aruco_msgs/msg/marker_array.hpp>
-#include <tf2_ros/transform_listener.h>
-#include <tf2_ros/buffer.h>
-#include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
-#include <std_msgs/msg/u_int32_multi_array.hpp>
+#include "cv_bridge/cv_bridge.h"
+#include "image_transport/image_transport.hpp"
+#include "rclcpp/rclcpp.hpp"
+#include "rclcpp/wait_for_message.hpp"
+#include "rcpputils/asserts.hpp"
+#include "sensor_msgs/image_encodings.hpp"
+#include "std_msgs/msg/u_int32_multi_array.hpp"
+#include "tf2_ros/transform_listener.h"
+#include "tf2_ros/buffer.h"
+#include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"
 
 using namespace std::chrono_literals;
 
@@ -84,8 +84,8 @@ private:
   std_msgs::msg::UInt32MultiArray marker_list_msg_;
 
 public:
-  ArucoMarkerPublisher() :
-      Node("marker_publisher"), useCamInfo_(true)
+  ArucoMarkerPublisher()
+  : Node("marker_publisher"), useCamInfo_(true)
   {
   }
 
@@ -98,11 +98,12 @@ public:
     image_sub_ = it_->subscribe("/image", 1, &ArucoMarkerPublisher::image_callback, this);
 
     this->get_parameter_or<bool>("use_camera_info", useCamInfo_, true);
-    if (useCamInfo_)
-    {
+    if (useCamInfo_) {
       RCLCPP_INFO(this->get_logger(), "Waiting for the camera info...");
-      sensor_msgs::msg::CameraInfo camera_info; 
-      rclcpp::wait_for_message<sensor_msgs::msg::CameraInfo>(camera_info, shared_from_this(), "/camera_info");
+      sensor_msgs::msg::CameraInfo camera_info;
+      rclcpp::wait_for_message<sensor_msgs::msg::CameraInfo>(
+        camera_info,
+        shared_from_this(), "/camera_info");
       RCLCPP_INFO(this->get_logger(), "Successfully obtained the camera info!");
 
       this->get_parameter_or<double>("marker_size", marker_size_, 0.05);
@@ -110,12 +111,13 @@ public:
       this->get_parameter_or<std::string>("reference_frame", reference_frame_, "");
       this->get_parameter_or<std::string>("camera_frame", camera_frame_, "");
       camParam_ = aruco_ros::rosCameraInfo2ArucoCamParams(camera_info, useRectifiedImages_);
-      rcpputils::assert_true(not (camera_frame_.empty() and not reference_frame_.empty()), "Either the camera frame is empty and also reference frame is empty..");
-      if (reference_frame_.empty())
+      rcpputils::assert_true(
+        !(camera_frame_.empty() && !reference_frame_.empty()),
+        "Either the camera frame is empty and also reference frame is empty..");
+      if (reference_frame_.empty()) {
         reference_frame_ = camera_frame_;
-    }
-    else
-    {
+      }
+    } else {
       camParam_ = aruco::CameraParameters();
     }
 
@@ -129,46 +131,47 @@ public:
     RCLCPP_INFO(this->get_logger(), "Successfully setup the marker publisher!");
   }
 
-  bool getTransform(const std::string& refFrame, const std::string& childFrame,   geometry_msgs::msg::TransformStamped& transform)
+  bool getTransform(
+    const std::string & refFrame, const std::string & childFrame,
+    geometry_msgs::msg::TransformStamped & transform)
   {
     std::string errMsg;
 
-    if (!tf_buffer_->canTransform(refFrame, childFrame, tf2::TimePointZero, tf2::durationFromSec(0.5), &errMsg))
+    if (!tf_buffer_->canTransform(
+        refFrame, childFrame, tf2::TimePointZero,
+        tf2::durationFromSec(0.5), &errMsg))
     {
       RCLCPP_ERROR_STREAM(this->get_logger(), "Unable to get pose from TF : " << errMsg.c_str());
       return false;
-    }
-    else
-    {
-      try
-      {
-        transform = tf_buffer_->lookupTransform(refFrame, childFrame, tf2::TimePointZero, tf2::durationFromSec(0.5));
-      }
-      catch (const tf2::TransformException& e)
-      {
+    } else {
+      try {
+        transform = tf_buffer_->lookupTransform(
+          refFrame, childFrame, tf2::TimePointZero, tf2::durationFromSec(
+            0.5));
+      } catch (const tf2::TransformException & e) {
         RCLCPP_ERROR_STREAM(
-            this->get_logger(), "Error in lookupTransform of " << childFrame << " in " << refFrame << " : " << e.what());
+          this->get_logger(),
+          "Error in lookupTransform of " << childFrame << " in " << refFrame << " : " << e.what());
         return false;
       }
-
     }
     return true;
   }
 
-  void image_callback(const sensor_msgs::msg::Image::ConstSharedPtr& msg)
+  void image_callback(const sensor_msgs::msg::Image::ConstSharedPtr & msg)
   {
     bool publishMarkers = marker_pub_->get_subscription_count() > 0;
     bool publishMarkersList = marker_list_pub_->get_subscription_count() > 0;
     bool publishImage = image_pub_.getNumSubscribers() > 0;
     bool publishDebug = debug_pub_.getNumSubscribers() > 0;
 
-    if (!publishMarkers && !publishMarkersList && !publishImage && !publishDebug)
+    if (!publishMarkers && !publishMarkersList && !publishImage && !publishDebug) {
       return;
+    }
 
     builtin_interfaces::msg::Time curr_stamp = msg->header.stamp;
     cv_bridge::CvImagePtr cv_ptr;
-    try
-    {
+    try {
       cv_ptr = cv_bridge::toCvCopy(*msg.get(), sensor_msgs::image_encodings::RGB8);
       inImage_ = cv_ptr->image;
 
@@ -179,14 +182,12 @@ public:
       mDetector_.detect(inImage_, markers_, camParam_, marker_size_, false);
 
       // marker array publish
-      if (publishMarkers)
-      {
+      if (publishMarkers) {
         marker_msg_->markers.clear();
         marker_msg_->markers.resize(markers_.size());
         marker_msg_->header.stamp = curr_stamp;
 
-        for (std::size_t i = 0; i < markers_.size(); ++i)
-        {
+        for (std::size_t i = 0; i < markers_.size(); ++i) {
           aruco_msgs::msg::Marker & marker_i = marker_msg_->markers.at(i);
           marker_i.header.stamp = curr_stamp;
           marker_i.id = markers_.at(i).id;
@@ -194,22 +195,19 @@ public:
         }
 
         // if there is camera info let's do 3D stuff
-        if (useCamInfo_)
-        {
+        if (useCamInfo_) {
           // get the current transform from the camera frame to output ref frame
           tf2::Stamped<tf2::Transform> cameraToReference;
           cameraToReference.setIdentity();
 
-          if (reference_frame_ != camera_frame_)
-          {
+          if (reference_frame_ != camera_frame_) {
             geometry_msgs::msg::TransformStamped transform;
             getTransform(reference_frame_, camera_frame_, transform);
             tf2::fromMsg(transform, cameraToReference);
           }
 
           // now find the transform for each detected marker
-          for (std::size_t i = 0; i < markers_.size(); ++i)
-          {
+          for (std::size_t i = 0; i < markers_.size(); ++i) {
             aruco_msgs::msg::Marker & marker_i = marker_msg_->markers.at(i);
             tf2::Transform transform = aruco_ros::arucoMarker2Tf2(markers_[i]);
             transform = static_cast<tf2::Transform>(cameraToReference) * transform;
@@ -219,35 +217,34 @@ public:
         }
 
         // publish marker array
-        if (marker_msg_->markers.size() > 0)
+        if (marker_msg_->markers.size() > 0) {
           marker_pub_->publish(*marker_msg_);
+        }
       }
 
-      if (publishMarkersList)
-      {
+      if (publishMarkersList) {
         marker_list_msg_.data.resize(markers_.size());
-        for (std::size_t i = 0; i < markers_.size(); ++i)
+        for (std::size_t i = 0; i < markers_.size(); ++i) {
           marker_list_msg_.data[i] = markers_[i].id;
+        }
 
         marker_list_pub_->publish(marker_list_msg_);
       }
 
       // draw detected markers on the image for visualization
-      for (std::size_t i = 0; i < markers_.size(); ++i)
-      {
+      for (std::size_t i = 0; i < markers_.size(); ++i) {
         markers_[i].draw(inImage_, cv::Scalar(0, 0, 255), 2);
       }
 
       // draw a 3D cube in each marker if there is 3D info
-      if (camParam_.isValid() && marker_size_ != -1)
-      {
-        for (std::size_t i = 0; i < markers_.size(); ++i)
+      if (camParam_.isValid() && marker_size_ != -1) {
+        for (std::size_t i = 0; i < markers_.size(); ++i) {
           aruco::CvDrawingUtils::draw3dAxis(inImage_, markers_[i], camParam_);
+        }
       }
 
       // publish input image with markers drawn on it
-      if (publishImage)
-      {
+      if (publishImage) {
         // show input with augmented information
         cv_bridge::CvImage out_msg;
         out_msg.header.stamp = curr_stamp;
@@ -257,8 +254,7 @@ public:
       }
 
       // publish image after internal image processing
-      if (publishDebug)
-      {
+      if (publishDebug) {
         // show also the internal image resulting from the threshold operation
         cv_bridge::CvImage debug_msg;
         debug_msg.header.stamp = curr_stamp;
@@ -266,16 +262,13 @@ public:
         debug_msg.image = mDetector_.getThresholdedImage();
         debug_pub_.publish(debug_msg.toImageMsg());
       }
-
-    }
-    catch (cv_bridge::Exception& e)
-    {
+    } catch (cv_bridge::Exception & e) {
       RCLCPP_ERROR(this->get_logger(), "cv_bridge exception: %s", e.what());
     }
   }
 };
 
-int main(int argc, char **argv)
+int main(int argc, char ** argv)
 {
   rclcpp::init(argc, argv);
   std::shared_ptr<ArucoMarkerPublisher> marker_pub = std::make_shared<ArucoMarkerPublisher>();

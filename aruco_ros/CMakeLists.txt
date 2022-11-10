@@ -72,7 +72,7 @@ ament_target_dependencies(double ${THIS_PACKAGE_INCLUDE_DEPENDS})
 target_link_libraries(double ${OpenCV_LIBRARIES})
 
 add_executable(marker_publisher src/marker_publish.cpp
-                                 src/aruco_ros_utils.cpp)
+                                src/aruco_ros_utils.cpp)
 target_include_directories(marker_publisher
   PUBLIC
   include)
@@ -93,7 +93,7 @@ endif()
 ## Install ##
 #############
 
-install(TARGETS aruco_ros_utils 
+install(TARGETS aruco_ros_utils
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin)
@@ -102,14 +102,14 @@ install(TARGETS marker_publisher single double
   DESTINATION lib/${PROJECT_NAME})
 
 install(DIRECTORY include/
-   DESTINATION include
-   FILES_MATCHING PATTERN "*.h"
+        DESTINATION include
+        FILES_MATCHING PATTERN "*.h"
 )
 
 foreach(dir etc launch)
     install(DIRECTORY ${dir}/
-        DESTINATION share/${PROJECT_NAME}/${dir})
-endforeach(dir)
+            DESTINATION share/${PROJECT_NAME}/${dir})
+endforeach()
 
 ament_package()
 

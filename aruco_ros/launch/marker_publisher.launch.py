@@ -19,7 +19,8 @@ def generate_launch_description():
 
     reference_frame = DeclareLaunchArgument(
         'reference_frame', default_value='base',
-        description='Reference frame. Leave it empty and the pose will be published wrt param parent_name. '
+        description='Reference frame. '
+        'Leave it empty and the pose will be published wrt param parent_name. '
     )
 
     aruco_marker_publisher_params = {
@@ -33,7 +34,8 @@ def generate_launch_description():
         package='aruco_ros',
         executable='single',
         parameters=[aruco_marker_publisher_params],
-        remappings=[('/camera_info', '/cameras/' + LaunchConfiguration('side') + '_hand_camera/camera_info'),
+        remappings=[('/camera_info', '/cameras/' + LaunchConfiguration('side') +
+                     '_hand_camera/camera_info'),
                     ('/image', '/cameras/' + LaunchConfiguration('side') + '_hand_camera/image')],
     )
 
