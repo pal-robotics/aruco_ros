@@ -1,3 +1,5 @@
+// NOLINT(legal/copyright)
+
 #ifndef ARUCO_ROS__ARUCO_ROS_UTILS_HPP_
 #define ARUCO_ROS__ARUCO_ROS_UTILS_HPP_
 

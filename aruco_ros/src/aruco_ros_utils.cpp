@@ -1,3 +1,5 @@
+// NOLINT(legal/copyright)
+
 #include <iostream>
 
 #include "aruco_ros/aruco_ros_utils.hpp"
