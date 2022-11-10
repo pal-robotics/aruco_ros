@@ -21,8 +21,8 @@ Changelog for package aruco
 * forcing opencv3 build for kinetic
 * Contributors: Andrea Ponza, Bence Magyar, Christopher Hrabia, Jordi Pages, Victor Lopez
 
-Forthcoming
------------
+2.2.1 (2022-11-10)
+------------------
 * Merge branch 'fix_disable_pal_flags' into 'ferrum-devel'
   disable the shadow compilation flag
   See merge request ros-overlays/aruco_ros!7
