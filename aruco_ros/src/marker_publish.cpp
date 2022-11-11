@@ -91,6 +91,13 @@ public:
 
   bool setup()
   {
+    // Declare node parameters
+    this->declare_parameter<double>("marker_size", 0.05);
+    this->declare_parameter<std::string>("reference_frame", "");
+    this->declare_parameter<std::string>("camera_frame", "");
+    this->declare_parameter<bool>("image_is_rectified", true);
+    this->declare_parameter<bool>("use_camera_info", true);
+
     tf_buffer_ = std::make_unique<tf2_ros::Buffer>(this->get_clock());
     tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
 

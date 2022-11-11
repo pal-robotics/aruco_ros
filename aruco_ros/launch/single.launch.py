@@ -1,7 +1,33 @@
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument
+from launch.actions import DeclareLaunchArgument, OpaqueFunction
 from launch.substitutions import LaunchConfiguration
+from launch.utilities import perform_substitutions
 from launch_ros.actions import Node
+
+
+def launch_setup(context, *args, **kwargs):
+
+    eye = perform_substitutions(context, [LaunchConfiguration('eye')])
+
+    aruco_single_params = {
+        'image_is_rectified': True,
+        'marker_size': LaunchConfiguration('marker_size'),
+        'marker_id': LaunchConfiguration('marker_id'),
+        'reference_frame': LaunchConfiguration('reference_frame'),
+        'camera_frame': 'stereo_gazebo_' + eye + '_camera_optical_frame',
+        'marker_frame': LaunchConfiguration('marker_frame'),
+        'corner_refinement': LaunchConfiguration('corner_refinement'),
+    }
+
+    aruco_single = Node(
+        package='aruco_ros',
+        executable='single',
+        parameters=[aruco_single_params],
+        remappings=[('/camera_info', '/stereo/' + eye + '/camera_info'),
+                    ('/image', '/stereo/' + eye + '/image_rect_color')],
+    )
+
+    return [aruco_single]
 
 
 def generate_launch_description():
@@ -39,24 +65,6 @@ def generate_launch_description():
         choices=['NONE', 'HARRIS', 'LINES', 'SUBPIX'],
     )
 
-    aruco_single_params = {
-        'image_is_rectified': True,
-        'marker_size': LaunchConfiguration('marker_size'),
-        'marker_id': LaunchConfiguration('marker_id'),
-        'reference_frame': LaunchConfiguration('reference_frame'),
-        'camera_frame': 'stereo_gazebo_' + LaunchConfiguration('eye') + '_camera_optical_frame',
-        'marker_frame': LaunchConfiguration('marker_frame'),
-        'corner_refinement': LaunchConfiguration('corner_refinement'),
-    }
-
-    aruco_single = Node(
-        package='aruco_ros',
-        executable='single',
-        parameters=[aruco_single_params],
-        remappings=[('/camera_info', '/stereo/' + LaunchConfiguration('eye') + '/camera_info'),
-                    ('/image', '/stereo/' + LaunchConfiguration('eye') + '/image_rect_color')],
-    )
-
     # Create the launch description and populate
     ld = LaunchDescription()
 
@@ -67,6 +75,6 @@ def generate_launch_description():
     ld.add_action(reference_frame)
     ld.add_action(corner_refinement_arg)
 
-    ld.add_action(aruco_single)
+    ld.add_action(OpaqueFunction(function=launch_setup))
 
     return ld

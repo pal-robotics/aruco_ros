@@ -1,7 +1,30 @@
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument
+from launch.actions import DeclareLaunchArgument, OpaqueFunction
 from launch.substitutions import LaunchConfiguration
+from launch.utilities import perform_substitutions
 from launch_ros.actions import Node
+
+
+def launch_setup(context, *args, **kwargs):
+
+    side = perform_substitutions(context, [LaunchConfiguration('side')])
+
+    aruco_marker_publisher_params = {
+        'image_is_rectified': True,
+        'marker_size': LaunchConfiguration('marker_size'),
+        'reference_frame': LaunchConfiguration('reference_frame'),
+        'camera_frame': side + '_hand_camera',
+    }
+
+    aruco_marker_publisher = Node(
+        package='aruco_ros',
+        executable='marker_publisher',
+        parameters=[aruco_marker_publisher_params],
+        remappings=[('/camera_info', '/cameras/' + side + '_hand_camera/camera_info'),
+                    ('/image', '/cameras/' + side + '_hand_camera/image')],
+    )
+
+    return [aruco_marker_publisher]
 
 
 def generate_launch_description():
@@ -23,22 +46,6 @@ def generate_launch_description():
         'Leave it empty and the pose will be published wrt param parent_name. '
     )
 
-    aruco_marker_publisher_params = {
-        'image_is_rectified': True,
-        'marker_size': LaunchConfiguration('marker_size'),
-        'reference_frame': LaunchConfiguration('reference_frame'),
-        'camera_frame': LaunchConfiguration('side') + '_hand_camera',
-    }
-
-    aruco_marker_publisher = Node(
-        package='aruco_ros',
-        executable='single',
-        parameters=[aruco_marker_publisher_params],
-        remappings=[('/camera_info', '/cameras/' + LaunchConfiguration('side') +
-                     '_hand_camera/camera_info'),
-                    ('/image', '/cameras/' + LaunchConfiguration('side') + '_hand_camera/image')],
-    )
-
     # Create the launch description and populate
     ld = LaunchDescription()
 
@@ -46,6 +53,6 @@ def generate_launch_description():
     ld.add_action(side_arg)
     ld.add_action(reference_frame)
 
-    ld.add_action(aruco_marker_publisher)
+    ld.add_action(OpaqueFunction(function=launch_setup))
 
     return ld

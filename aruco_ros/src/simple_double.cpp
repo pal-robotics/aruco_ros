@@ -243,6 +243,17 @@ int main(int argc, char ** argv)
   rclcpp::init(argc, argv);
   node = std::make_shared<rclcpp::Node>("double");
 
+  // Declare node parameters
+  node->declare_parameter<bool>("image_is_rectified", true);
+  node->declare_parameter<double>("marker_size", 0.05);
+  node->declare_parameter<int>("marker_id1", 582);
+  node->declare_parameter<int>("marker_id2", 26);
+  node->declare_parameter<bool>("normalizeImage", true);
+  node->declare_parameter<int>("dct_components_to_remove", 2);
+  node->declare_parameter<std::string>("parent_name", "");
+  node->declare_parameter<std::string>("child_name1", "");
+  node->declare_parameter<std::string>("child_name2", "");
+
   image_transport::ImageTransport it(node);
 
   tf_broadcaster_ = std::make_unique<tf2_ros::TransformBroadcaster>(*node.get());
