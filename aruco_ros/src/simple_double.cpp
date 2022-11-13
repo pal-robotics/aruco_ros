@@ -55,6 +55,7 @@
 #include "visualization_msgs/msg/marker.hpp"
 
 rclcpp::Node::SharedPtr node = nullptr;
+rclcpp::Node::SharedPtr subNode = nullptr;
 cv::Mat inImage;
 aruco::CameraParameters camParam;
 bool useRectifiedImages, normalizeImageIllumination;
@@ -241,7 +242,8 @@ void cam_info_callback(const sensor_msgs::msg::CameraInfo & msg)
 int main(int argc, char ** argv)
 {
   rclcpp::init(argc, argv);
-  node = std::make_shared<rclcpp::Node>("double");
+  node = std::make_shared<rclcpp::Node>("aruco_double");
+  subNode = node->create_sub_node(node->get_name());
 
   // Declare node parameters
   node->declare_parameter<bool>("image_is_rectified", true);
@@ -274,10 +276,10 @@ int main(int argc, char ** argv)
     cam_info_callback);
 
   cam_info_received = false;
-  image_pub = it.advertise("result", 1);
-  debug_pub = it.advertise("debug", 1);
-  pose_pub1 = node->create_publisher<geometry_msgs::msg::Pose>("pose", 100);
-  pose_pub2 = node->create_publisher<geometry_msgs::msg::Pose>("pose2", 100);
+  image_pub = it.advertise(node->get_name() + std::string("/result"), 1);
+  debug_pub = it.advertise(node->get_name() + std::string("/debug"), 1);
+  pose_pub1 = subNode->create_publisher<geometry_msgs::msg::Pose>("pose", 100);
+  pose_pub2 = subNode->create_publisher<geometry_msgs::msg::Pose>("pose2", 100);
 
   node->get_parameter_or<double>("marker_size", marker_size, 0.05);
   node->get_parameter_or<int>("marker_id1", marker_id1, 582);

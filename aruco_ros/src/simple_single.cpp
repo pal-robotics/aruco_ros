@@ -55,6 +55,7 @@
 class ArucoSimple : public rclcpp::Node
 {
 private:
+  rclcpp::Node::SharedPtr subNode;
   cv::Mat inImage;
   aruco::CameraParameters camParam;
   tf2::Stamped<tf2::Transform> rightToLeft;
@@ -87,7 +88,7 @@ private:
 
 public:
   ArucoSimple()
-  : Node("aruco_simple"), cam_info_received(false)
+  : Node("aruco_single"), cam_info_received(false)
   {
   }
 
@@ -95,6 +96,7 @@ public:
   {
     tf_buffer_ = std::make_unique<tf2_ros::Buffer>(this->get_clock());
     tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
+    subNode = this->create_sub_node(this->get_name());
 
     it_ = std::make_unique<image_transport::ImageTransport>(shared_from_this());
     tf_broadcaster_ = std::make_unique<tf2_ros::TransformBroadcaster>(this);
@@ -156,13 +158,13 @@ public:
         &ArucoSimple::cam_info_callback, this,
         std::placeholders::_1));
 
-    image_pub = it_->advertise("result", 1);
-    debug_pub = it_->advertise("debug", 1);
-    pose_pub = this->create_publisher<geometry_msgs::msg::PoseStamped>("pose", 100);
-    transform_pub = this->create_publisher<geometry_msgs::msg::TransformStamped>("transform", 100);
-    position_pub = this->create_publisher<geometry_msgs::msg::Vector3Stamped>("position", 100);
-    marker_pub = this->create_publisher<visualization_msgs::msg::Marker>("marker", 10);
-    pixel_pub = this->create_publisher<geometry_msgs::msg::PointStamped>("pixel", 10);
+    image_pub = it_->advertise(this->get_name() + std::string("/result"), 1);
+    debug_pub = it_->advertise(this->get_name() + std::string("/debug"), 1);
+    pose_pub = subNode->create_publisher<geometry_msgs::msg::PoseStamped>("pose", 100);
+    transform_pub = subNode->create_publisher<geometry_msgs::msg::TransformStamped>("transform", 100);
+    position_pub = subNode->create_publisher<geometry_msgs::msg::Vector3Stamped>("position", 100);
+    marker_pub = subNode->create_publisher<visualization_msgs::msg::Marker>("marker", 10);
+    pixel_pub = subNode->create_publisher<geometry_msgs::msg::PointStamped>("pixel", 10);
 
     this->get_parameter_or<double>("marker_size", marker_size, 0.05);
     this->get_parameter_or<int>("marker_id", marker_id, 300);
