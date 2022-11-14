@@ -161,7 +161,8 @@ public:
     image_pub = it_->advertise(this->get_name() + std::string("/result"), 1);
     debug_pub = it_->advertise(this->get_name() + std::string("/debug"), 1);
     pose_pub = subNode->create_publisher<geometry_msgs::msg::PoseStamped>("pose", 100);
-    transform_pub = subNode->create_publisher<geometry_msgs::msg::TransformStamped>("transform", 100);
+    transform_pub =
+      subNode->create_publisher<geometry_msgs::msg::TransformStamped>("transform", 100);
     position_pub = subNode->create_publisher<geometry_msgs::msg::Vector3Stamped>("position", 100);
     marker_pub = subNode->create_publisher<visualization_msgs::msg::Marker>("marker", 10);
     pixel_pub = subNode->create_publisher<geometry_msgs::msg::PointStamped>("pixel", 10);

@@ -133,7 +133,8 @@ public:
     image_pub_ = it_->advertise(this->get_name() + std::string("/result"), 1);
     debug_pub_ = it_->advertise(this->get_name() + std::string("/debug"), 1);
     marker_pub_ = subNode->create_publisher<aruco_msgs::msg::MarkerArray>("markers", 100);
-    marker_list_pub_ = subNode->create_publisher<std_msgs::msg::UInt32MultiArray>("markers_list", 10);
+    marker_list_pub_ =
+      subNode->create_publisher<std_msgs::msg::UInt32MultiArray>("markers_list", 10);
 
     marker_msg_ = aruco_msgs::msg::MarkerArray::Ptr(new aruco_msgs::msg::MarkerArray());
     marker_msg_->header.frame_id = reference_frame_;
