@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>aruco_msgs</name>
-  <version>2.2.1</version>
+  <version>2.2.2</version>
   <description>The aruco_msgs package</description>
   <maintainer email="sai.kishor@pal-robotics.com">Sai Kishor Kothakota</maintainer>
   <author email="bence.magyar@pal-robotics.com">Bence Magyar</author>
