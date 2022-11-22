@@ -21,8 +21,8 @@ Changelog for package aruco
 * forcing opencv3 build for kinetic
 * Contributors: Andrea Ponza, Bence Magyar, Christopher Hrabia, Jordi Pages, Victor Lopez
 
-Forthcoming
------------
+3.1.3 (2022-11-23)
+------------------
 * Fix/109/ferrum/cornerupsample
 * Contributors: josegarcia
 
