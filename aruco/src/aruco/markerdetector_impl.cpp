@@ -1789,18 +1789,6 @@ void MarkerDetector_Impl::filter_ambiguous_query(std::vector<cv::DMatch> &matche
 void MarkerDetector_Impl::cornerUpsample(std::vector<Marker> &MarkerCanditates,
                                          cv::Size lowResImageSize)
 {
-  std::vector<std::vector<cv::Point2f>> corners;
-  for (const auto &m : MarkerCanditates)
-    corners.push_back(m);
-  cornerUpsample(corners, lowResImageSize);
-  for (size_t i = 0; i < MarkerCanditates.size(); i++)
-    MarkerCanditates[i] = corners[i];
-}
-
-
-void MarkerDetector_Impl::cornerUpsample(std::vector<std::vector<cv::Point2f>> &MarkerCanditates,
-                                         cv::Size lowResImageSize)
-{
   if (MarkerCanditates.size() == 0)
     return;
   // first, determine the image in the pyramid nearest to this one
@@ -1842,6 +1830,22 @@ void MarkerDetector_Impl::cornerUpsample(std::vector<std::vector<cv::Point2f>> &
       }
 
     prevLowResSize = imagePyramid[curpyr].size();
+  }
+}
+
+
+void MarkerDetector_Impl::cornerUpsample(std::vector<std::vector<cv::Point2f>> &MarkerCanditates,
+                                         cv::Size lowResImageSize)
+{
+  std::vector<Marker> markers;
+  markers.reserve(MarkerCanditates.size());
+  std::copy(MarkerCanditates.begin(), MarkerCanditates.end(), std::back_inserter(markers));
+
+  cornerUpsample(markers, lowResImageSize);
+
+  for (std::size_t i = 0; i < markers.size(); i++)
+  {
+    MarkerCanditates[i] = markers[i];
   }
 }
 };  // namespace aruco
