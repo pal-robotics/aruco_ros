@@ -21,6 +21,11 @@ Changelog for package aruco
 * forcing opencv3 build for kinetic
 * Contributors: Andrea Ponza, Bence Magyar, Christopher Hrabia, Jordi Pages, Victor Lopez
 
+Forthcoming
+-----------
+* Fix/109/ferrum/cornerupsample
+* Contributors: josegarcia
+
 3.1.2 (2022-11-10)
 ------------------
 * disable the shadow compilation flag
