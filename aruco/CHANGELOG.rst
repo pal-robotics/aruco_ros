@@ -21,6 +21,14 @@ Changelog for package aruco
 * forcing opencv3 build for kinetic
 * Contributors: Andrea Ponza, Bence Magyar, Christopher Hrabia, Jordi Pages, Victor Lopez
 
+Forthcoming
+-----------
+* Merge branch 'fix/109/ferrum/cornerupsample' into 'ferrum-devel'
+  Fix/109/ferrum/cornerupsample
+  See merge request ros-overlays/aruco_ros!9
+* Fix/109/ferrum/cornerupsample
+* Contributors: josegarcia, saikishor
+
 2.2.1 (2022-11-10)
 ------------------
 * Merge branch 'fix_disable_pal_flags' into 'ferrum-devel'
