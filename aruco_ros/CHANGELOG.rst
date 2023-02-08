@@ -30,6 +30,27 @@ Changelog for package aruco_ros
 * Replace assert by error message to keep library functional
 * Contributors: Andrea Ponza, Bence Magyar, Christopher Hrabia, Jordi Pages, Jorge Nicho, Ugnius Malūkas, Victor Lopez, Voidminded
 
+Forthcoming
+-----------
+* ament uncrustify lint
+* create subnode to namespace the topics and changed default node names
+* declare params and fix launchers
+* disable copyright check
+* linters fixes
+* add tests
+* remove wrong copyright
+* params fix
+* port launchers to ros2
+* declare node parameters
+* migrate the aruco_ros double node to ROS2
+* added some fixes for the aruco_simple ros2 node
+* migrate the node aruco_simple to ROS2
+* refactor marker_publisher for the setup to work correctly
+* migrated the marker publish node to ROS2
+* migrated the aruco_ros_utils.cpp to ros2
+* added temporary changes of humble
+* Contributors: Noel Jimenez, Sai Kishor Kothakota
+
 3.1.2 (2022-11-10)
 ------------------
 

@@ -21,6 +21,16 @@ Changelog for package aruco
 * forcing opencv3 build for kinetic
 * Contributors: Andrea Ponza, Bence Magyar, Christopher Hrabia, Jordi Pages, Victor Lopez
 
+Forthcoming
+-----------
+* fixed cornerUpsample slicing bug issue
+* disable tests for package aruco
+* added missing ament exports in CMakeLists.txt
+* added ament_lint test to the packages aruco and aruco_msgs
+* added minor fix in aruco CMakeLists.txt
+* added the ament configuration to build with colcon
+* Contributors: Noel Jimenez, Sai Kishor Kothakota, josegarcia
+
 3.1.2 (2022-11-10)
 ------------------
 * disable the shadow compilation flag
