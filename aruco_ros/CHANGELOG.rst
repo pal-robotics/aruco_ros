@@ -30,8 +30,8 @@ Changelog for package aruco_ros
 * Replace assert by error message to keep library functional
 * Contributors: Andrea Ponza, Bence Magyar, Christopher Hrabia, Jordi Pages, Jorge Nicho, Ugnius Malūkas, Victor Lopez, Voidminded
 
-Forthcoming
------------
+5.0.0 (2023-02-08)
+------------------
 * ament uncrustify lint
 * create subnode to namespace the topics and changed default node names
 * declare params and fix launchers
