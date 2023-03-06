@@ -7,8 +7,8 @@ Changelog for package aruco_msgs
 * Merge branch 'indigo-devel' into kinetic-devel
 * Contributors: Victor Lopez
 
-Forthcoming
------------
+5.0.1 (2023-03-06)
+------------------
 
 5.0.0 (2023-02-08)
 ------------------
