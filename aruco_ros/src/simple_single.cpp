@@ -256,9 +256,9 @@ public:
             cameraToReference.setIdentity();
 
             if (reference_frame != camera_frame) {
-              geometry_msgs::msg::TransformStamped transform;
-              getTransform(reference_frame, camera_frame, transform);
-              tf2::fromMsg(transform, cameraToReference);
+              geometry_msgs::msg::TransformStamped transform_stamped;
+              getTransform(reference_frame, camera_frame, transform_stamped);
+              tf2::fromMsg(transform_stamped, cameraToReference);
             }
 
             transform = static_cast<tf2::Transform>(cameraToReference) *
