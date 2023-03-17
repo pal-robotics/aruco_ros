@@ -139,6 +139,8 @@ public:
     marker_msg_ = aruco_msgs::msg::MarkerArray::Ptr(new aruco_msgs::msg::MarkerArray());
     marker_msg_->header.frame_id = reference_frame_;
     RCLCPP_INFO(this->get_logger(), "Successfully setup the marker publisher!");
+
+    return true;
   }
 
   bool getTransform(
