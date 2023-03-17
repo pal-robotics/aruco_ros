@@ -249,7 +249,7 @@ public:
       }
 
       // draw a 3D cube in each marker if there is 3D info
-      if (camParam_.isValid() && marker_size_ != -1) {
+      if (camParam_.isValid() && marker_size_ > 0) {
         for (std::size_t i = 0; i < markers_.size(); ++i) {
           aruco::CvDrawingUtils::draw3dAxis(inImage_, markers_[i], camParam_);
         }
