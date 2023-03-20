@@ -139,6 +139,8 @@ public:
     marker_msg_ = aruco_msgs::msg::MarkerArray::Ptr(new aruco_msgs::msg::MarkerArray());
     marker_msg_->header.frame_id = reference_frame_;
     RCLCPP_INFO(this->get_logger(), "Successfully setup the marker publisher!");
+
+    return true;
   }
 
   bool getTransform(
@@ -247,7 +249,7 @@ public:
       }
 
       // draw a 3D cube in each marker if there is 3D info
-      if (camParam_.isValid() && marker_size_ != -1) {
+      if (camParam_.isValid() && marker_size_ > 0) {
         for (std::size_t i = 0; i < markers_.size(); ++i) {
           aruco::CvDrawingUtils::draw3dAxis(inImage_, markers_[i], camParam_);
         }

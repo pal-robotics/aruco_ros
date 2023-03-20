@@ -256,9 +256,9 @@ public:
             cameraToReference.setIdentity();
 
             if (reference_frame != camera_frame) {
-              geometry_msgs::msg::TransformStamped transform;
-              getTransform(reference_frame, camera_frame, transform);
-              tf2::fromMsg(transform, cameraToReference);
+              geometry_msgs::msg::TransformStamped transform_stamped;
+              getTransform(reference_frame, camera_frame, transform_stamped);
+              tf2::fromMsg(transform_stamped, cameraToReference);
             }
 
             transform = static_cast<tf2::Transform>(cameraToReference) *
@@ -315,7 +315,7 @@ public:
         }
 
         // draw a 3d cube in each marker if there is 3d info
-        if (camParam.isValid() && marker_size != -1) {
+        if (camParam.isValid() && marker_size > 0) {
           for (std::size_t i = 0; i < markers.size(); ++i) {
             aruco::CvDrawingUtils::draw3dAxis(inImage, markers[i], camParam);
           }

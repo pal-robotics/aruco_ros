@@ -189,7 +189,7 @@ void image_callback(const sensor_msgs::msg::Image::ConstSharedPtr & msg)
       }
 
       // draw a 3D cube in each marker if there is 3D info
-      if (camParam.isValid() && marker_size != -1) {
+      if (camParam.isValid() && marker_size > 0) {
         for (unsigned int i = 0; i < markers.size(); ++i) {
           aruco::CvDrawingUtils::draw3dCube(inImage, markers[i], camParam);
         }
