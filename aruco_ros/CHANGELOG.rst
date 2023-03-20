@@ -30,6 +30,16 @@ Changelog for package aruco_ros
 * Replace assert by error message to keep library functional
 * Contributors: Andrea Ponza, Bence Magyar, Christopher Hrabia, Jordi Pages, Jorge Nicho, Ugnius Malūkas, Victor Lopez, Voidminded
 
+Forthcoming
+-----------
+* Merge branch 'fix_warnings' into 'humble-devel'
+  Fix warnings
+  See merge request ros-overlays/aruco_ros!11
+* rename variable to avoid shadowing
+* check marker_size greater than 0
+* return true at the end of setup
+* Contributors: Noel Jimenez, saikishor
+
 5.0.1 (2023-03-06)
 ------------------
 
