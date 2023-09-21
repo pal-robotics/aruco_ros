@@ -21,6 +21,14 @@ Changelog for package aruco
 * forcing opencv3 build for kinetic
 * Contributors: Andrea Ponza, Bence Magyar, Christopher Hrabia, Jordi Pages, Victor Lopez
 
+Forthcoming
+-----------
+* Merge branch 'smd/fix/correctFisheye' into 'gallium-devel'
+  Added correctFisheye parameter, not the default one (false)
+  See merge request ros-overlays/aruco_ros!14
+* Added correctFisheye parameter, not the default one (false)
+* Contributors: Sai Kishor Kothakota, sergiomoyano
+
 3.1.3 (2022-11-23)
 ------------------
 * Fix/109/ferrum/cornerupsample
