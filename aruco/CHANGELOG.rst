@@ -21,8 +21,8 @@ Changelog for package aruco
 * forcing opencv3 build for kinetic
 * Contributors: Andrea Ponza, Bence Magyar, Christopher Hrabia, Jordi Pages, Victor Lopez
 
-Forthcoming
------------
+2.2.3 (2023-09-21)
+------------------
 * Added correctFisheye parameter, not the default one (false)
 * Contributors: sergiomoyano
 
