@@ -30,6 +30,9 @@ Changelog for package aruco_ros
 * Replace assert by error message to keep library functional
 * Contributors: Andrea Ponza, Bence Magyar, Christopher Hrabia, Jordi Pages, Jorge Nicho, Ugnius Malūkas, Victor Lopez, Voidminded
 
+Forthcoming
+-----------
+
 5.0.2 (2023-03-20)
 ------------------
 * Merge branch 'fix_warnings' into 'humble-devel'
