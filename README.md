@@ -1,7 +1,7 @@
 aruco_ros
 =========
 
-Software package and ROS wrappers of the [Aruco][1] Augmented Reality marker detector library.
+Software package and ROS wrappers of the [ArUco][1] Augmented Reality marker detector library.
 
 
 ### Features
@@ -19,68 +19,47 @@ Software package and ROS wrappers of the [Aruco][1] Augmented Reality marker det
 ### Applications
 
  * Object pose estimation
+ * Robot Localization
  * Visual servoing: track object and hand at the same time
 
-<img align="right" src="https://raw.github.com/pal-robotics/aruco_ros/master/aruco_ros/etc/reem_gazebo_floating_marker_world.png"/>
+<img align="center" src="/aruco_ros/etc/tiago_aruco.png"/>
 
 
 ### ROS API
 
 #### Messages
 
- * aruco_ros/Marker.msg
+ * aruco_msg/Marker.msg
 
         Header header
         uint32 id
         geometry_msgs/PoseWithCovariance pose
         float64 confidence
 
- * aruco_ros/MarkerArray.msg
+ * aruco_msg/MarkerArray.msg
 
         Header header
         aruco_ros/Marker[] markers
 
-### Kinetic changes
+### Changelog
 
-* Updated the [Aruco][1] library to version 3.0.4
+* Updated the [ArUco][1] library to version 3.1.5
 
-* Changed the coordinate system to match the library's, the convention is shown
-  in the image below, following rviz conventions, X is red, Y is green and Z is
-  blue.
+* Add support for extrinsics with stereo cameras 
+
+* Undistort fisheye detected points
+
+### ArUco marker coordinate system
+
 <img align="bottom" src="/aruco_ros/etc/new_coordinates.png"/>
 
-### Test it with REEM
+### Results with TIAGo
 
- * Open a REEM in simulation with a marker floating in front of the robot. This will start the stereo cameras of the robot too. Since this is only a vision test, there is nothing else in this world apart from the robot and a marker floating in front of it. An extra light source had to be added to compensate for the default darkness.
+<img src="https://media3.giphy.com/media/gRg0FfVUK9viRXp43H/giphy.gif"/>
 
-    ```
-    roslaunch reem_gazebo reem_gazebo.launch world:=floating_marker
-    ```
- * Launch the `image_proc` node to get undistorted images from the cameras of the robot.
- 
-    ```
-    ROS_NAMESPACE=/stereo/right rosrun image_proc image_proc image_raw:=image
-    ```
- * Start the `single` node which will start tracking the specified marker and will publish its pose in the camera frame
- 
-    ```
-    roslaunch aruco_ros single.launch markerId:=26 markerSize:=0.08 eye:="right"
-    ```
+<img src="https://media2.giphy.com/media/K2ZQXoG8Q5RRgd616h/giphy.gif"/>
 
-    the frame in which the pose is refered to can be chosen with the 'ref_frame' argument. The next example forces the marker pose to
-    be published with respect to the robot base_link frame:
-
-    ```
-    roslaunch aruco_ros single.launch markerId:=26 markerSize:=0.08 eye:="right" ref_frame:=/base_link
-    ```
-    
- * Visualize the result
- 
-    ```    
-    rosrun image_view image_view image:=/aruco_single/result
-    ```
-
-<img align="right" src="https://raw.github.com/pal-robotics/aruco_ros/master/aruco_ros/etc/reem_gazebo_floating_marker.png"/>
+<img src="https://media0.giphy.com/media/5hM9fugNr2aFOHHxsI/giphy.gif"/>
 
 
 [1]: http://www.sciencedirect.com/science/article/pii/S0031320314000235 "Automatic generation and detection of highly reliable fiducial markers under occlusion by S. Garrido-Jurado and R. Muñoz-Salinas and F.J. Madrid-Cuevas and M.J. Marín-Jiménez 2014"
