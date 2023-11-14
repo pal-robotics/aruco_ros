@@ -7,6 +7,8 @@
   <author email="bence.magyar@pal-robotics.com">Bence Magyar</author>
   <license>MIT</license>
 
+  <url type="website">https://github.com/pal-robotics/aruco_ros</url>
+
   <buildtool_depend>ament_cmake</buildtool_depend>
 
   <depend>geometry_msgs</depend>

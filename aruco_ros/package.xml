@@ -12,6 +12,8 @@
   <author email="rmsalinas@uco.es">Rafael Muñoz Salinas</author>
   <author email="bence.magyar@pal-robotics.com">Bence Magyar</author>
 
+  <url type="website">https://github.com/pal-robotics/aruco_ros</url>
+
   <buildtool_depend>ament_cmake</buildtool_depend>
 
   <depend>cv_bridge</depend>
