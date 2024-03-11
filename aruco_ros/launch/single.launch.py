@@ -17,6 +17,7 @@ def launch_setup(context, *args, **kwargs):
         'camera_frame': 'stereo_gazebo_' + eye + '_camera_optical_frame',
         'marker_frame': LaunchConfiguration('marker_frame'),
         'corner_refinement': LaunchConfiguration('corner_refinement'),
+        'image_transport': LaunchConfiguration('image_transport'),
     }
 
     aruco_single = Node(
@@ -65,6 +66,12 @@ def generate_launch_description():
         choices=['NONE', 'HARRIS', 'LINES', 'SUBPIX'],
     )
 
+    image_transport_arg = DeclareLaunchArgument(
+        'image_transport', default_value='raw',
+        description='Image Transport. ',
+        choices=['raw', 'compressed'],
+    )
+
     # Create the launch description and populate
     ld = LaunchDescription()
 
@@ -74,6 +81,7 @@ def generate_launch_description():
     ld.add_action(marker_frame_arg)
     ld.add_action(reference_frame)
     ld.add_action(corner_refinement_arg)
+    ld.add_action(image_transport_arg)
 
     ld.add_action(OpaqueFunction(function=launch_setup))
 
