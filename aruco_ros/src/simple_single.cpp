@@ -80,6 +80,7 @@ private:
   int marker_id;
 
   std::unique_ptr<image_transport::ImageTransport> it_;
+  image_transport::TransportHints hints;
   image_transport::Subscriber image_sub;
 
   std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
@@ -88,7 +89,7 @@ private:
 
 public:
   ArucoSimple()
-  : Node("aruco_single"), cam_info_received(false)
+      : Node("aruco_single"), cam_info_received(false), hints(this)
   {
   }
 
@@ -133,6 +134,7 @@ public:
     this->declare_parameter<bool>("image_is_rectified", true);
     this->declare_parameter<float>("min_marker_size", 0.02);
     this->declare_parameter<std::string>("detection_mode", "");
+    this->declare_parameter<std::string>("image_transport", "raw");
 
     float min_marker_size;  // percentage of image area
     this->get_parameter_or<float>("min_marker_size", min_marker_size, 0.02);
@@ -152,7 +154,7 @@ public:
       this->get_logger(), "Marker size min: " << min_marker_size << " of image area");
     RCLCPP_INFO_STREAM(this->get_logger(), "Detection mode: " << detection_mode);
 
-    image_sub = it_->subscribe("/image", 1, &ArucoSimple::image_callback, this);
+    image_sub = it_->subscribe("/image", 1, &ArucoSimple::image_callback, this, &hints);
     cam_info_sub = this->create_subscription<sensor_msgs::msg::CameraInfo>(
       "/camera_info", 1, std::bind(
         &ArucoSimple::cam_info_callback, this,
