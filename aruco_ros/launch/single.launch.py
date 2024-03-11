@@ -67,7 +67,7 @@ def generate_launch_description():
     )
 
     image_transport_arg = DeclareLaunchArgument(
-        'image_transport', default_value='compressed',
+        'image_transport', default_value='raw',
         description='Image Transport. ',
         choices=['raw', 'compressed'],
     )
