@@ -4,6 +4,12 @@ project(aruco_ros)
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
+
+# compile release by default
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type." FORCE)
+endif()
+
 set(CMAKE_CXX_STANDARD 11) # C++11...
 set(CMAKE_CXX_STANDARD_REQUIRED ON) #...is required...
 set(CMAKE_CXX_EXTENSIONS ON) #...with compiler extensions like gnu++11
@@ -14,6 +20,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
     geometry_msgs
     image_transport
     rclcpp
+    rclcpp_components
     rclpy
     tf2
     tf2_ros
@@ -44,19 +51,25 @@ target_include_directories(aruco_ros_utils
 ament_target_dependencies(aruco_ros_utils ${THIS_PACKAGE_INCLUDE_DEPENDS})
 target_link_libraries(aruco_ros_utils ${OpenCV_LIBRARIES})
 
-add_executable(single src/simple_single.cpp
-                      src/aruco_ros_utils.cpp)
+add_library(single_component
+  SHARED  
+  src/simple_single.cpp
+  src/aruco_ros_utils.cpp)
 
-target_include_directories(single
+target_include_directories(single_component
   PUBLIC
   include)
 
-target_include_directories(single
+target_include_directories(single_component
   SYSTEM PUBLIC
   ${OpenCV_INCLUDE_DIRS}
 )
-ament_target_dependencies(single ${THIS_PACKAGE_INCLUDE_DEPENDS})
-target_link_libraries(single ${OpenCV_LIBRARIES})
+ament_target_dependencies(single_component ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_link_libraries(single_component ${OpenCV_LIBRARIES})
+
+rclcpp_components_register_node(single_component
+  PLUGIN aruco_ros::ArUcoSimple
+  EXECUTABLE single)
 
 add_executable(double src/simple_double.cpp
                       src/aruco_ros_utils.cpp)
@@ -71,18 +84,25 @@ target_include_directories(double
 ament_target_dependencies(double ${THIS_PACKAGE_INCLUDE_DEPENDS})
 target_link_libraries(double ${OpenCV_LIBRARIES})
 
-add_executable(marker_publisher src/marker_publish.cpp
-                                src/aruco_ros_utils.cpp)
-target_include_directories(marker_publisher
+add_library(marker_publisher_component 
+  SHARED
+  src/marker_publish.cpp
+  src/aruco_ros_utils.cpp)
+
+target_include_directories(marker_publisher_component
   PUBLIC
   include)
 
-target_include_directories(marker_publisher
+target_include_directories(marker_publisher_component
   SYSTEM PUBLIC
   ${OpenCV_INCLUDE_DIRS}
 )
-ament_target_dependencies(marker_publisher ${THIS_PACKAGE_INCLUDE_DEPENDS})
-target_link_libraries(marker_publisher ${OpenCV_LIBRARIES})
+ament_target_dependencies(marker_publisher_component ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_link_libraries(marker_publisher_component ${OpenCV_LIBRARIES})
+
+rclcpp_components_register_node(marker_publisher_component
+  PLUGIN aruco_ros::ArUcoMarkerPublisher
+  EXECUTABLE marker_publisher)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -102,8 +122,10 @@ install(TARGETS aruco_ros_utils
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin)
 
-install(TARGETS marker_publisher single double
-  DESTINATION lib/${PROJECT_NAME})
+install(TARGETS marker_publisher_component single_component double
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION lib/${PROJECT_NAME})
+
 
 install(DIRECTORY include/
         DESTINATION include
