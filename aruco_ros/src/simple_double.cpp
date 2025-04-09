@@ -58,113 +58,113 @@
 #include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"
 #include "visualization_msgs/msg/marker.hpp"
 
-rclcpp::Node::SharedPtr node = nullptr;
-rclcpp::Node::SharedPtr subNode = nullptr;
-cv::Mat inImage;
-aruco::CameraParameters camParam;
-bool useRectifiedImages, normalizeImageIllumination;
-int dctComponentsToRemove;
-aruco::MarkerDetector mDetector;
-std::vector<aruco::Marker> markers;
-rclcpp::Subscription<sensor_msgs::msg::CameraInfo>::SharedPtr cam_info_sub;
-bool cam_info_received;
-image_transport::Publisher image_pub;
-image_transport::Publisher debug_pub;
-rclcpp::Publisher<geometry_msgs::msg::Pose>::SharedPtr pose_pub1;
-rclcpp::Publisher<geometry_msgs::msg::Pose>::SharedPtr pose_pub2;
-std::string child_name1;  // NOLINT(runtime/string)
-std::string parent_name;  // NOLINT(runtime/string)
-std::string child_name2;  // NOLINT(runtime/string)
+rclcpp::Node::SharedPtr node_ = nullptr;
+rclcpp::Node::SharedPtr subNode_ = nullptr;
+cv::Mat inImage_;
+aruco::CameraParameters camParam_;
+bool useRectifiedImages_, normalizeImageIllumination_;
+int dctComponentsToRemove_;
+aruco::MarkerDetector mDetector_;
+std::vector<aruco::Marker> markers_;
+rclcpp::Subscription<sensor_msgs::msg::CameraInfo>::SharedPtr cam_info_sub_;
+bool cam_info_received_;
+image_transport::Publisher image_pub_;
+image_transport::Publisher debug_pub_;
+rclcpp::Publisher<geometry_msgs::msg::Pose>::SharedPtr pose_pub1_;
+rclcpp::Publisher<geometry_msgs::msg::Pose>::SharedPtr pose_pub2_;
+std::string child_name1_;  // NOLINT(runtime/string)
+std::string parent_name_;  // NOLINT(runtime/string)
+std::string child_name2_;  // NOLINT(runtime/string)
 
-double marker_size;
-int marker_id1;
-int marker_id2;
+double marker_size_;
+int marker_id1_;
+int marker_id2_;
 std::unique_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
 
 void image_callback(const sensor_msgs::msg::Image::ConstSharedPtr & msg)
 {
   double ticksBefore = cv::getTickCount();
-  if (cam_info_received) {
+  if (cam_info_received_) {
     builtin_interfaces::msg::Time curr_stamp = msg->header.stamp;
     cv_bridge::CvImagePtr cv_ptr;
     try {
       cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::RGB8);
-      inImage = cv_ptr->image;
+      inImage_ = cv_ptr->image;
 
-      if (normalizeImageIllumination) {
-        RCLCPP_WARN(node->get_logger(), "normalizeImageIllumination is unimplemented!");
+      if (normalizeImageIllumination_) {
+        RCLCPP_WARN(node_->get_logger(), "normalizeImageIllumination is unimplemented!");
 //        cv::Mat inImageNorm;
-//        pal_vision_util::dctNormalization(inImage, inImageNorm, dctComponentsToRemove);
-//        inImage = inImageNorm;
+//        pal_vision_util::dctNormalization(inImage_, inImageNorm, dctComponentsToRemove_);
+//        inImage_ = inImageNorm;
       }
 
-      // detection results will go into "markers"
-      markers.clear();
+      // detection results will go into "markers_"
+      markers_.clear();
       // ok, let's detect
-      mDetector.detect(inImage, markers, camParam, marker_size, false);
+      mDetector_.detect(inImage_, markers_, camParam_, marker_size_, false);
       // for each marker, draw info and its boundaries in the image
-      for (unsigned int i = 0; i < markers.size(); ++i) {
+      for (unsigned int i = 0; i < markers_.size(); ++i) {
         // only publishing the selected marker
-        if (markers[i].id == marker_id1) {
-          tf2::Transform transform = aruco_ros::arucoMarker2Tf2(markers[i]);
+        if (markers_[i].id == marker_id1_) {
+          tf2::Transform transform = aruco_ros::arucoMarker2Tf2(markers_[i]);
           geometry_msgs::msg::TransformStamped m1_transform;
-          m1_transform.header.frame_id = parent_name;
+          m1_transform.header.frame_id = parent_name_;
           m1_transform.header.stamp = curr_stamp;
-          m1_transform.child_frame_id = child_name1;
+          m1_transform.child_frame_id = child_name1_;
           tf2::toMsg(transform, m1_transform.transform);
           tf_broadcaster_->sendTransform(m1_transform);
           geometry_msgs::msg::Pose poseMsg;
           tf2::toMsg(transform, poseMsg);
-          pose_pub1->publish(poseMsg);
-        } else if (markers[i].id == marker_id2) {
-          tf2::Transform transform = aruco_ros::arucoMarker2Tf2(markers[i]);
+          pose_pub1_->publish(poseMsg);
+        } else if (markers_[i].id == marker_id2_) {
+          tf2::Transform transform = aruco_ros::arucoMarker2Tf2(markers_[i]);
           geometry_msgs::msg::TransformStamped m2_transform;
-          m2_transform.header.frame_id = parent_name;
+          m2_transform.header.frame_id = parent_name_;
           m2_transform.header.stamp = curr_stamp;
-          m2_transform.child_frame_id = child_name2;
+          m2_transform.child_frame_id = child_name2_;
           tf2::toMsg(transform, m2_transform.transform);
           tf_broadcaster_->sendTransform(m2_transform);
           geometry_msgs::msg::Pose poseMsg;
           tf2::toMsg(transform, poseMsg);
-          pose_pub2->publish(poseMsg);
+          pose_pub2_->publish(poseMsg);
         }
 
-        // but drawing all the detected markers
-        markers[i].draw(inImage, cv::Scalar(0, 0, 255), 2);
+        // but drawing all the detected markers_
+        markers_[i].draw(inImage_, cv::Scalar(0, 0, 255), 2);
       }
 
       // paint a circle in the center of the image
       cv::circle(
-        inImage, cv::Point(inImage.cols / 2, inImage.rows / 2), 4, cv::Scalar(0, 255, 0),
+        inImage_, cv::Point(inImage_.cols / 2, inImage_.rows / 2), 4, cv::Scalar(0, 255, 0),
         1);
 
-      if (markers.size() == 2) {
+      if (markers_.size() == 2) {
         float x[2], y[2], u[2], v[2];
         for (unsigned int i = 0; i < 2; ++i) {
           RCLCPP_DEBUG_STREAM(
-            node->get_logger(),
-            "Marker(" << i << ") at camera coordinates = (" << markers[i].Tvec.at<float>(
+            node_->get_logger(),
+            "Marker(" << i << ") at camera coordinates = (" << markers_[i].Tvec.at<float>(
               0,
               0) << ", " <<
-              markers[i].Tvec.at<float>(1, 0) << ", " << markers[i].Tvec.at<float>(2, 0));
+              markers_[i].Tvec.at<float>(1, 0) << ", " << markers_[i].Tvec.at<float>(2, 0));
           // normalized coordinates of the marker
-          x[i] = markers[i].Tvec.at<float>(0, 0) / markers[i].Tvec.at<float>(2, 0);
-          y[i] = markers[i].Tvec.at<float>(1, 0) / markers[i].Tvec.at<float>(2, 0);
+          x[i] = markers_[i].Tvec.at<float>(0, 0) / markers_[i].Tvec.at<float>(2, 0);
+          y[i] = markers_[i].Tvec.at<float>(1, 0) / markers_[i].Tvec.at<float>(2, 0);
           // undistorted pixel
           u[i] = x[i] *
-            camParam.CameraMatrix.at<float>(0, 0) + camParam.CameraMatrix.at<float>(0, 2);
+            camParam_.CameraMatrix.at<float>(0, 0) + camParam_.CameraMatrix.at<float>(0, 2);
           v[i] = y[i] *
-            camParam.CameraMatrix.at<float>(1, 1) + camParam.CameraMatrix.at<float>(1, 2);
+            camParam_.CameraMatrix.at<float>(1, 1) + camParam_.CameraMatrix.at<float>(1, 2);
         }
 
         RCLCPP_DEBUG_STREAM(
-          node->get_logger(),
+          node_->get_logger(),
           "Mid point between the two markers in the image = (" << (x[0] + x[1]) / 2 << ", " <<
             (y[0] + y[1]) / 2 << ")");
 
-//        // paint a circle in the mid point of the normalized coordinates of both markers
+//        // paint a circle in the mid point of the normalized coordinates of both markers_
 //        cv::circle(
-//          inImage, cv::Point((u[0] + u[1]) / 2, (v[0] + v[1]) / 2), 3, cv::Scalar(
+//          inImage_, cv::Point((u[0] + u[1]) / 2, (v[0] + v[1]) / 2), 3, cv::Scalar(
 //            0, 0,
 //            255),
 //          cv::FILLED);
@@ -172,56 +172,56 @@ void image_callback(const sensor_msgs::msg::Image::ConstSharedPtr & msg)
         // compute the midpoint in 3D:
         float midPoint3D[3];  // 3D point
         for (unsigned int i = 0; i < 3; ++i) {
-          midPoint3D[i] = (markers[0].Tvec.at<float>(i, 0) + markers[1].Tvec.at<float>(i, 0)) / 2;
+          midPoint3D[i] = (markers_[0].Tvec.at<float>(i, 0) + markers_[1].Tvec.at<float>(i, 0)) / 2;
         }
         // now project the 3D mid point to normalized coordinates
         float midPointNormalized[2];
         midPointNormalized[0] = midPoint3D[0] / midPoint3D[2];  // x
         midPointNormalized[1] = midPoint3D[1] / midPoint3D[2];  // y
         u[0] = midPointNormalized[0] *
-          camParam.CameraMatrix.at<float>(0, 0) + camParam.CameraMatrix.at<float>(0, 2);
+          camParam_.CameraMatrix.at<float>(0, 0) + camParam_.CameraMatrix.at<float>(0, 2);
         v[0] = midPointNormalized[1] *
-          camParam.CameraMatrix.at<float>(1, 1) + camParam.CameraMatrix.at<float>(1, 2);
+          camParam_.CameraMatrix.at<float>(1, 1) + camParam_.CameraMatrix.at<float>(1, 2);
 
         RCLCPP_DEBUG_STREAM(
-          node->get_logger(),
+          node_->get_logger(),
           "3D Mid point between the two markers in undistorted pixel coordinates = (" <<
             u[0] << ", " << v[0] << ")");
 
-        // paint a circle in the mid point of the normalized coordinates of both markers
-        cv::circle(inImage, cv::Point(u[0], v[0]), 3, cv::Scalar(0, 0, 255), cv::FILLED);
+        // paint a circle in the mid point of the normalized coordinates of both markers_
+        cv::circle(inImage_, cv::Point(u[0], v[0]), 3, cv::Scalar(0, 0, 255), cv::FILLED);
       }
 
       // draw a 3D cube in each marker if there is 3D info
-      if (camParam.isValid() && marker_size > 0) {
-        for (unsigned int i = 0; i < markers.size(); ++i) {
-          aruco::CvDrawingUtils::draw3dCube(inImage, markers[i], camParam);
+      if (camParam_.isValid() && marker_size_ > 0) {
+        for (unsigned int i = 0; i < markers_.size(); ++i) {
+          aruco::CvDrawingUtils::draw3dCube(inImage_, markers_[i], camParam_);
         }
       }
 
-      if (image_pub.getNumSubscribers() > 0) {
+      if (image_pub_.getNumSubscribers() > 0) {
         // show input with augmented information
         cv_bridge::CvImage out_msg;
         out_msg.header.stamp = curr_stamp;
         out_msg.encoding = sensor_msgs::image_encodings::RGB8;
-        out_msg.image = inImage;
-        image_pub.publish(out_msg.toImageMsg());
+        out_msg.image = inImage_;
+        image_pub_.publish(out_msg.toImageMsg());
       }
 
-      if (debug_pub.getNumSubscribers() > 0) {
+      if (debug_pub_.getNumSubscribers() > 0) {
         // show also the internal image resulting from the threshold operation
         cv_bridge::CvImage debug_msg;
         debug_msg.header.stamp = curr_stamp;
         debug_msg.encoding = sensor_msgs::image_encodings::MONO8;
-        debug_msg.image = mDetector.getThresholdedImage();
-        debug_pub.publish(debug_msg.toImageMsg());
+        debug_msg.image = mDetector_.getThresholdedImage();
+        debug_pub_.publish(debug_msg.toImageMsg());
       }
 
       RCLCPP_DEBUG(
-        node->get_logger(), "runtime: %f ms",
+        node_->get_logger(), "runtime: %f ms",
         1000 * (cv::getTickCount() - ticksBefore) / cv::getTickFrequency());
     } catch (cv_bridge::Exception & e) {
-      RCLCPP_ERROR(node->get_logger(), "cv_bridge exception: %s", e.what());
+      RCLCPP_ERROR(node_->get_logger(), "cv_bridge exception: %s", e.what());
       return;
     }
   }
@@ -230,89 +230,89 @@ void image_callback(const sensor_msgs::msg::Image::ConstSharedPtr & msg)
 // wait for one camerainfo and then don't update the info
 void cam_info_callback(const sensor_msgs::msg::CameraInfo & msg)
 {
-  if (!cam_info_received) {
-    camParam = aruco_ros::rosCameraInfo2ArucoCamParams(msg, useRectifiedImages);
-    cam_info_received = true;
+  if (!cam_info_received_) {
+    camParam_ = aruco_ros::rosCameraInfo2ArucoCamParams(msg, useRectifiedImages_);
+    cam_info_received_ = true;
   }
 }
 
 // void reconf_callback(aruco_ros::ArucoThresholdConfig &config, std::uint32_t level)
 // {
-//   mDetector.setDetectionMode(aruco::DetectionMode(config.detection_mode), config.min_image_size);
-//   normalizeImageIllumination = config.normalizeImage;
-//   dctComponentsToRemove = config.dctComponentsToRemove;
+//   mDetector_.setDetectionMode(aruco::DetectionMode(config.detection_mode), config.min_image_size);
+//   normalizeImageIllumination_ = config.normalizeImage;
+//   dctComponentsToRemove_ = config.dctComponentsToRemove_;
 // }
 
 int main(int argc, char ** argv)
 {
   rclcpp::init(argc, argv);
-  node = std::make_shared<rclcpp::Node>("aruco_double");
-  subNode = node->create_sub_node(node->get_name());
+  node_ = std::make_shared<rclcpp::Node>("aruco_double");
+  subNode_ = node_->create_sub_node(node_->get_name());
 
   // Declare node parameters
-  node->declare_parameter<bool>("image_is_rectified", true);
-  node->declare_parameter<double>("marker_size", 0.05);
-  node->declare_parameter<int>("marker_id1", 582);
-  node->declare_parameter<int>("marker_id2", 26);
-  node->declare_parameter<bool>("normalizeImage", true);
-  node->declare_parameter<int>("dct_components_to_remove", 2);
-  node->declare_parameter<std::string>("parent_name", "");
-  node->declare_parameter<std::string>("child_name1", "");
-  node->declare_parameter<std::string>("child_name2", "");
+  node_->declare_parameter<bool>("image_is_rectified", true);
+  node_->declare_parameter<double>("marker_size", 0.05);
+  node_->declare_parameter<int>("marker_id1", 582);
+  node_->declare_parameter<int>("marker_id2", 26);
+  node_->declare_parameter<bool>("normalizeImage", true);
+  node_->declare_parameter<int>("dct_components_to_remove", 2);
+  node_->declare_parameter<std::string>("parent_name", "");
+  node_->declare_parameter<std::string>("child_name1", "");
+  node_->declare_parameter<std::string>("child_name2", "");
 
-  image_transport::ImageTransport it(node);
+  image_transport::ImageTransport it(node_);
 
-  tf_broadcaster_ = std::make_unique<tf2_ros::TransformBroadcaster>(*node.get());
+  tf_broadcaster_ = std::make_unique<tf2_ros::TransformBroadcaster>(*node_.get());
 
   // dynamic_reconfigure::Server<aruco_ros::ArucoThresholdConfig> server;
   // dynamic_reconfigure::Server<aruco_ros::ArucoThresholdConfig>::CallbackType f_;
   // f_ = boost::bind(&reconf_callback, _1, _2);
   // server.setCallback(f_);
 
-  normalizeImageIllumination = false;
+  normalizeImageIllumination_ = false;
 
-  node->get_parameter_or<bool>("image_is_rectified", useRectifiedImages, true);
-  RCLCPP_INFO_STREAM(node->get_logger(), "Image is rectified: " << useRectifiedImages);
+  node_->get_parameter_or<bool>("image_is_rectified", useRectifiedImages_, true);
+  RCLCPP_INFO_STREAM(node_->get_logger(), "Image is rectified: " << useRectifiedImages_);
 
   image_transport::Subscriber image_sub = it.subscribe("/image", 1, &image_callback);
-  cam_info_sub = node->create_subscription<sensor_msgs::msg::CameraInfo>(
+  cam_info_sub_ = node_->create_subscription<sensor_msgs::msg::CameraInfo>(
     "/camera_info", 1,
     cam_info_callback);
 
-  cam_info_received = false;
-  image_pub = it.advertise(node->get_name() + std::string("/result"), 1);
-  debug_pub = it.advertise(node->get_name() + std::string("/debug"), 1);
-  pose_pub1 = subNode->create_publisher<geometry_msgs::msg::Pose>("pose", 100);
-  pose_pub2 = subNode->create_publisher<geometry_msgs::msg::Pose>("pose2", 100);
+  cam_info_received_ = false;
+  image_pub_ = it.advertise(node_->get_name() + std::string("/result"), 1);
+  debug_pub_ = it.advertise(node_->get_name() + std::string("/debug"), 1);
+  pose_pub1_ = subNode_->create_publisher<geometry_msgs::msg::Pose>("pose", 100);
+  pose_pub2_ = subNode_->create_publisher<geometry_msgs::msg::Pose>("pose2", 100);
 
-  node->get_parameter_or<double>("marker_size", marker_size, 0.05);
-  node->get_parameter_or<int>("marker_id1", marker_id1, 582);
-  node->get_parameter_or<int>("marker_id2", marker_id2, 26);
-  node->get_parameter_or<bool>("normalizeImage", normalizeImageIllumination, true);
-  node->get_parameter_or<int>("dct_components_to_remove", dctComponentsToRemove, 2);
-  if (dctComponentsToRemove == 0) {
-    normalizeImageIllumination = false;
+  node_->get_parameter_or<double>("marker_size_", marker_size_, 0.05);
+  node_->get_parameter_or<int>("marker_id1_", marker_id1_, 582);
+  node_->get_parameter_or<int>("marker_id2_", marker_id2_, 26);
+  node_->get_parameter_or<bool>("normalizeImage", normalizeImageIllumination_, true);
+  node_->get_parameter_or<int>("dct_components_to_remove", dctComponentsToRemove_, 2);
+  if (dctComponentsToRemove_ == 0) {
+    normalizeImageIllumination_ = false;
   }
 
-  node->get_parameter_or<std::string>("parent_name", parent_name, "");
-  node->get_parameter_or<std::string>("child_name1", child_name1, "");
-  node->get_parameter_or<std::string>("child_name2", child_name2, "");
+  node_->get_parameter_or<std::string>("parent_name_", parent_name_, "");
+  node_->get_parameter_or<std::string>("child_name1_", child_name1_, "");
+  node_->get_parameter_or<std::string>("child_name2_", child_name2_, "");
 
-  if (parent_name == "" || child_name1 == "" || child_name2 == "") {
-    RCLCPP_ERROR(node->get_logger(), "parent_name and/or child_name was not set!");
+  if (parent_name_ == "" || child_name1_ == "" || child_name2_ == "") {
+    RCLCPP_ERROR(node_->get_logger(), "parent_name and/or child_name was not set!");
     rclcpp::shutdown();
     return -1;
   }
 
   RCLCPP_INFO(
-    node->get_logger(),
+    node_->get_logger(),
     "ArUco node started with marker size of %f meters and marker ids to track: %d, %d",
-    marker_size, marker_id1, marker_id2);
+    marker_size_, marker_id1_, marker_id2_);
   RCLCPP_INFO(
-    node->get_logger(),
+    node_->get_logger(),
     "ArUco node will publish pose to TF with (%s, %s) and (%s, %s) as (parent,child).",
-    parent_name.c_str(), child_name1.c_str(), parent_name.c_str(), child_name2.c_str());
+    parent_name_.c_str(), child_name1_.c_str(), parent_name_.c_str(), child_name2_.c_str());
 
-  rclcpp::spin(node);
+  rclcpp::spin(node_);
   rclcpp::shutdown();
 }
