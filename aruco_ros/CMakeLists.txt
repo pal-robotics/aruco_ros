@@ -23,6 +23,24 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
     sensor_msgs
     visualization_msgs
 )
+set(THIS_PACKAGE_INCLUDE_TARGETS
+    # OpenCV
+    cv_bridge::cv_bridge
+    ${geometry_msgs_TARGETS}
+    image_transport::image_transport
+    rclcpp::rclcpp
+    # rclpy
+    tf2::tf2
+    tf2_ros::tf2_ros
+    tf2_geometry_msgs::tf2_geometry_msgs
+    # aruco::aruco
+    ${aruco_msgs_TARGETS}
+    ${sensor_msgs_TARGETS}
+    sensor_msgs::sensor_msgs_library
+    ${visualization_msgs_TARGETS}
+)
+
+
 find_package(ament_cmake REQUIRED)
 foreach(Dependency IN ITEMS ${THIS_PACKAGE_INCLUDE_DEPENDS})
   find_package(${Dependency} REQUIRED)
@@ -41,8 +59,7 @@ target_include_directories(aruco_ros_utils
   SYSTEM PUBLIC
   ${OpenCV_INCLUDE_DIRS}
 )
-target_link_libraries(aruco_ros_utils PUBLIC ${THIS_PACKAGE_INCLUDE_DEPENDS})
-target_link_libraries(aruco_ros_utils ${OpenCV_LIBRARIES})
+target_link_libraries(aruco_ros_utils PUBLIC ${OpenCV_LIBRARIES} ${THIS_PACKAGE_INCLUDE_TARGETS})
 
 add_executable(single src/simple_single.cpp
                       src/aruco_ros_utils.cpp)
@@ -55,8 +72,7 @@ target_include_directories(single
   SYSTEM PUBLIC
   ${OpenCV_INCLUDE_DIRS}
 )
-target_link_libraries(single PUBLIC ${THIS_PACKAGE_INCLUDE_DEPENDS})
-target_link_libraries(single ${OpenCV_LIBRARIES})
+target_link_libraries(single PUBLIC ${OpenCV_LIBRARIES} ${THIS_PACKAGE_INCLUDE_TARGETS})
 
 add_executable(double src/simple_double.cpp
                       src/aruco_ros_utils.cpp)
@@ -68,8 +84,7 @@ target_include_directories(double
   SYSTEM PUBLIC
   ${OpenCV_INCLUDE_DIRS}
 )
-target_link_libraries(double PUBLIC ${THIS_PACKAGE_INCLUDE_DEPENDS})
-target_link_libraries(double ${OpenCV_LIBRARIES})
+target_link_libraries(double PUBLIC ${OpenCV_LIBRARIES} ${THIS_PACKAGE_INCLUDE_TARGETS})
 
 add_executable(marker_publisher src/marker_publish.cpp
                                 src/aruco_ros_utils.cpp)
@@ -81,7 +96,7 @@ target_include_directories(marker_publisher
   SYSTEM PUBLIC
   ${OpenCV_INCLUDE_DIRS}
 )
-target_link_libraries(marker_publisher PUBLIC ${THIS_PACKAGE_INCLUDE_DEPENDS})
+ament_target_dependencies(marker_publisher ${THIS_PACKAGE_INCLUDE_DEPENDS})
 target_link_libraries(marker_publisher ${OpenCV_LIBRARIES})
 
 if(BUILD_TESTING)
@@ -116,5 +131,3 @@ foreach(dir etc launch)
 endforeach()
 
 ament_package()
-
-
