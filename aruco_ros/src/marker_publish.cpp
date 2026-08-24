@@ -33,6 +33,13 @@
  * (modified by Josh Langsfeld, 2014)
  */
 
+/*
+ * Modifications by Pedro Graça, August 2026
+ * Added support for specifying different marker sizes per marker ID via the
+ * `marker_sizes_by_id` parameter (YAML dictionary or JSON string).
+ */
+
+
 #include <iostream>
 #include <aruco/aruco.h>
 #include <aruco/cvdrawingutils.h>
@@ -45,6 +52,14 @@
 #include <aruco_msgs/MarkerArray.h>
 #include <tf/transform_listener.h>
 #include <std_msgs/UInt32MultiArray.h>
+
+// [Pedro Graça, 2026-08-24] Start of modifications for per‑ID marker sizes
+#include <map>
+#include <string>
+#include <algorithm>
+#include <cctype>
+#include <XmlRpcValue.h>
+// [Pedro Graça, 2026-08-24] End of modifications
 
 class ArucoMarkerPublisher
 {
@@ -77,7 +92,59 @@ private:
   cv::Mat inImage_;
   bool useCamInfo_;
   std_msgs::UInt32MultiArray marker_list_msg_;
+  
+  // [Pedro Graça, 2026-08-24] Start of modifications for per‑ID marker sizes
+  std::map<int, double> marker_sizes_by_id_;
 
+  void parseMarkerSizes(const XmlRpc::XmlRpcValue& param)
+  {
+      marker_sizes_by_id_.clear();
+
+      if (param.getType() != XmlRpc::XmlRpcValue::TypeStruct)
+      {
+          ROS_ERROR("marker_sizes_by_id must be a YAML dictionary (structure).");
+          return;
+      }
+
+      for (auto it = param.begin(); it != param.end(); ++it)
+      {
+          std::string key = it->first;
+          XmlRpc::XmlRpcValue value = it->second;
+
+          int id;
+          try
+          {
+              id = std::stoi(key);
+          }
+          catch (const std::exception& e)
+          {
+              ROS_ERROR("Invalid key in marker_sizes_by_id: '%s' (must be an integer)", key.c_str());
+              marker_sizes_by_id_.clear();
+              return;
+          }
+
+          double size;
+          if (value.getType() == XmlRpc::XmlRpcValue::TypeInt)
+          {
+              size = static_cast<double>(static_cast<int>(value));
+          }
+          else if (value.getType() == XmlRpc::XmlRpcValue::TypeDouble)
+          {
+              size = static_cast<double>(value);
+          }
+          else
+          {
+              ROS_ERROR("Invalid value for ID %d in marker_sizes_by_id (must be a number)", id);
+              marker_sizes_by_id_.clear();
+              return;
+          }
+
+          marker_sizes_by_id_[id] = size;
+      }
+
+      ROS_INFO("marker_sizes_by_id loaded with %zu entries.", marker_sizes_by_id_.size());
+  }
+  // [Pedro Graça, 2026-08-24] End of modifications
 public:
   ArucoMarkerPublisher() :
       nh_("~"), it_(nh_), useCamInfo_(true)
@@ -93,6 +160,15 @@ public:
       nh_.param<bool>("image_is_rectified", useRectifiedImages_, true);
       nh_.param<std::string>("reference_frame", reference_frame_, "");
       nh_.param<std::string>("camera_frame", camera_frame_, "");
+
+      // [Pedro Graça, 2026-08-24] Start of modifications for per‑ID marker sizes
+      XmlRpc::XmlRpcValue marker_sizes_by_id_param;
+      if (nh_.getParam("marker_sizes_by_id", marker_sizes_by_id_param))
+          parseMarkerSizes(marker_sizes_by_id_param);
+      else
+          ROS_WARN("Parameter marker_sizes_by_id not found. Using default marker_size for all.");
+      // [Pedro Graça, 2026-08-24] End of modifications
+
       camParam_ = aruco_ros::rosCameraInfo2ArucoCamParams(*msg, useRectifiedImages_);
       ROS_ASSERT(not (camera_frame_.empty() and not reference_frame_.empty()));
       if (reference_frame_.empty())
@@ -160,8 +236,18 @@ public:
       // clear out previous detection results
       markers_.clear();
 
-      // ok, let's detect
-      mDetector_.detect(inImage_, markers_, camParam_, marker_size_, false);
+      // [Pedro Graça, 2026-08-24] Start of modifications for per‑ID marker sizes  
+      // ok, let's detect (without calculating the pose yet)
+      mDetector_.detect(inImage_, markers_, camParam_, -1, false);
+
+      // Calculates the pose for each marker with the specific size (if applicable).
+      for (auto& marker : markers_)
+      {
+          double size = marker_size_;
+          if (camParam_.isValid() && size > 0)
+              marker.calculateExtrinsics(size, camParam_, false);
+      }
+      // [Pedro Graça, 2026-08-24] End of modifications
 
       // marker array publish
       if (publishMarkers)
