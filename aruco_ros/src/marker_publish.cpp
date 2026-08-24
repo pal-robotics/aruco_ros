@@ -51,6 +51,7 @@
 #include <aruco_ros/aruco_ros_utils.h>
 #include <aruco_msgs/MarkerArray.h>
 #include <tf/transform_listener.h>
+#include <tf/transform_broadcaster.h>
 #include <std_msgs/UInt32MultiArray.h>
 
 #include <map>
@@ -84,6 +85,12 @@ private:
   ros::Publisher marker_pub_;
   ros::Publisher marker_list_pub_;
   tf::TransformListener tfListener_;
+
+  // TF broadcaster
+  tf::TransformBroadcaster tf_broadcaster_;
+
+  // Node param
+  bool publish_tf_;
 
   ros::Subscriber cam_info_sub_;
   aruco_msgs::MarkerArray::Ptr marker_msg_;
@@ -144,6 +151,7 @@ private:
   }
 
 public:
+  public:
   ArucoMarkerPublisher() :
       nh_("~"), it_(nh_), useCamInfo_(true)
   {
@@ -152,20 +160,21 @@ public:
     nh_.param<bool>("use_camera_info", useCamInfo_, true);
     if (useCamInfo_)
     {
-      sensor_msgs::CameraInfoConstPtr msg = ros::topic::waitForMessage<sensor_msgs::CameraInfo>("/camera_info", nh_); //, 10.0);
+      sensor_msgs::CameraInfoConstPtr msg = ros::topic::waitForMessage<sensor_msgs::CameraInfo>("/camera_info", nh_);
 
       nh_.param<double>("marker_size", marker_size_, 0.05);
       nh_.param<bool>("image_is_rectified", useRectifiedImages_, true);
       nh_.param<std::string>("reference_frame", reference_frame_, "");
       nh_.param<std::string>("camera_frame", camera_frame_, "");
 
+      // Reading publish_tf
+      nh_.param<bool>("publish_tf", publish_tf_, true);   // default: true
 
       XmlRpc::XmlRpcValue marker_sizes_by_id_param;
       if (nh_.getParam("marker_sizes_by_id", marker_sizes_by_id_param))
           parseMarkerSizes(marker_sizes_by_id_param);
       else
           ROS_WARN("Parameter marker_sizes_by_id not found. Using default marker_size for all.");
-
 
       camParam_ = aruco_ros::rosCameraInfo2ArucoCamParams(*msg, useRectifiedImages_);
       ROS_ASSERT(not (camera_frame_.empty() and not reference_frame_.empty()));
@@ -176,6 +185,9 @@ public:
     {
       camParam_ = aruco::CameraParameters();
     }
+
+    // Initializes the broadcaster (outside the if-statement, so it always exists)
+    tf_broadcaster_ = tf::TransformBroadcaster();
 
     image_pub_ = it_.advertise("result", 1);
     debug_pub_ = it_.advertise("debug", 1);
@@ -246,7 +258,6 @@ public:
               marker.calculateExtrinsics(size, camParam_, false);
       }
 
-
       // marker array publish
       if (publishMarkers)
       {
@@ -283,6 +294,14 @@ public:
             transform = static_cast<tf::Transform>(cameraToReference) * transform;
             tf::poseTFToMsg(transform, marker_i.pose.pose);
             marker_i.header.frame_id = reference_frame_;
+
+            // Publishes the marker's TF
+            if (publish_tf_)
+            {
+              std::string child_frame = "marker_" + std::to_string(marker_i.id);
+              tf_broadcaster_.sendTransform(
+                  tf::StampedTransform(transform, curr_stamp, reference_frame_, child_frame));
+            }
           }
         }
 
