@@ -103,7 +103,7 @@ public:
     subNode_ = this->create_sub_node(this->get_name());
 
     it_ = std::make_unique<image_transport::ImageTransport>(shared_from_this());
-    tf_broadcaster_ = std::make_unique<tf2_ros::TransformBroadcaster>(this);
+    tf_broadcaster_ = std::make_unique<tf2_ros::TransformBroadcaster>(*this);
     if (this->has_parameter("corner_refinement")) {
       RCLCPP_WARN(
         this->get_logger(),
