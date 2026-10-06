@@ -9,8 +9,8 @@
 #include "geometry_msgs/msg/pose_stamped.hpp"
 #include "sensor_msgs/msg/camera_info.hpp"
 #include "sensor_msgs/msg/image.hpp"
-#include "tf2/LinearMath/Transform.h"
-#include "tf2/transform_datatypes.h"
+#include "tf2/LinearMath/Transform.hpp"
+#include "tf2/transform_datatypes.hpp"
 #include "visualization_msgs/msg/marker.hpp"
 
 namespace aruco_ros
