@@ -40,9 +40,22 @@ target_include_directories(aruco_ros_utils
 target_include_directories(aruco_ros_utils
   SYSTEM PUBLIC
   ${OpenCV_INCLUDE_DIRS}
+  ${aruco_INCLUDE_DIRS}
 )
-ament_target_dependencies(aruco_ros_utils ${THIS_PACKAGE_INCLUDE_DEPENDS})
-target_link_libraries(aruco_ros_utils ${OpenCV_LIBRARIES})
+target_link_libraries(aruco_ros_utils
+  ${OpenCV_LIBRARIES}
+  cv_bridge::cv_bridge
+  ${geometry_msgs_TARGETS}
+  image_transport::image_transport
+  rclcpp::rclcpp
+  tf2::tf2
+  tf2_ros::tf2_ros
+  tf2_geometry_msgs::tf2_geometry_msgs
+  ${aruco_LIBRARIES}
+  ${aruco_msgs_TARGETS}
+  ${sensor_msgs_TARGETS}
+  ${visualization_msgs_TARGETS}
+)
 
 add_executable(single src/simple_single.cpp
                       src/aruco_ros_utils.cpp)
@@ -54,9 +67,22 @@ target_include_directories(single
 target_include_directories(single
   SYSTEM PUBLIC
   ${OpenCV_INCLUDE_DIRS}
+  ${aruco_INCLUDE_DIRS}
 )
-ament_target_dependencies(single ${THIS_PACKAGE_INCLUDE_DEPENDS})
-target_link_libraries(single ${OpenCV_LIBRARIES})
+target_link_libraries(single
+  ${OpenCV_LIBRARIES}
+  cv_bridge::cv_bridge
+  ${geometry_msgs_TARGETS}
+  image_transport::image_transport
+  rclcpp::rclcpp
+  tf2::tf2
+  tf2_ros::tf2_ros
+  tf2_geometry_msgs::tf2_geometry_msgs
+  ${aruco_LIBRARIES}
+  ${aruco_msgs_TARGETS}
+  ${sensor_msgs_TARGETS}
+  ${visualization_msgs_TARGETS}
+)
 
 add_executable(double src/simple_double.cpp
                       src/aruco_ros_utils.cpp)
@@ -67,9 +93,22 @@ target_include_directories(double
 target_include_directories(double
   SYSTEM PUBLIC
   ${OpenCV_INCLUDE_DIRS}
+  ${aruco_INCLUDE_DIRS}
 )
-ament_target_dependencies(double ${THIS_PACKAGE_INCLUDE_DEPENDS})
-target_link_libraries(double ${OpenCV_LIBRARIES})
+target_link_libraries(double
+  ${OpenCV_LIBRARIES}
+  cv_bridge::cv_bridge
+  ${geometry_msgs_TARGETS}
+  image_transport::image_transport
+  rclcpp::rclcpp
+  tf2::tf2
+  tf2_ros::tf2_ros
+  tf2_geometry_msgs::tf2_geometry_msgs
+  ${aruco_LIBRARIES}
+  ${aruco_msgs_TARGETS}
+  ${sensor_msgs_TARGETS}
+  ${visualization_msgs_TARGETS}
+)
 
 add_executable(marker_publisher src/marker_publish.cpp
                                 src/aruco_ros_utils.cpp)
@@ -80,9 +119,22 @@ target_include_directories(marker_publisher
 target_include_directories(marker_publisher
   SYSTEM PUBLIC
   ${OpenCV_INCLUDE_DIRS}
+  ${aruco_INCLUDE_DIRS}
 )
-ament_target_dependencies(marker_publisher ${THIS_PACKAGE_INCLUDE_DEPENDS})
-target_link_libraries(marker_publisher ${OpenCV_LIBRARIES})
+target_link_libraries(marker_publisher
+  ${OpenCV_LIBRARIES}
+  cv_bridge::cv_bridge
+  ${geometry_msgs_TARGETS}
+  image_transport::image_transport
+  rclcpp::rclcpp
+  tf2::tf2
+  tf2_ros::tf2_ros
+  tf2_geometry_msgs::tf2_geometry_msgs
+  ${aruco_LIBRARIES}
+  ${aruco_msgs_TARGETS}
+  ${sensor_msgs_TARGETS}
+  ${visualization_msgs_TARGETS}
+)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
