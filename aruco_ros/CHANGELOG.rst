@@ -30,8 +30,8 @@ Changelog for package aruco_ros
 * Replace assert by error message to keep library functional
 * Contributors: Andrea Ponza, Bence Magyar, Christopher Hrabia, Jordi Pages, Jorge Nicho, Ugnius Malūkas, Victor Lopez, Voidminded
 
-Forthcoming
------------
+5.0.6 (2026-10-07)
+------------------
 * Construct ImageTransport via reference or shared pointer
   Based on the image_transport/node_interfaces.hpp header
 * Use NodeInterfaces for tf2_ros constructors
