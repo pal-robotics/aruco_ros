@@ -52,9 +52,9 @@
 #include "rclcpp/rclcpp.hpp"
 #include "rcpputils/asserts.hpp"
 #include "sensor_msgs/image_encodings.hpp"
-#include "tf2_ros/transform_broadcaster.h"
-#include "tf2_ros/buffer.h"
-#include "tf2_ros/transform_listener.h"
+#include "tf2_ros/transform_broadcaster.hpp"
+#include "tf2_ros/buffer.hpp"
+#include "tf2_ros/transform_listener.hpp"
 #include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"
 #include "visualization_msgs/msg/marker.hpp"
 
@@ -238,7 +238,9 @@ void cam_info_callback(const sensor_msgs::msg::CameraInfo & msg)
 
 // void reconf_callback(aruco_ros::ArucoThresholdConfig &config, std::uint32_t level)
 // {
-//   mDetector_.setDetectionMode(aruco::DetectionMode(config.detection_mode), config.min_image_size);
+//   mDetector_.setDetectionMode(
+//     aruco::DetectionMode(config.detection_mode), config.min_image_size);
+//
 //   normalizeImageIllumination_ = config.normalizeImage;
 //   dctComponentsToRemove_ = config.dctComponentsToRemove_;
 // }
@@ -260,7 +262,11 @@ int main(int argc, char ** argv)
   node_->declare_parameter<std::string>("child_name1", "");
   node_->declare_parameter<std::string>("child_name2", "");
 
+#ifdef ARUCO_ROS_IMAGE_TRANSPORT_NODE_INTERFACES
+  image_transport::ImageTransport it(*node_);
+#else
   image_transport::ImageTransport it(node_);
+#endif
 
   tf_broadcaster_ = std::make_unique<tf2_ros::TransformBroadcaster>(*node_.get());
 

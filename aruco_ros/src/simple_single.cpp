@@ -50,9 +50,9 @@
 #include "rclcpp/rclcpp.hpp"
 #include "rcpputils/asserts.hpp"
 #include "sensor_msgs/image_encodings.hpp"
-#include "tf2_ros/transform_broadcaster.h"
-#include "tf2_ros/buffer.h"
-#include "tf2_ros/transform_listener.h"
+#include "tf2_ros/transform_broadcaster.hpp"
+#include "tf2_ros/buffer.hpp"
+#include "tf2_ros/transform_listener.hpp"
 #include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"
 #include "visualization_msgs/msg/marker.hpp"
 
@@ -102,8 +102,12 @@ public:
     tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
     subNode_ = this->create_sub_node(this->get_name());
 
+#ifdef ARUCO_ROS_IMAGE_TRANSPORT_NODE_INTERFACES
+    it_ = std::make_unique<image_transport::ImageTransport>(*this);
+#else
     it_ = std::make_unique<image_transport::ImageTransport>(shared_from_this());
-    tf_broadcaster_ = std::make_unique<tf2_ros::TransformBroadcaster>(this);
+#endif
+    tf_broadcaster_ = std::make_unique<tf2_ros::TransformBroadcaster>(*this);
     if (this->has_parameter("corner_refinement")) {
       RCLCPP_WARN(
         this->get_logger(),

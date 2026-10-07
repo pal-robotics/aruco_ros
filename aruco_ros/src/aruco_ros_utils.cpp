@@ -10,7 +10,7 @@
 #endif
 #include "opencv4/opencv2/calib3d.hpp"
 #include "rclcpp/logging.hpp"
-#include "tf2/transform_datatypes.h"
+#include "tf2/transform_datatypes.hpp"
 
 aruco::CameraParameters aruco_ros::rosCameraInfo2ArucoCamParams(
   const sensor_msgs::msg::CameraInfo & cam_info,

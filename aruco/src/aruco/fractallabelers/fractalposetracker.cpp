@@ -804,7 +804,7 @@ bool FractalPoseTracker::ROI(const std::vector<cv::Mat> imagePyramid, cv::Mat &i
   for (int idx = 0;
        idx < _fractalMarker.fractalMarkerCollection.size() & biggest_p3d.size() < 4; idx++)
   {
-    biggest_p3d.empty();
+    biggest_p3d.clear();
     for (auto pt : _fractalMarker.fractalMarkerCollection[idx].points)
     {
       cv::Mat_<double> src(3, 1, rot.type());

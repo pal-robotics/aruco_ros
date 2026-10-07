@@ -50,8 +50,8 @@
 #include "rcpputils/asserts.hpp"
 #include "sensor_msgs/image_encodings.hpp"
 #include "std_msgs/msg/u_int32_multi_array.hpp"
-#include "tf2_ros/transform_listener.h"
-#include "tf2_ros/buffer.h"
+#include "tf2_ros/transform_listener.hpp"
+#include "tf2_ros/buffer.hpp"
 #include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"
 
 using namespace std::chrono_literals;
@@ -107,7 +107,11 @@ public:
     tf_buffer_ = std::make_unique<tf2_ros::Buffer>(this->get_clock());
     tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
 
+#ifdef ARUCO_ROS_IMAGE_TRANSPORT_NODE_INTERFACES
+    it_ = std::make_unique<image_transport::ImageTransport>(*this);
+#else
     it_ = std::make_unique<image_transport::ImageTransport>(shared_from_this());
+#endif
     image_sub_ = it_->subscribe("/image", 1, &ArucoMarkerPublisher::image_callback, this);
 
     this->get_parameter_or<bool>("use_camera_info", useCamInfo_, true);
