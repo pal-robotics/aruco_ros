@@ -238,7 +238,9 @@ void cam_info_callback(const sensor_msgs::msg::CameraInfo & msg)
 
 // void reconf_callback(aruco_ros::ArucoThresholdConfig &config, std::uint32_t level)
 // {
-//   mDetector_.setDetectionMode(aruco::DetectionMode(config.detection_mode), config.min_image_size);
+//   mDetector_.setDetectionMode(
+//     aruco::DetectionMode(config.detection_mode), config.min_image_size);
+//
 //   normalizeImageIllumination_ = config.normalizeImage;
 //   dctComponentsToRemove_ = config.dctComponentsToRemove_;
 // }
