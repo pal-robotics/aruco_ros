@@ -262,7 +262,11 @@ int main(int argc, char ** argv)
   node_->declare_parameter<std::string>("child_name1", "");
   node_->declare_parameter<std::string>("child_name2", "");
 
+#ifdef ARUCO_ROS_IMAGE_TRANSPORT_NODE_INTERFACES
+  image_transport::ImageTransport it(*node_);
+#else
   image_transport::ImageTransport it(node_);
+#endif
 
   tf_broadcaster_ = std::make_unique<tf2_ros::TransformBroadcaster>(*node_.get());
 

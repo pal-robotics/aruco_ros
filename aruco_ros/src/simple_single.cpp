@@ -102,7 +102,11 @@ public:
     tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
     subNode_ = this->create_sub_node(this->get_name());
 
+#ifdef ARUCO_ROS_IMAGE_TRANSPORT_NODE_INTERFACES
+    it_ = std::make_unique<image_transport::ImageTransport>(*this);
+#else
     it_ = std::make_unique<image_transport::ImageTransport>(shared_from_this());
+#endif
     tf_broadcaster_ = std::make_unique<tf2_ros::TransformBroadcaster>(*this);
     if (this->has_parameter("corner_refinement")) {
       RCLCPP_WARN(

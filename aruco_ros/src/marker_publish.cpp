@@ -107,7 +107,11 @@ public:
     tf_buffer_ = std::make_unique<tf2_ros::Buffer>(this->get_clock());
     tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
 
+#ifdef ARUCO_ROS_IMAGE_TRANSPORT_NODE_INTERFACES
+    it_ = std::make_unique<image_transport::ImageTransport>(*this);
+#else
     it_ = std::make_unique<image_transport::ImageTransport>(shared_from_this());
+#endif
     image_sub_ = it_->subscribe("/image", 1, &ArucoMarkerPublisher::image_callback, this);
 
     this->get_parameter_or<bool>("use_camera_info", useCamInfo_, true);

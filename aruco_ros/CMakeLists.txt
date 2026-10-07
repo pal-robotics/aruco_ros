@@ -28,6 +28,14 @@ foreach(Dependency IN ITEMS ${THIS_PACKAGE_INCLUDE_DEPENDS})
   find_package(${Dependency} REQUIRED)
 endforeach()
 
+get_target_property(_image_transport_include_dirs image_transport::image_transport
+  INTERFACE_INCLUDE_DIRECTORIES)
+find_file(IMAGE_TRANSPORT_NODE_INTERFACES_HEADER image_transport/node_interfaces.hpp
+  PATHS ${_image_transport_include_dirs} NO_DEFAULT_PATH)
+if(IMAGE_TRANSPORT_NODE_INTERFACES_HEADER)
+  add_compile_definitions(ARUCO_ROS_IMAGE_TRANSPORT_NODE_INTERFACES)
+endif()
+
 #generate_dynamic_reconfigure_options(
 #  cfg/ArucoThreshold.cfg
 #)
