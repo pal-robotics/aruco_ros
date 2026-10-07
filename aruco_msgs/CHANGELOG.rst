@@ -7,6 +7,11 @@ Changelog for package aruco_msgs
 * Merge branch 'indigo-devel' into kinetic-devel
 * Contributors: Victor Lopez
 
+Forthcoming
+-----------
+* Bump cmake_minimum_required to 3.10
+* Contributors: Noel Jimenez
+
 5.0.5 (2024-05-09)
 ------------------
 

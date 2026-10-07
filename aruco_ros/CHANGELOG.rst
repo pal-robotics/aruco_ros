@@ -30,6 +30,24 @@ Changelog for package aruco_ros
 * Replace assert by error message to keep library functional
 * Contributors: Andrea Ponza, Bence Magyar, Christopher Hrabia, Jordi Pages, Jorge Nicho, Ugnius Malūkas, Victor Lopez, Voidminded
 
+Forthcoming
+-----------
+* Construct ImageTransport via reference or shared pointer
+  Based on the image_transport/node_interfaces.hpp header
+* Use NodeInterfaces for tf2_ros constructors
+  geometry2 0.46.2 removed the deprecated tf2_ros constructors that took a
+  node pointer or separate node interfaces (ros2/geometry2#940), which breaks
+  the rolling binary build for this package.
+  Pass the node itself instead: rclcpp::node_interfaces::NodeInterfaces has an
+  implicit constructor taking a node reference.
+  Assisted-by: Claude Opus 5 <noreply@anthropic.com>
+* Fix line length
+* Use .hpp tf2 headers
+* Drop ament_target_dependencies in favor of target_link_libraries
+* Bump cmake_minimum_required to 3.10
+* Consistent naming for private variables within the nodes (#145)
+* Contributors: Michael Carroll, Noel Jimenez, Tanishq Chaudhary
+
 5.0.5 (2024-05-09)
 ------------------
 * Merge pull request #135 from wep21/jazzy-devel

@@ -21,6 +21,12 @@ Changelog for package aruco
 * forcing opencv3 build for kinetic
 * Contributors: Andrea Ponza, Bence Magyar, Christopher Hrabia, Jordi Pages, Victor Lopez
 
+Forthcoming
+-----------
+* Replace biggest_p3d.empty call by biggest_p3d.clear
+* Bump cmake_minimum_required to 3.10
+* Contributors: Noel Jimenez
+
 5.0.5 (2024-05-09)
 ------------------
 
